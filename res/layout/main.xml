@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical" >
+	android:layout_width="fill_parent" android:layout_height="fill_parent"
+	android:orientation="vertical">
 
-    <TextView
-        android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/hello" />
+	<LinearLayout android:layout_height="wrap_content" android:layout_weight="1"
+		android:id="@+id/BodyLayout" android:layout_width="match_parent"
+		android:orientation="vertical"></LinearLayout>
+
+	<com.codegears.getable.ui.tabbar.TabBar
+		android:layout_height="wrap_content" android:id="@+id/TabBar"
+		android:layout_width="match_parent"></com.codegears.getable.ui.tabbar.TabBar>
 
 </LinearLayout>
