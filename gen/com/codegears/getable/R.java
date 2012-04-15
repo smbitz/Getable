@@ -14,11 +14,33 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int BodyLayout=0x7f050000;
-        public static final int TabBar=0x7f050001;
+        public static final int BadgeButton=0x7f050011;
+        public static final int BadgeList=0x7f050001;
+        public static final int BodyLayout=0x7f05000e;
+        public static final int FilterButton=0x7f05000c;
+        public static final int GalleryGrid=0x7f05000d;
+        public static final int TabBar=0x7f05000f;
+        public static final int ViewProfileButton=0x7f050010;
+        public static final int button1=0x7f05000b;
+        public static final int imageView1=0x7f050002;
+        public static final int linearLayout1=0x7f050003;
+        public static final int linearLayout2=0x7f050008;
+        public static final int textView1=0x7f050000;
+        public static final int textView2=0x7f050004;
+        public static final int toggleButton1=0x7f050005;
+        public static final int toggleButton2=0x7f050006;
+        public static final int toggleButton3=0x7f050007;
+        public static final int toggleButton4=0x7f050009;
+        public static final int toggleButton5=0x7f05000a;
     }
     public static final class layout {
-        public static final int main=0x7f030000;
+        public static final int badgelayout=0x7f030000;
+        public static final int badgelistitem=0x7f030001;
+        public static final int galleryfilterlayout=0x7f030002;
+        public static final int gallerylayout=0x7f030003;
+        public static final int main=0x7f030004;
+        public static final int productdetaillayout=0x7f030005;
+        public static final int userprofilelayout=0x7f030006;
     }
     public static final class string {
         public static final int app_name=0x7f040001;

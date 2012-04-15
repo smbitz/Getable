@@ -1,23 +1,33 @@
 package com.codegears.getable;
 
+import java.util.Stack;
+
+import com.codegears.getable.ui.BadgeLayout;
+import com.codegears.getable.ui.GalleryLayout;
+import com.codegears.getable.ui.ProductDetailLayout;
+import com.codegears.getable.ui.UserProfileLayout;
 import com.codegears.getable.ui.tabbar.TabBar;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.view.KeyEvent;
+import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class MainActivity extends Activity {
+public class MainActivity extends Activity implements BodyLayoutStackListener{
   
 		private TabBar tabBar;
 		private ViewGroup bodyLayout;
+		private Stack<View> layoutStack;
 		
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        layoutStack = new Stack<View>();
         tabBar = (TabBar)this.findViewById( R.id.TabBar );
         bodyLayout = (ViewGroup)this.findViewById( R.id.BodyLayout );
         tabBar.setBodyLayout( bodyLayout );
@@ -25,7 +35,8 @@ public class MainActivity extends Activity {
         ToggleButton b1 = new ToggleButton(this);
         b1.setTextOff( "Gallery" );
         b1.setTextOn( "Gallery" );
-        LinearLayout l1 = new LinearLayout(this);
+        GalleryLayout l1 = new GalleryLayout(this);
+        l1.setBodyLayoutChangeListener( this );
         l1.setBackgroundColor( 0xFFFF0000 );
         TextView text = new TextView(this);
         text.setText( "GalleryView" );
@@ -77,4 +88,43 @@ public class MainActivity extends Activity {
         b5.setTextOn( "Profile" );
         tabBar.addTab( b5, l5 );    
     }
+
+
+		@Override
+		public void onRequestBodyLayoutStack(int requestId) {
+			if(requestId == GalleryLayout.LAYOUTCHANGE_PRODUCTDETAIL){
+				layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
+				ProductDetailLayout view = new ProductDetailLayout(this);
+				view.setBodyLayoutChangeListener( this );
+				bodyLayout.removeAllViews();
+				bodyLayout.addView( view );
+				bodyLayout.requestLayout();
+			} else if(requestId == ProductDetailLayout.LAYOUTCHANGE_USERPROFILE){
+				layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
+				UserProfileLayout view = new UserProfileLayout(this);
+				view.setBodyLayoutChangeListener( this );
+				bodyLayout.removeAllViews();
+				bodyLayout.addView( view );
+				bodyLayout.requestLayout();
+			} else if(requestId == UserProfileLayout.LAYOUTCHANGE_BADGE){
+				layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
+				BadgeLayout view = new BadgeLayout(this);
+				bodyLayout.removeAllViews();
+				bodyLayout.addView( view );
+				bodyLayout.requestLayout();
+			}
+		}
+		
+		@Override
+		public boolean onKeyDown(int keyCode, KeyEvent event){
+			if(keyCode == KeyEvent.KEYCODE_BACK){
+				if(!layoutStack.isEmpty()){
+					bodyLayout.removeAllViews();
+					bodyLayout.addView( layoutStack.pop() );
+					bodyLayout.requestLayout();				
+					return true;
+				}
+			}
+			return super.onKeyDown( keyCode, event );
+		}
 }

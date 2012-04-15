@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="match_parent"
+	android:layout_height="match_parent" android:background="#7F000000">
+	<TextView android:text="TextView" android:layout_height="wrap_content"
+		android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium"
+		android:id="@+id/textView1"></TextView>
+	<LinearLayout android:layout_height="wrap_content"
+		android:id="@+id/linearLayout1" android:layout_width="match_parent">
+		<ToggleButton android:text="Local" android:id="@+id/toggleButton1"
+			android:layout_width="wrap_content" android:layout_height="wrap_content" android:textOn="Local" android:textOff="Local"></ToggleButton>
+		<ToggleButton android:text="ToggleButton" android:id="@+id/toggleButton2"
+			android:layout_width="wrap_content" android:layout_height="wrap_content" android:textOff="All" android:textOn="All"></ToggleButton>
+		<ToggleButton android:text="ToggleButton" android:id="@+id/toggleButton3"
+			android:layout_width="wrap_content" android:layout_height="wrap_content" android:textOff="City" android:textOn="City"></ToggleButton>
+	</LinearLayout>
+	<TextView android:text="TextView" android:layout_height="wrap_content"
+		android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium"
+		android:id="@+id/textView2"></TextView>
+	<LinearLayout android:layout_height="wrap_content"
+		android:id="@+id/linearLayout2" android:layout_width="match_parent">
+		<ToggleButton android:text="ToggleButton" android:id="@+id/toggleButton4"
+			android:layout_width="wrap_content" android:layout_height="wrap_content" android:textOff="Popular" android:textOn="Popular"></ToggleButton>
+		<ToggleButton android:text="ToggleButton" android:id="@+id/toggleButton5"
+			android:layout_width="wrap_content" android:layout_height="wrap_content" android:textOff="Recent" android:textOn="Recent"></ToggleButton>
+	</LinearLayout>
+	<Button android:text="Done" android:id="@+id/button1"
+		android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="right"></Button>
+
+</LinearLayout>
