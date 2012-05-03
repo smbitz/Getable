@@ -1,5 +1,7 @@
 package com.codegears.getable.util;
 
+import java.util.List;
+
 import org.w3c.dom.Document;
 
 public class NetworkThreadUtil {
@@ -34,6 +36,20 @@ public class NetworkThreadUtil {
 		}.start();
 	}
 
+	public static void getRawDataWithCookie(final String urlString, final String postData,final List<String> cookie, final NetworkThreadListener listener){
+		new Thread() {
+			@Override
+			public void run() {
+				String raw = NetworkUtil.getRawData(urlString, postData, cookie);
+				if (!raw.equals("")) {
+					listener.onNetworkRawSuccess(urlString, raw);
+				} else {
+					listener.onNetworkFail(urlString);
+				}
+			}
+		}.start();
+	}
+	
 	public static void getRawData(final String urlString,
 			final String postData, final NetworkThreadListener listener) {
 		new Thread() {
