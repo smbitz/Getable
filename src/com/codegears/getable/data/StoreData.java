@@ -13,11 +13,11 @@ public class StoreData {
 	
 	public StoreData(JSONObject jsonObject) {
 		try {
-			name = jsonObject.getString("name");
-			id = jsonObject.getString("id");
-			url = jsonObject.getString("url");
-			streetAddress = jsonObject.getString("streetAddress");
-			postalCode = jsonObject.getString("postalCode");
+			name = jsonObject.optString("name");
+			id = jsonObject.optString("id");
+			url = jsonObject.optString("url");
+			streetAddress = jsonObject.optString("streetAddress");
+			postalCode = jsonObject.optString("postalCode");
 			coondinate = new StoreCoondinate( jsonObject.getJSONObject("coondinate") );
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block

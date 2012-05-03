@@ -8,12 +8,7 @@ public class StoreCoondinate {
 	private String longitude;
 	
 	public StoreCoondinate(JSONObject jsonObject) {
-		try {
-			latitude = jsonObject.getString("latitude");
-			longitude = jsonObject.getString("longitude");
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		latitude = jsonObject.optString("latitude");
+		longitude = jsonObject.optString("longitude");
 	}
 }

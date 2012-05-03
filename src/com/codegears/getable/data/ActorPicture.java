@@ -11,8 +11,8 @@ public class ActorPicture {
 	public ActorPicture(JSONObject jsonObject) {
 		try {
 			urls = new PictureDataUrls( jsonObject.getJSONObject("urls") );
-			description = jsonObject.getString("description");
-			uploadTime = jsonObject.getString("uploadTime");
+			description = jsonObject.optString("description");
+			uploadTime = jsonObject.optString("uploadTime");
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

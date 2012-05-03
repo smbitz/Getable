@@ -10,7 +10,7 @@ public class ProductCommentData {
 	public ProductCommentData( JSONObject getJsonObject ) {
 		try {
 			activity = new ProductActivityData( getJsonObject.getJSONObject("activity") );
-			text = getJsonObject.getString("text");
+			text = getJsonObject.optString("text");
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

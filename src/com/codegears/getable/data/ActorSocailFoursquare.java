@@ -7,11 +7,6 @@ public class ActorSocailFoursquare {
 	private boolean status;
 	
 	public ActorSocailFoursquare(JSONObject jsonObject) {
-		try {
-			status = jsonObject.getBoolean("status");
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		status = jsonObject.optBoolean("status");
 	}
 }

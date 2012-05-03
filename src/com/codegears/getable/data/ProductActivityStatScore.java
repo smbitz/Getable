@@ -8,12 +8,7 @@ public class ProductActivityStatScore {
 	private int allTime;
 	
 	public ProductActivityStatScore(JSONObject jsonObject) {
-		try {
-			active = jsonObject.getInt("active");
-			allTime = jsonObject.getInt("allTime");
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		active = jsonObject.optInt("active");
+		allTime = jsonObject.optInt("allTime");
 	}
 }

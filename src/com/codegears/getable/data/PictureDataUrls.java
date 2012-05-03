@@ -9,14 +9,9 @@ public class PictureDataUrls {
 	private String l;
 	
 	public PictureDataUrls(JSONObject jsonObject) {
-		try {
-			t = jsonObject.getString("t");
-			s = jsonObject.getString("s");
-			l = jsonObject.getString("l");
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		t = jsonObject.optString("t");
+		s = jsonObject.optString("s");
+		l = jsonObject.optString("l");
 	}
 	
 	public String getImageURLT(){

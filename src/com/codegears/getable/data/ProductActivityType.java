@@ -9,12 +9,7 @@ public class ProductActivityType {
 	private String name;
 	
 	public ProductActivityType(JSONObject jsonObject) {
-		try {
-			id = jsonObject.getString("id");
-			name = jsonObject.getString("name");
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		id = jsonObject.optString("id");
+		name = jsonObject.optString("name");
 	}
 }

@@ -20,18 +20,18 @@ public class ActorData {
 	
 	public ActorData(JSONObject jsonObject) {
 		try {
-			id = jsonObject.getString("id");
-			url = jsonObject.getString("url");
-			name = jsonObject.getString("name");
-			firstName = jsonObject.getString("firstName");
-			lastName = jsonObject.getString("lastName");
-			joinTime = jsonObject.getString("joinTime");
+			id = jsonObject.optString("id");
+			url = jsonObject.optString("url");
+			name = jsonObject.optString("name");
+			firstName = jsonObject.optString("firstName");
+			lastName = jsonObject.optString("lastName");
+			joinTime = jsonObject.optString("joinTime");
 			statistic = new ActorStatData( jsonObject.getJSONObject("statistic") );
 			notificationSettings = new ActorNotificationSettings( jsonObject.getJSONObject("notificationSettings") );
 			socialConnections = new ActorSocialConnections( jsonObject.getJSONObject("socialConnections") );
-			phoneNumber = jsonObject.getString("phoneNumber");
+			phoneNumber = jsonObject.optString("phoneNumber");
 			picture = new ActorPicture( jsonObject.getJSONObject("picture") );
-			firstLogin = jsonObject.getBoolean("firstLogin");
+			firstLogin = jsonObject.optBoolean("firstLogin");
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -48,5 +48,13 @@ public class ActorData {
 	
 	public String getId(){
 		return id;
+	}
+	
+	public ActorStatData getStatistic(){
+		return statistic;
+	}
+	
+	public String getPhone(){
+		return phoneNumber;
 	}
 }

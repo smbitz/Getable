@@ -10,14 +10,9 @@ public class CategoryData {
 	private String subCategories;
 	
 	public CategoryData(JSONObject jsonObject) {
-		try {
-			id = jsonObject.getString("id");
-			name = jsonObject.getString("name");
-			tags = jsonObject.getString("tags");
-			subCategories = jsonObject.getString("subCategories");
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		id = jsonObject.optString("id");
+		name = jsonObject.optString("name");
+		tags = jsonObject.optString("tags");
+		subCategories = jsonObject.optString("subCategories");
 	}
 }

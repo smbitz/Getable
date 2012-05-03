@@ -15,9 +15,9 @@ public class ProductActivityData {
 	
 	public ProductActivityData(JSONObject setObject) {
 		try {
-			id = setObject.getString("id");
-			url = setObject.getString("url");
-			activityTime = setObject.getString("activityTime");
+			id = setObject.optString("id");
+			url = setObject.optString("url");
+			activityTime = setObject.optString("activityTime");
 			type = new ProductActivityType( setObject.getJSONObject("type") );
 			actor = new ActorData( setObject.getJSONObject("actor") );
 			statistic = new ProductActivityStat( setObject.getJSONObject("statistic") );

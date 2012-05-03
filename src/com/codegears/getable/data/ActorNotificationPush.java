@@ -9,13 +9,8 @@ public class ActorNotificationPush {
 	private boolean liked;
 	
 	public ActorNotificationPush(JSONObject jsonObject) {
-		try {
-			followed = jsonObject.getBoolean("followed");
-			commented = jsonObject.getBoolean("commented");
-			liked = jsonObject.getBoolean("liked");
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		followed = jsonObject.optBoolean("followed");
+		commented = jsonObject.optBoolean("commented");
+		liked = jsonObject.optBoolean("liked");
 	}
 }

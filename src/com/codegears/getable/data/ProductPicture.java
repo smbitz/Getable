@@ -12,8 +12,8 @@ public class ProductPicture {
 	public ProductPicture(JSONObject jsonObject) {
 		try {
 			urls = new PictureDataUrls( (JSONObject) jsonObject.get("urls") );
-			description = jsonObject.getString("description");
-			uploadTime  = jsonObject.getString("uploadTime");
+			description = jsonObject.optString("description");
+			uploadTime  = jsonObject.optString("uploadTime");
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

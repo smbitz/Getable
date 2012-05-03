@@ -11,8 +11,8 @@ public class ProductActivityStat {
 	
 	public ProductActivityStat(JSONObject jsonObject) {
 		try {
-			numberOfComments = jsonObject.getInt("numberOfComments");
-			numberOfLikes = jsonObject.getInt("numberOfLikes");
+			numberOfComments = jsonObject.optInt("numberOfComments");
+			numberOfLikes = jsonObject.optInt("numberOfLikes");
 			score = new ProductActivityStatScore( jsonObject.getJSONObject("score") );
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block

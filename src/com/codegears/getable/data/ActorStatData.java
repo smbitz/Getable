@@ -18,16 +18,16 @@ public class ActorStatData {
 	
 	public ActorStatData(JSONObject jsonObject) {
 		try {
-			numberOfProducts = jsonObject.getInt("numberOfProducts");
-			numberOfComments = jsonObject.getInt("numberOfComments");
-			numberOfReceivedComments = jsonObject.getInt("numberOfReceivedComments");
-			numberOfCommentedProducts = jsonObject.getInt("numberOfCommentedProducts");
-			numberOfFollowers = jsonObject.getInt("numberOfFollowers");
-			numberOfFollowings = jsonObject.getInt("numberOfFollowings");
-			numberOfLikes = jsonObject.getInt("numberOfLikes");
-			numberOfReceivedLikes = jsonObject.getInt("numberOfReceivedLikes");
-			numberOfSharings = jsonObject.getInt("numberOfSharings");
-			numberOfWishlists = jsonObject.getInt("numberOfWishlists");
+			numberOfProducts = jsonObject.optInt("numberOfProducts");
+			numberOfComments = jsonObject.optInt("numberOfComments");
+			numberOfReceivedComments = jsonObject.optInt("numberOfReceivedComments");
+			numberOfCommentedProducts = jsonObject.optInt("numberOfCommentedProducts");
+			numberOfFollowers = jsonObject.optInt("numberOfFollowers");
+			numberOfFollowings = jsonObject.optInt("numberOfFollowings");
+			numberOfLikes = jsonObject.optInt("numberOfLikes");
+			numberOfReceivedLikes = jsonObject.optInt("numberOfReceivedLikes");
+			numberOfSharings = jsonObject.optInt("numberOfSharings");
+			numberOfWishlists = jsonObject.optInt("numberOfWishlists");
 			score = new ActorStatScore( jsonObject.getJSONObject("score") );
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block

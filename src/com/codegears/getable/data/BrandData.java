@@ -10,15 +10,10 @@ public class BrandData {
 	private String tags;
 	
 	public BrandData( JSONObject jsonObject ) {
-		try {
-			id = jsonObject.getString("id");
-			url = jsonObject.getString("url");
-			name = jsonObject.getString("name");
-			tags = jsonObject.getString("tags");
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		id = jsonObject.optString("id");
+		url = jsonObject.optString("url");
+		name = jsonObject.optString("name");
+		tags = jsonObject.optString("tags");
 	}
 	
 	public String getName(){

@@ -7,11 +7,6 @@ public class ActorSocialFacebook {
 	private boolean status;
 	
 	public ActorSocialFacebook(JSONObject jsonObject) {
-		try {
-			status = jsonObject.getBoolean("status");
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+		status = jsonObject.optBoolean("status");
 	}
 }

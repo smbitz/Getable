@@ -21,9 +21,9 @@ public class ProductData {
 			store = new StoreData( (JSONObject) jsonObject.get("store") );
 			picture = new ProductPicture( (JSONObject) jsonObject.get("picture") );
 			gender = new ProductGender( (JSONObject) jsonObject.get("gender") );
-			price = jsonObject.getString("price");
-			keywords = jsonObject.getString("keywords");
-			description = jsonObject.getString("description");
+			price = jsonObject.optString("price");
+			keywords = jsonObject.optString("keywords");
+			description = jsonObject.optString("description");
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
