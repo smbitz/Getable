@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string 
+        name="URL_GET_PRODUCT_ACTIVITIES" 
+        value="http://wongnaimedia.dyndns.org/getable/activities.json" />
+    <string 
+        name="URL_GET_PRODUCT_ACTIVITIES_BY_ID" 
+        value="http://wongnaimedia.dyndns.org/getable/activities/" />
+    <string 
+        name="URL_GET_METROS" 
+        value="http://wongnaimedia.dyndns.org/getable/metros.json" />
+</resources>

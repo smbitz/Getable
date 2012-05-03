@@ -4,7 +4,24 @@
   android:orientation="vertical"
   android:layout_width="match_parent"
   android:layout_height="match_parent">
-    <TextView android:text="User Detail Layout" android:layout_height="wrap_content" android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium" android:id="@+id/textView1"></TextView>
-    <Button android:text="Badge" android:id="@+id/BadgeButton" android:layout_width="wrap_content" android:layout_height="wrap_content"></Button>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:id="@+id/userProfileHeaderLayout" android:background="#ffffff">
+    </LinearLayout>
+
+    <com.codegears.getable.ui.tabbar.TabBar
+        android:id="@+id/userProfileTabBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+    </com.codegears.getable.ui.tabbar.TabBar>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" android:id="@+id/userProfileBodyLayout">
+    </LinearLayout>
+	
+    <Button android:text="Badge" android:id="@+id/BadgeButton" android:layout_width="wrap_content" android:layout_height="wrap_content" android:visibility="gone"></Button>
     
 </LinearLayout>

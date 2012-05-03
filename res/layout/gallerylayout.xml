@@ -4,7 +4,11 @@
 	android:layout_height="match_parent">
 	<Button android:text="Filter" android:id="@+id/FilterButton"
 		android:layout_width="match_parent" android:layout_height="wrap_content"></Button>
-	<GridView android:id="@+id/GalleryGrid" android:layout_height="wrap_content"
-		android:layout_width="match_parent" android:layout_weight="1"></GridView>
-
+	<GridView android:id="@+id/GalleryGrid" 
+	    android:layout_height="match_parent"
+		android:layout_width="match_parent"
+		android:numColumns="auto_fit"
+	    android:verticalSpacing="10dp"
+	    android:horizontalSpacing="10dp"
+	    android:gravity="center" android:columnWidth="90dp"></GridView>
 </LinearLayout>
