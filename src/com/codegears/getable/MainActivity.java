@@ -1,12 +1,20 @@
 package com.codegears.getable;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Stack;
+
+import org.w3c.dom.Document;
 
 import com.codegears.getable.ui.BadgeLayout;
 import com.codegears.getable.ui.GalleryLayout;
 import com.codegears.getable.ui.ProductDetailLayout;
 import com.codegears.getable.ui.UserProfileLayout;
 import com.codegears.getable.ui.tabbar.TabBar;
+import com.codegears.getable.util.NetworkThreadUtil;
+import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
+import com.codegears.getable.util.NetworkUtil;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -19,7 +27,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class MainActivity extends Activity implements BodyLayoutStackListener{
+public class MainActivity extends Activity implements BodyLayoutStackListener, NetworkThreadListener{
 	
 	public static final int REQUEST_GALLERY_FILTER = 1;
 	
@@ -32,6 +40,14 @@ public class MainActivity extends Activity implements BodyLayoutStackListener{
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        
+        //------- Login
+        Map< String, String > newMapData = new HashMap<String, String>();
+        newMapData.put( "email", "benz_shimo@hotmail.com" );
+        newMapData.put( "password", "codegears" );
+        newMapData.put( "_a", "logIn" );
+        String postData = NetworkUtil.createPostData( newMapData );
+        NetworkThreadUtil.getRawData( "http://wongnaimedia.dyndns.org/getable/guest.json?_f=logIn", postData, this );
         
         layoutStack = new Stack<View>();
         tabBar = (TabBar)this.findViewById( R.id.TabBar );
@@ -142,6 +158,34 @@ public class MainActivity extends Activity implements BodyLayoutStackListener{
 		if( requestCode == REQUEST_GALLERY_FILTER ){
 			galleryLayout.refreshView( data );
 		}
+	}
+
+	@Override
+	public void onNetworkDocSuccess( String urlString, Document document ) {
+	}
+
+	@Override
+	public void onNetworkRawSuccess( String urlString, String result ) {
+		List<String> lastCookie = NetworkUtil.lastCookie;
+		System.out.println("cookie test : " + lastCookie.size());
+		for (String cookie : lastCookie) {
+			System.out.println("cookie : " + cookie);
+		}
+		NetworkThreadUtil.getRawDataWithCookie( "http://wongnaimedia.dyndns.org/getable/me/feed.json", null, lastCookie, new NetworkThreadListener(){
+			@Override
+			public void onNetworkDocSuccess( String urlString, Document document ) {
+			}
+			@Override
+			public void onNetworkRawSuccess( String urlString, String result ) {
+				System.out.println("feed result : " + result);
+			}
+			@Override
+			public void onNetworkFail( String urlString ) {
+			}} );
+	}
+
+	@Override
+	public void onNetworkFail( String urlString ) {
 	}
 	
 }

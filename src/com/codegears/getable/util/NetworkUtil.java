@@ -9,6 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -23,6 +24,9 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
 public class NetworkUtil {
+	
+	public static List<String> lastCookie;
+	
 	public static Document getXml( String urlString, String postData ) {
 		try {
 			URL url = new URL( urlString );
@@ -74,8 +78,9 @@ public class NetworkUtil {
 				wr.close();
 			}
 			connection.connect();
+			lastCookie = connection.getHeaderFields().get("Set-Cookie");
 			InputStream i = connection.getInputStream();
-			BufferedReader bReader = new BufferedReader( new InputStreamReader( i ) );
+			BufferedReader bReader = new BufferedReader( new InputStreamReader( i ));
 			String line = bReader.readLine();
 			while ( line != null ) {
 				rawData += line;
@@ -111,5 +116,39 @@ public class NetworkUtil {
 			return true;
 		}
 		return false;
+	}
+
+	public static String getRawData( String urlString, String postData, List< String > cookies ) {
+		String rawData = "";
+		try {
+			URL url = new URL( urlString );
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setDoInput( true );
+			connection.setUseCaches( false );
+			if ( postData != null ) {
+				connection.setRequestMethod( "POST" );
+				connection.setDoOutput( true );
+				DataOutputStream wr = new DataOutputStream( connection.getOutputStream() );
+				wr.writeBytes( postData );
+				wr.flush();
+				wr.close();
+			}
+			for (String cookie : cookies) {
+		    connection.addRequestProperty("Cookie", cookie.split(";", 2)[0]);
+			}
+			connection.connect();
+			InputStream i = connection.getInputStream();
+			BufferedReader bReader = new BufferedReader( new InputStreamReader( i ) );
+			String line = bReader.readLine();
+			while ( line != null ) {
+				rawData += line;
+				line = bReader.readLine();
+			}
+		} catch ( MalformedURLException e ) {
+			e.printStackTrace();
+		} catch ( IOException e ) {
+			e.printStackTrace();
+		}
+		return rawData;
 	}
 }
