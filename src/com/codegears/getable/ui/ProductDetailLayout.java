@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import com.codegears.getable.BodyLayoutStackListener;
+import com.codegears.getable.MainActivity;
 import com.codegears.getable.ProductPhotoOptions;
 import com.codegears.getable.R;
 import com.codegears.getable.data.ActorData;
@@ -34,10 +35,11 @@ import android.widget.TextView;
 
 public class ProductDetailLayout extends AbstractViewLayout implements OnClickListener, NetworkThreadListener {
 
-	public static final int LAYOUTCHANGE_USERPROFILE = 2;
 	private static final String URL_GET_PRODUCT_ACTIVITIES_BY_ID = "URL_GET_PRODUCT_ACTIVITIES_BY_ID";
 	public static final String SHARE_PREF_PRODUCT_USER_ID = "SHARE_PREF_PRODUCT_USER_ID";
 	public static final String SHARE_PREF_KEY_USER_ID = "SHARE_PREF_KEY_USER_ID";
+	public static final String SHARE_PREF_PRODUCT_ACT_ID = "SHARE_PREF_PRODUCT_ACT_ID";
+	public static final String SHARE_PREF_KEY_ACTIVITY_ID = "SHARE_PREF_KEY_ACTIVITY_ID";
 	
 	private BodyLayoutStackListener listener;
 	private String productActivityId;
@@ -55,13 +57,14 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 	private UserProfileHeader userHeader;
 	private LinearLayout commentLayout;
 	private Button photoOptionsButton;
+	private UserProfileImageLayout userProfileImageLayout;
 	
 	public ProductDetailLayout( Activity activity ) {
 		super( activity );
 		View.inflate( this.getContext(), R.layout.productdetaillayout, this );
 		
-		SharedPreferences myPrefs = this.getActivity().getSharedPreferences( GalleryLayout.SHARE_PREF_PRODUCT_ACT_ID, this.getActivity().MODE_PRIVATE );
-		productActivityId = myPrefs.getString( GalleryLayout.SHARE_PREF_KEY_ACTIVITY_ID, null );
+		SharedPreferences myPrefs = this.getActivity().getSharedPreferences( SHARE_PREF_PRODUCT_ACT_ID, this.getActivity().MODE_PRIVATE );
+		productActivityId = myPrefs.getString( SHARE_PREF_KEY_ACTIVITY_ID, null );
 		
 		userHeader = new UserProfileHeader( activity );
 		config = new Config( this.getActivity() );
@@ -77,9 +80,10 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		headerLayout.addView( userHeader );
 		commentLayout = (LinearLayout) findViewById( R.id.productDetailCommentLayout );
 		photoOptionsButton = (Button) findViewById( R.id.productDetailPhotoOptionsButton );
+		userProfileImageLayout = (UserProfileImageLayout) userHeader.getUserProfileImageLayout();
 		
-		userHeader.setOnClickListener( this );
 		photoOptionsButton.setOnClickListener( this );
+		userProfileImageLayout.setOnClickListener( this );
 		
 		getProductDataURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+".json";
 		getProductCommentURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/comments.json";
@@ -94,14 +98,14 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 	
 	@Override
 	public void onClick( View v ) {
-		if( v.equals( userHeader ) ){
+		if( v.equals( userProfileImageLayout ) ){
 			if(listener != null){
-				UserProfileHeader profileHeader = (UserProfileHeader) v;
+				UserProfileImageLayout profileHeader = (UserProfileImageLayout) v;
 				SharedPreferences myPreferences = this.getActivity().getSharedPreferences( SHARE_PREF_PRODUCT_USER_ID, this.getActivity().MODE_PRIVATE );
 				SharedPreferences.Editor prefsEditor = myPreferences.edit();
-				prefsEditor.putString( SHARE_PREF_KEY_USER_ID, profileHeader.getUserData().getId() );
+				prefsEditor.putString( SHARE_PREF_KEY_USER_ID, profileHeader.getUserId() );
 				prefsEditor.commit();
-				listener.onRequestBodyLayoutStack( LAYOUTCHANGE_USERPROFILE );
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_USERPROFILE );
 			}
 		}else if( v.equals( photoOptionsButton ) ){
 			Intent newIntent = new Intent( this.getContext(), ProductPhotoOptions.class );
@@ -179,8 +183,9 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 					
 					//Set User Header
 					userHeader.setName( setUserName );
-					userHeader.setImage( setUserImage );
 					userHeader.setData( setUserData );
+					userProfileImageLayout.setUserImage( setUserImage );
+					userProfileImageLayout.setUserId( setUserData.getId() );
 				}
 			});
 			

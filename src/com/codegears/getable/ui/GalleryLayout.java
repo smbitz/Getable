@@ -42,10 +42,7 @@ import android.widget.LinearLayout;
 
 public class GalleryLayout extends AbstractViewLayout implements OnClickListener, OnItemClickListener, NetworkThreadListener {
 
-	public static final int LAYOUTCHANGE_PRODUCTDETAIL = 1;
 	private static final String URL_GET_PRODUCT_ACTIVITIES = "URL_GET_PRODUCT_ACTIVITIES";
-	public static final String SHARE_PREF_PRODUCT_ACT_ID = "SHARE_PREF_PRODUCT_ACT_ID";
-	public static final String SHARE_PREF_KEY_ACTIVITY_ID = "SHARE_PREF_KEY_ACTIVITY_ID";
 	
 	private Button filterButton;
 	private GridView galleryGrid;
@@ -129,12 +126,12 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 		if(listener != null){
 			if( v instanceof  ProductImageThumbnail ){
 				ProductImageThumbnail productSelect = (ProductImageThumbnail) v;
-				SharedPreferences myPref = this.getActivity().getSharedPreferences( SHARE_PREF_PRODUCT_ACT_ID, this.getActivity().MODE_PRIVATE );
+				SharedPreferences myPref = this.getActivity().getSharedPreferences( ProductDetailLayout.SHARE_PREF_PRODUCT_ACT_ID, this.getActivity().MODE_PRIVATE );
 				SharedPreferences.Editor prefsEditor = myPref.edit();
-				prefsEditor.putString( SHARE_PREF_KEY_ACTIVITY_ID, productSelect.getProductData().getId() );
+				prefsEditor.putString( ProductDetailLayout.SHARE_PREF_KEY_ACTIVITY_ID, productSelect.getProductData().getId() );
 		        prefsEditor.commit();
 			}
-			listener.onRequestBodyLayoutStack(LAYOUTCHANGE_PRODUCTDETAIL);
+			listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PRODUCTDETAIL );
 		}
 	}
 

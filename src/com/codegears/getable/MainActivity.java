@@ -22,6 +22,9 @@ import android.widget.ToggleButton;
 public class MainActivity extends Activity implements BodyLayoutStackListener{
 	
 	public static final int REQUEST_GALLERY_FILTER = 1;
+	public static final int LAYOUTCHANGE_PRODUCTDETAIL = 1;
+	public static final int LAYOUTCHANGE_USERPROFILE = 2;
+	public static final int LAYOUTCHANGE_BADGE = 3;
 	
 	private TabBar tabBar;
 	private ViewGroup bodyLayout;
@@ -99,7 +102,7 @@ public class MainActivity extends Activity implements BodyLayoutStackListener{
 
 	@Override
 	public void onRequestBodyLayoutStack(int requestId) {
-		if(requestId == GalleryLayout.LAYOUTCHANGE_PRODUCTDETAIL){
+		if(requestId == LAYOUTCHANGE_PRODUCTDETAIL){
 			layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
 			ProductDetailLayout view = new ProductDetailLayout(this);
 			view.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -107,14 +110,14 @@ public class MainActivity extends Activity implements BodyLayoutStackListener{
 			bodyLayout.removeAllViews();
 			bodyLayout.addView( view );
 			bodyLayout.requestLayout();
-		} else if(requestId == ProductDetailLayout.LAYOUTCHANGE_USERPROFILE){
+		} else if(requestId == LAYOUTCHANGE_USERPROFILE){
 			layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
 			UserProfileLayout view = new UserProfileLayout(this);
 			view.setBodyLayoutChangeListener( this );
 			bodyLayout.removeAllViews();
 			bodyLayout.addView( view );
 			bodyLayout.requestLayout();
-		} else if(requestId == UserProfileLayout.LAYOUTCHANGE_BADGE){
+		} else if(requestId == LAYOUTCHANGE_BADGE){
 			layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
 			BadgeLayout view = new BadgeLayout(this);
 			bodyLayout.removeAllViews();

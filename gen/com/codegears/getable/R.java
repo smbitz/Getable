@@ -14,13 +14,13 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int BadgeButton=0x7f060033;
+        public static final int BadgeButton=0x7f060038;
         public static final int BadgeList=0x7f060001;
         public static final int BodyLayout=0x7f060012;
-        public static final int Button01=0x7f060028;
-        public static final int Button02=0x7f060029;
-        public static final int Button03=0x7f06002a;
-        public static final int Button04=0x7f06002b;
+        public static final int Button01=0x7f06002b;
+        public static final int Button02=0x7f06002c;
+        public static final int Button03=0x7f06002d;
+        public static final int Button04=0x7f06002e;
         public static final int FilterButton=0x7f060010;
         public static final int GalleryGrid=0x7f060011;
         public static final int TabBar=0x7f060013;
@@ -53,19 +53,24 @@ public final class R {
         public static final int productDetailNumLike=0x7f060020;
         public static final int productDetailNumMentions=0x7f060021;
         public static final int productDetailPhotoOptionsButton=0x7f06001d;
-        public static final int productDetailPhotoOptionsCloseButton=0x7f06002c;
+        public static final int productDetailPhotoOptionsCloseButton=0x7f06002f;
         public static final int productDetailPrice=0x7f06001e;
+        public static final int productImageThumbnailDetailImage=0x7f060028;
+        public static final int productImageThumbnailDetailName=0x7f060029;
+        public static final int productImageThumbnailDetailUserName=0x7f06002a;
         public static final int productImageView=0x7f060027;
         public static final int scrollView1=0x7f060016;
         public static final int slidingDrawer1=0x7f060024;
         public static final int textView1=0x7f060000;
         public static final int textView2=0x7f060004;
-        public static final int userProfileBodyLayout=0x7f060032;
-        public static final int userProfileHeaderLayout=0x7f060030;
-        public static final int userProfileImage=0x7f06002d;
-        public static final int userProfileName=0x7f06002e;
-        public static final int userProfilePostTime=0x7f06002f;
-        public static final int userProfileTabBar=0x7f060031;
+        public static final int userGalleryGridView=0x7f060030;
+        public static final int userProfileBodyLayout=0x7f060037;
+        public static final int userProfileHeaderLayout=0x7f060035;
+        public static final int userProfileImageLayout=0x7f060031;
+        public static final int userProfileImageLayoutImage=0x7f060034;
+        public static final int userProfileName=0x7f060032;
+        public static final int userProfilePostTime=0x7f060033;
+        public static final int userProfileTabBar=0x7f060036;
     }
     public static final class layout {
         public static final int badgelayout=0x7f030000;
@@ -77,9 +82,12 @@ public final class R {
         public static final int metrolisttextview=0x7f030006;
         public static final int productdetaillayout=0x7f030007;
         public static final int productimagethumbnail=0x7f030008;
-        public static final int productphotooptions=0x7f030009;
-        public static final int userprofileheader=0x7f03000a;
-        public static final int userprofilelayout=0x7f03000b;
+        public static final int productimagethumbnaildetail=0x7f030009;
+        public static final int productphotooptions=0x7f03000a;
+        public static final int usergallerylayout=0x7f03000b;
+        public static final int userprofileheader=0x7f03000c;
+        public static final int userprofileimagelayout=0x7f03000d;
+        public static final int userprofilelayout=0x7f03000e;
     }
     public static final class string {
         public static final int app_name=0x7f050001;

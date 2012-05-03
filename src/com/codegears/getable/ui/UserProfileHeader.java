@@ -12,24 +12,20 @@ import android.widget.TextView;
 
 public class UserProfileHeader extends LinearLayout {
 	
-	private ImageView userImage;
 	private TextView userName;
 	private ActorData userData;
+	private UserProfileImageLayout userProfileImageLayout;
 	
 	public UserProfileHeader(Context context) {
 		super(context);
 		View.inflate(context, R.layout.userprofileheader, this);
 		
-		userImage = (ImageView) findViewById( R.id.userProfileImage );
 		userName = (TextView) findViewById( R.id.userProfileName );
+		userProfileImageLayout = (UserProfileImageLayout) findViewById( R.id.userProfileImageLayout );
 	}
 
 	public void setName(String setUserName) {
 		userName.setText( setUserName );
-	}
-
-	public void setImage(Bitmap setUserImage) {
-		userImage.setImageBitmap( setUserImage );
 	}
 
 	public void setData(ActorData setUserData) {
@@ -39,5 +35,9 @@ public class UserProfileHeader extends LinearLayout {
 	public ActorData getUserData(){
 		return userData;
 	}
-
+	
+	public UserProfileImageLayout getUserProfileImageLayout(){
+		return userProfileImageLayout;
+	}
+	
 }
