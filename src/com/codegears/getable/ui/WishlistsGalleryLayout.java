@@ -29,40 +29,48 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.Gallery;
 import android.widget.GridView;
 
-public class UserGalleryLayout extends AbstractViewLayout implements OnItemClickListener, NetworkThreadListener {
+public class WishlistsGalleryLayout extends AbstractViewLayout implements OnItemClickListener, NetworkThreadListener {
 
 	public static final String URL_DEFAULT = "URL_DEFAULT";
-	public static final String USER_GALLERY_VIEW_TYPE_PHOTOS = "USER_GALLERY_VIEW_TYPE_PHOTOS";
-	public static final String USER_GALLERY_VIEW_TYPE_LIKES = "USER_GALLERY_VIEW_TYPE_LIKES";
+	public static final String WISHLISTS_GALLERY_VIEW = "WISHLISTS_GALLERY_VIEW";
 	
 	private BodyLayoutStackListener listener;
-	private GridView userGalleryGrid;
-	private UserGalleryAdapter userGalleryAdapter;
-	private String userDataURL;
+	private GridView wishlistsGalleryGrid;
+	private WishlistsGalleryAdapter wishlistsGalleryAdapter;
+	private String wishlistsDataURL;
 	private ArrayList<ProductActivityData> arrayProductData;
 	private ArrayList<Bitmap> arrayProductImage;
+	private Button filterButton;
+	private Config config;
+	private String wishlistsId;
 	
-	public UserGalleryLayout(Activity activity, String setDataURL) {
+	public WishlistsGalleryLayout(Activity activity) {
 		super(activity);
-		View.inflate( this.getContext(), R.layout.usergallerylayout, this);
+		View.inflate( this.getContext(), R.layout.wishlistsgallerylayout, this);
 		
-		userGalleryGrid = (GridView) findViewById( R.id.userGalleryGridView );
-		userGalleryAdapter = new UserGalleryAdapter();
-		userGalleryGrid.setOnItemClickListener( this );
+		SharedPreferences myPreferences = this.getActivity().getSharedPreferences( UserWishlistsLayout.SHARE_PREF_WISHLISTS_ID, this.getActivity().MODE_PRIVATE );
+		wishlistsId = myPreferences.getString( UserWishlistsLayout.SHARE_PREF_KEY_WISHLISTS_ID, null );
+		
+		wishlistsGalleryGrid = (GridView) findViewById( R.id.wishlistsGalleryGridView );
+		wishlistsGalleryAdapter = new WishlistsGalleryAdapter();
+		wishlistsGalleryGrid.setOnItemClickListener( this );
 		arrayProductData = new ArrayList<ProductActivityData>();
 		arrayProductImage = new ArrayList<Bitmap>();
+		filterButton = (Button) findViewById( R.id.wishlistsGalleryFilterButton );
+		config = new Config(this.getContext());
 		
-		userDataURL = setDataURL;
+		wishlistsDataURL = config.get( URL_DEFAULT ).toString()+"wishlists/"+wishlistsId+"/activities.json";
 
 		loadData();
 	}
 
 	private void loadData() {
 		recycleResource();
-		NetworkThreadUtil.getRawData( userDataURL, null, this);
+		NetworkThreadUtil.getRawData( wishlistsDataURL, null, this);
 	}
 
 	private void recycleResource() {
@@ -76,11 +84,11 @@ public class UserGalleryLayout extends AbstractViewLayout implements OnItemClick
 		
 	}
 	
-	public void setBodyLayoutStackListener( BodyLayoutStackListener setListener ){
+	public void setBodyLayoutChangeListener( BodyLayoutStackListener setListener ){
 		this.listener = setListener;
 	}
 	
-	private class UserGalleryAdapter extends BaseAdapter {
+	private class WishlistsGalleryAdapter extends BaseAdapter {
 		
 		private ArrayList<ProductActivityData> arrayProductData;
 		
@@ -108,7 +116,7 @@ public class UserGalleryLayout extends AbstractViewLayout implements OnItemClick
 			productImageThumbnailDetail returnView;
 			
 			if (convertView == null) {
-				productImageThumbnailDetail newImageThumbnailDetail = new productImageThumbnailDetail( UserGalleryLayout.this.getContext() );
+				productImageThumbnailDetail newImageThumbnailDetail = new productImageThumbnailDetail( WishlistsGalleryLayout.this.getContext() );
 				returnView = newImageThumbnailDetail;
 			}else{
 				returnView = (productImageThumbnailDetail) convertView;
@@ -174,11 +182,11 @@ public class UserGalleryLayout extends AbstractViewLayout implements OnItemClick
 			e.printStackTrace();
 		}
 		
-		userGalleryAdapter.setData( arrayProductData );
+		wishlistsGalleryAdapter.setData( arrayProductData );
 		this.getActivity().runOnUiThread( new Runnable() {
 			@Override
 			public void run() {
-				userGalleryGrid.setAdapter( userGalleryAdapter );
+				wishlistsGalleryGrid.setAdapter( wishlistsGalleryAdapter );
 			}
 		});
 	}

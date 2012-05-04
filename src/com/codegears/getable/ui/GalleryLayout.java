@@ -58,7 +58,6 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 	private String currentLat;
 	private String currentLng;
 	private GetCurrentLocation getCurrentLocation;
-	private ProgressDialog loadingDialog;
 	
 	public GalleryLayout( Activity activity ) {
 		super( activity );
@@ -95,9 +94,6 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 			//SharedPreference.put(key, image.id);
 			//which image clicked??
 		//}
-		loadingDialog = ProgressDialog.show(this.getActivity(), "", 
-	               "Loading. Please wait...", true);
-		
 		recycleResource();
 		NetworkThreadUtil.getRawData(
 				config.get( URL_GET_PRODUCT_ACTIVITIES ).toString()+urlVar1+urlVar2+urlVar3,
@@ -219,8 +215,6 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 				galleryGrid.setAdapter( galleryAdapter );
 			}
 		});
-		
-		loadingDialog.dismiss();
 	}
 
 	@Override

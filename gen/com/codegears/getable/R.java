@@ -14,7 +14,7 @@ public final class R {
         public static final int ic_launcher=0x7f020000;
     }
     public static final class id {
-        public static final int BadgeButton=0x7f060038;
+        public static final int BadgeButton=0x7f060039;
         public static final int BadgeList=0x7f060001;
         public static final int BodyLayout=0x7f060012;
         public static final int Button01=0x7f06002b;
@@ -40,6 +40,7 @@ public final class R {
         public static final int galleryFilterRecentButton=0x7f06000e;
         public static final int handle=0x7f060026;
         public static final int imageView1=0x7f060002;
+        public static final int imageView2=0x7f06003d;
         public static final int linearLayout1=0x7f060003;
         public static final int linearLayout2=0x7f06000c;
         public static final int metroListViewText=0x7f060014;
@@ -64,13 +65,19 @@ public final class R {
         public static final int textView1=0x7f060000;
         public static final int textView2=0x7f060004;
         public static final int userGalleryGridView=0x7f060030;
-        public static final int userProfileBodyLayout=0x7f060037;
-        public static final int userProfileHeaderLayout=0x7f060035;
+        public static final int userProfileBodyLayout=0x7f060038;
+        public static final int userProfileHeaderFollowButton=0x7f060034;
+        public static final int userProfileHeaderLayout=0x7f060036;
         public static final int userProfileImageLayout=0x7f060031;
-        public static final int userProfileImageLayoutImage=0x7f060034;
+        public static final int userProfileImageLayoutImage=0x7f060035;
         public static final int userProfileName=0x7f060032;
         public static final int userProfilePostTime=0x7f060033;
-        public static final int userProfileTabBar=0x7f060036;
+        public static final int userProfileTabBar=0x7f060037;
+        public static final int userWishlistsImage=0x7f06003a;
+        public static final int userWishlistsItemNumber=0x7f06003c;
+        public static final int userWishlistsName=0x7f06003b;
+        public static final int wishlistsGalleryFilterButton=0x7f06003e;
+        public static final int wishlistsGalleryGridView=0x7f06003f;
     }
     public static final class layout {
         public static final int badgelayout=0x7f030000;
@@ -88,6 +95,8 @@ public final class R {
         public static final int userprofileheader=0x7f03000c;
         public static final int userprofileimagelayout=0x7f03000d;
         public static final int userprofilelayout=0x7f03000e;
+        public static final int userwishlistsgroupitem=0x7f03000f;
+        public static final int wishlistsgallerylayout=0x7f030010;
     }
     public static final class string {
         public static final int app_name=0x7f050001;

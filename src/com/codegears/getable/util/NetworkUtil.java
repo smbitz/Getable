@@ -9,6 +9,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLEncoder;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -80,12 +81,37 @@ public class NetworkUtil {
 			connection.connect();
 			lastCookie = connection.getHeaderFields().get("Set-Cookie");
 			InputStream i = connection.getInputStream();
-			BufferedReader bReader = new BufferedReader( new InputStreamReader( i ));
+			BufferedReader bReader = new BufferedReader( new InputStreamReader( i ) );
+			//Read bReader
+			/*char[] buffer = new char[2048];
+			while loop
+			bReader.read(buffer, 0, 1024);
+			bReader.read(buffer, 1024, 1024);
+			...
+			add to raw data*/
 			String line = bReader.readLine();
 			while ( line != null ) {
 				rawData += line;
 				line = bReader.readLine();
 			}
+			/*char[] buffer = new char[2048];
+			int defaultOffsetSize = 0;
+			int loop = 0;
+			while( (bReader.read( buffer, defaultOffsetSize, 1024 )) > 0 ){
+				String s = String.valueOf(buffer);
+				System.out.println("STRING : "+s);
+				rawData += s;
+				
+				//System.out.println("In buffer Data : "+buffer[0]+buffer[1]+buffer[2]+", "+loop);
+				loop++;
+			}*/
+			/*StringBuilder totalString = new StringBuilder();
+			String line;
+			while ((line = bReader.readLine()) != null) {
+				totalString.append(line);
+			}
+			rawData = totalString.toString();*/
+			//System.out.println("In Raw Data : "+rawData.length());
 		} catch ( MalformedURLException e ) {
 			e.printStackTrace();
 		} catch ( IOException e ) {

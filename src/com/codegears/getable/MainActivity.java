@@ -11,6 +11,7 @@ import com.codegears.getable.ui.BadgeLayout;
 import com.codegears.getable.ui.GalleryLayout;
 import com.codegears.getable.ui.ProductDetailLayout;
 import com.codegears.getable.ui.UserProfileLayout;
+import com.codegears.getable.ui.WishlistsGalleryLayout;
 import com.codegears.getable.ui.tabbar.TabBar;
 import com.codegears.getable.util.NetworkThreadUtil;
 import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
@@ -33,6 +34,7 @@ public class MainActivity extends Activity implements BodyLayoutStackListener, N
 	public static final int LAYOUTCHANGE_PRODUCTDETAIL = 1;
 	public static final int LAYOUTCHANGE_USERPROFILE = 2;
 	public static final int LAYOUTCHANGE_BADGE = 3;
+	public static final int LAYOUTCHANGE_WISHLISTS_GALLERY = 4;
 	
 	private TabBar tabBar;
 	private ViewGroup bodyLayout;
@@ -136,6 +138,13 @@ public class MainActivity extends Activity implements BodyLayoutStackListener, N
 		} else if(requestId == LAYOUTCHANGE_BADGE){
 			layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
 			BadgeLayout view = new BadgeLayout(this);
+			bodyLayout.removeAllViews();
+			bodyLayout.addView( view );
+			bodyLayout.requestLayout();
+		} else if(requestId == LAYOUTCHANGE_WISHLISTS_GALLERY){
+			layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
+			WishlistsGalleryLayout view = new WishlistsGalleryLayout(this);
+			view.setBodyLayoutChangeListener( this );
 			bodyLayout.removeAllViews();
 			bodyLayout.addView( view );
 			bodyLayout.requestLayout();

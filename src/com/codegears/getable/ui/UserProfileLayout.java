@@ -35,17 +35,30 @@ import android.widget.ToggleButton;
 public class UserProfileLayout extends AbstractViewLayout implements OnClickListener, BodyLayoutStackListener, NetworkThreadListener {
 
 	public static final String URL_DEFAULT = "URL_DEFAULT";
+	public static final String GET_NUMBER_OF_PRODUCT = "numberOfProducts";
 	
 	private BodyLayoutStackListener listener;
 	private TabBar tabBar;
 	private ViewGroup bodyLayout;
-	private UserGalleryLayout userGalleryLayout;
+	private UserGalleryLayout userGalleryLayoutPhotos;
+	private UserGalleryLayout userGalleryLayoutLikes;
+	private UserWishlistsLayout userWishlistsLayout;
 	private LinearLayout headerLayout;
 	private UserProfileHeader userHeader;
 	private String userId;
 	private String getUserDataURL;
 	private Config config;
 	private UserProfileImageLayout userProfileImageLayout;
+	private ToggleButton photoColumnButton;
+	private ToggleButton likesColumnButton;
+	private ToggleButton wishlistsColumnButton;
+	private ToggleButton followersColumnButton;
+	private ToggleButton followingColumnButton;
+	private String photoTextButton;
+	private String likesTextButton;
+	private String wishlistsTextButton;
+	private String followersTextButton;
+	private String followingTextButton;
 	
 	public UserProfileLayout( Activity activity ) {
 		super( activity );
@@ -65,15 +78,43 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 		
 		tabBar.setBodyLayout( bodyLayout );
 		
+		//Set URL data.
+		String getPhotosDataURL = config.get( URL_DEFAULT ).toString()+"users/"+userId+"/activities.json";
+		String getLikesDataURL = config.get( URL_DEFAULT ).toString()+"users/"+userId+"/activities.json";
+		String getWishlistsDataURL = config.get( URL_DEFAULT ).toString()+"users/"+userId+"/wishlists.json";
+		
 		//---- First Layout ----//
-        ToggleButton b1 = new ToggleButton(this.getContext());
-        b1.setTextOff( "Photo" );
-        b1.setTextOn( "Photo" );
-        userGalleryLayout = new UserGalleryLayout( this.getActivity(), userId );
-        userGalleryLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        userGalleryLayout.setBodyLayoutStackListener( listener );
-        userGalleryLayout.setBackgroundColor( 0xFFFF0000 );
-        tabBar.addTab( b1, userGalleryLayout );
+		photoColumnButton = new ToggleButton( this.getContext() );
+		photoColumnButton.setText( "PHOTOS" );
+		photoColumnButton.setTextOn( photoTextButton );
+		photoColumnButton.setTextOff( photoTextButton );
+		userGalleryLayoutPhotos = new UserGalleryLayout( this.getActivity(), getPhotosDataURL );
+		userGalleryLayoutPhotos.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+		userGalleryLayoutPhotos.setBackgroundColor( 0xFFFF0000 );
+        tabBar.addTab( photoColumnButton, userGalleryLayoutPhotos );
+        
+        //---- Second Layout ----//
+        likesColumnButton = new ToggleButton( this.getContext() );
+        likesColumnButton.setText( "LIKES" );
+        likesColumnButton.setTextOn( likesTextButton );
+        likesColumnButton.setTextOff( likesTextButton );
+        userGalleryLayoutLikes = new UserGalleryLayout( this.getActivity(), getLikesDataURL );
+        userGalleryLayoutLikes.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        userGalleryLayoutLikes.setBackgroundColor( 0xFFFF0000 );
+        tabBar.addTab( likesColumnButton, userGalleryLayoutLikes );
+        
+        //---- Third Layout ----//
+        wishlistsColumnButton = new ToggleButton( this.getContext() );
+        wishlistsColumnButton.setText( "WISHLISTS" );
+        wishlistsColumnButton.setTextOn( wishlistsTextButton );
+        wishlistsColumnButton.setTextOff( wishlistsTextButton );
+        userWishlistsLayout = new UserWishlistsLayout( this.getActivity(), getWishlistsDataURL );
+        userWishlistsLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        userWishlistsLayout.setBackgroundColor( 0xFFFFFFFF );
+        tabBar.addTab( wishlistsColumnButton, userWishlistsLayout );
+        
+        //---- Fourth Layout ----//
+        //---- Fifth Layout ----//
         
         getUserDataURL = config.get( URL_DEFAULT ).toString()+"users/"+userId+".json";
         
@@ -82,6 +123,9 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 	
 	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener){
 		this.listener = listener;
+		userGalleryLayoutPhotos.setBodyLayoutStackListener( listener );
+		userGalleryLayoutLikes.setBodyLayoutStackListener( listener );
+		userWishlistsLayout.setBodyLayoutStackListener( listener );
 	}
 
 	@Override
@@ -111,9 +155,10 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 	public void onNetworkRawSuccess(String urlString, String result) {
 		if( urlString.equals( getUserDataURL ) ){
 			ActorData newData = null;
+			JSONObject jsonObject = null;
 			try {
 				//Load Product Data
-				JSONObject jsonObject = new JSONObject(result);
+				jsonObject = new JSONObject( result );
 				newData = new ActorData( jsonObject );
 			} catch (JSONException e) {
 				// TODO Auto-generated catch block
@@ -140,6 +185,22 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 			final Bitmap setUserImage = userImageBitmap;
 			final ActorData setUserData = newData;
 			
+			//Set number button
+			JSONObject statisticJson = null;
+			try {
+				statisticJson = jsonObject.getJSONObject("statistic");
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			photoTextButton = statisticJson.optString("numberOfProducts");
+			likesTextButton = statisticJson.optString("numberOfLikes");
+			wishlistsTextButton = statisticJson.optString("numberOfWishlists");
+			
+			final String setNumberPhotos = photoTextButton;
+			final String setNumberLikes = likesTextButton;
+			final String setNumberWishlists = wishlistsTextButton;
 			this.getActivity().runOnUiThread( new Runnable() {
 				@Override
 				public void run() {
@@ -147,6 +208,11 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 					userHeader.setName( setUserName );
 					userHeader.setData( setUserData );
 					userProfileImageLayout.setUserImage( setUserImage );
+					
+					//Set number of likes.
+					photoColumnButton.setText( setNumberPhotos+"\nPHOTOS" );
+					likesColumnButton.setText( setNumberLikes+"\nLIKES" );
+					wishlistsColumnButton.setText( setNumberWishlists+"\nWISHLISTS" );
 				}
 			});
 		}
