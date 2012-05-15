@@ -11,7 +11,6 @@ public class ProductActivityData {
 	private ActorData actor;
 	private ProductActivityStat statistic;
 	private ProductData product;
-	private ProductCommentData comment;
 	
 	public ProductActivityData(JSONObject setObject) {
 		try {
@@ -22,7 +21,6 @@ public class ProductActivityData {
 			actor = new ActorData( setObject.getJSONObject("actor") );
 			statistic = new ProductActivityStat( setObject.getJSONObject("statistic") );
 			product = new ProductData( setObject.getJSONObject("product") );
-			comment = new ProductCommentData( setObject.getJSONObject("comment") );
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -39,10 +37,6 @@ public class ProductActivityData {
 	
 	public ProductActivityStat getStatisitc(){
 		return statistic;
-	}
-	
-	public ProductCommentData getComment(){
-		return comment;
 	}
 	
 	public ActorData getActor(){

@@ -10,14 +10,14 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class productImageThumbnailDetail extends LinearLayout {
+public class ProductImageThumbnailDetail extends LinearLayout {
 	
 	private ImageView productImage;
 	private ProductActivityData productActivityData;
 	private TextView productName;
 	private TextView userName;
 
-	public productImageThumbnailDetail(Context context) {
+	public ProductImageThumbnailDetail(Context context) {
 		super(context);
 		View.inflate(context, R.layout.productimagethumbnaildetail, this);
 		

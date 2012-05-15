@@ -32,4 +32,9 @@ public class StoreData {
 	public String getStreetAddress(){
 		return streetAddress;
 	}
+	
+	public String getId(){
+		return id;
+	}
+	
 }

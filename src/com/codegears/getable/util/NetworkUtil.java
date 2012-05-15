@@ -151,6 +151,9 @@ public class NetworkUtil {
 			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
 			connection.setDoInput( true );
 			connection.setUseCaches( false );
+			for (String cookie : cookies) {
+				connection.addRequestProperty("Cookie", cookie.split(";", 2)[0]);
+			}
 			if ( postData != null ) {
 				connection.setRequestMethod( "POST" );
 				connection.setDoOutput( true );
@@ -158,9 +161,6 @@ public class NetworkUtil {
 				wr.writeBytes( postData );
 				wr.flush();
 				wr.close();
-			}
-			for (String cookie : cookies) {
-		    connection.addRequestProperty("Cookie", cookie.split(";", 2)[0]);
 			}
 			connection.connect();
 			InputStream i = connection.getInputStream();

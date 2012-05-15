@@ -15,7 +15,7 @@
         android:id="@+id/wishlistsGalleryGridView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:numColumns="2" >
+        android:numColumns="3" android:columnWidth="90dp" android:horizontalSpacing="10dp" android:verticalSpacing="10dp">
     </GridView>
 
 </LinearLayout>

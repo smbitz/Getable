@@ -8,10 +8,15 @@ import java.util.Stack;
 import org.w3c.dom.Document;
 
 import com.codegears.getable.ui.BadgeLayout;
-import com.codegears.getable.ui.GalleryLayout;
-import com.codegears.getable.ui.ProductDetailLayout;
-import com.codegears.getable.ui.UserProfileLayout;
-import com.codegears.getable.ui.WishlistsGalleryLayout;
+import com.codegears.getable.ui.ProductNumComment;
+import com.codegears.getable.ui.activity.BrandFeedLayout;
+import com.codegears.getable.ui.activity.GalleryLayout;
+import com.codegears.getable.ui.activity.ProductCommentLayout;
+import com.codegears.getable.ui.activity.ProductDetailLayout;
+import com.codegears.getable.ui.activity.ProductLikeLayout;
+import com.codegears.getable.ui.activity.StoreMainLayout;
+import com.codegears.getable.ui.activity.UserProfileLayout;
+import com.codegears.getable.ui.activity.WishlistsGalleryLayout;
 import com.codegears.getable.ui.tabbar.TabBar;
 import com.codegears.getable.util.NetworkThreadUtil;
 import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
@@ -28,31 +33,39 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class MainActivity extends Activity implements BodyLayoutStackListener, NetworkThreadListener{
+public class MainActivity extends Activity implements BodyLayoutStackListener {
+	
+	public static final String URL_DEFAULT = "URL_DEFAULT";
 	
 	public static final int REQUEST_GALLERY_FILTER = 1;
+	public static final int REQUEST_WISHLISTS_FILTER = 2;
+	
 	public static final int LAYOUTCHANGE_PRODUCTDETAIL = 1;
 	public static final int LAYOUTCHANGE_USERPROFILE = 2;
 	public static final int LAYOUTCHANGE_BADGE = 3;
 	public static final int LAYOUTCHANGE_WISHLISTS_GALLERY = 4;
+	public static final int LAYOUTCHANGE_BRAND_FEED = 5;
+	public static final int LAYOUTCHANGE_STORE_MAIN = 6;
+	public static final int LAYOUTCHANGE_PRODUCT_LIKE_USER_LIST = 7;
+	public static final int LAYOUTCHANGE_PRODUCT_COMMENT_USER_LIST = 8;
+	
+	public static int RESULT_GALLERY_FILTER_FINISH = 1;
+	public static int RESULT_WISHLISTS_FILTER_FINISH = 2;
 	
 	private TabBar tabBar;
 	private ViewGroup bodyLayout;
 	private Stack<View> layoutStack;
 	private GalleryLayout galleryLayout;
+	private WishlistsGalleryLayout wishlistsGalleryLayout;
+	private BrandFeedLayout brandFeedLayout;
+	private StoreMainLayout storeMainLayout;
+	private ProductLikeLayout productLikeLayout;
+	private ProductCommentLayout productCommentLayout;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-        
-        //------- Login
-        Map< String, String > newMapData = new HashMap<String, String>();
-        newMapData.put( "email", "benz_shimo@hotmail.com" );
-        newMapData.put( "password", "codegears" );
-        newMapData.put( "_a", "logIn" );
-        String postData = NetworkUtil.createPostData( newMapData );
-        NetworkThreadUtil.getRawData( "http://wongnaimedia.dyndns.org/getable/guest.json?_f=logIn", postData, this );
         
         layoutStack = new Stack<View>();
         tabBar = (TabBar)this.findViewById( R.id.TabBar );
@@ -63,10 +76,10 @@ public class MainActivity extends Activity implements BodyLayoutStackListener, N
         ToggleButton b1 = new ToggleButton(this);
         b1.setTextOff( "Gallery" );
         b1.setTextOn( "Gallery" );
+        //b1.setBackgroundResource( R.drawable.gallery_button_default );
         galleryLayout = new GalleryLayout(this);
         galleryLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         galleryLayout.setBodyLayoutChangeListener( this );
-        galleryLayout.setBackgroundColor( 0xFFFF0000 );
         tabBar.addTab( b1, galleryLayout );
         
         //---- Second Layout ----//
@@ -143,10 +156,38 @@ public class MainActivity extends Activity implements BodyLayoutStackListener, N
 			bodyLayout.requestLayout();
 		} else if(requestId == LAYOUTCHANGE_WISHLISTS_GALLERY){
 			layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
-			WishlistsGalleryLayout view = new WishlistsGalleryLayout(this);
-			view.setBodyLayoutChangeListener( this );
+			wishlistsGalleryLayout = new WishlistsGalleryLayout( this );
+			wishlistsGalleryLayout.setBodyLayoutChangeListener( this );
 			bodyLayout.removeAllViews();
-			bodyLayout.addView( view );
+			bodyLayout.addView( wishlistsGalleryLayout );
+			bodyLayout.requestLayout();
+		} else if(requestId == LAYOUTCHANGE_BRAND_FEED){
+			layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
+			brandFeedLayout = new BrandFeedLayout( this );
+			brandFeedLayout.setBodyLayoutChangeListener( this );
+			bodyLayout.removeAllViews();
+			bodyLayout.addView( brandFeedLayout );
+			bodyLayout.requestLayout();
+		}else if(requestId == LAYOUTCHANGE_STORE_MAIN){
+			layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
+			storeMainLayout = new StoreMainLayout( this );
+			storeMainLayout.setBodyLayoutChangeListener( this );
+			bodyLayout.removeAllViews();
+			bodyLayout.addView( storeMainLayout );
+			bodyLayout.requestLayout();
+		}else if(requestId == LAYOUTCHANGE_PRODUCT_LIKE_USER_LIST){
+			layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
+			productLikeLayout = new ProductLikeLayout( this );
+			productLikeLayout.setBodyLayoutChangeListener( this );
+			bodyLayout.removeAllViews();
+			bodyLayout.addView( productLikeLayout );
+			bodyLayout.requestLayout();
+		}else if(requestId ==  LAYOUTCHANGE_PRODUCT_COMMENT_USER_LIST){
+			layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
+			productCommentLayout = new ProductCommentLayout( this );
+			productCommentLayout.setBodyLayoutChangeListener( this );
+			bodyLayout.removeAllViews();
+			bodyLayout.addView( productCommentLayout );
 			bodyLayout.requestLayout();
 		}
 	}
@@ -169,35 +210,9 @@ public class MainActivity extends Activity implements BodyLayoutStackListener, N
 		super.onActivityResult(requestCode, resultCode, data);
 		if( requestCode == REQUEST_GALLERY_FILTER ){
 			galleryLayout.refreshView( data );
+		}else if( requestCode == REQUEST_WISHLISTS_FILTER ){
+			wishlistsGalleryLayout.refreshView( data );
 		}
-	}
-
-	@Override
-	public void onNetworkDocSuccess( String urlString, Document document ) {
-	}
-
-	@Override
-	public void onNetworkRawSuccess( String urlString, String result ) {
-		List<String> lastCookie = NetworkUtil.lastCookie;
-		System.out.println("cookie test : " + lastCookie.size());
-		for (String cookie : lastCookie) {
-			System.out.println("cookie : " + cookie);
-		}
-		NetworkThreadUtil.getRawDataWithCookie( "http://wongnaimedia.dyndns.org/getable/me/feed.json", null, lastCookie, new NetworkThreadListener(){
-			@Override
-			public void onNetworkDocSuccess( String urlString, Document document ) {
-			}
-			@Override
-			public void onNetworkRawSuccess( String urlString, String result ) {
-				System.out.println("feed result : " + result);
-			}
-			@Override
-			public void onNetworkFail( String urlString ) {
-			}} );
-	}
-
-	@Override
-	public void onNetworkFail( String urlString ) {
 	}
 	
 }

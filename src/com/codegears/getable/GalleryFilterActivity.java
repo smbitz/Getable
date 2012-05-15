@@ -34,7 +34,6 @@ import android.widget.ToggleButton;
 
 public class GalleryFilterActivity extends Activity implements CompoundButtonGroupListener, OnClickListener, NetworkThreadListener {
 	
-	private static int RESULT_GALLERY_FILTER_FINISH = 1;
 	private static String URL_VAR_LOCAL_TEXT_LAT = "&currentCoordinate.latitude=";
 	private static String URL_VAR_LOCAL_TEXT_LNG = "&currentCoordinate.longitude=";
 	private static String URL_VAR_LOCAL_TEXT_METOR = "&metro=";
@@ -129,7 +128,7 @@ public class GalleryFilterActivity extends Activity implements CompoundButtonGro
 			Intent intent = new Intent();
 			intent.putExtra( PUT_EXTRA_URL_VAR_1, resultTxt1 );
 			intent.putExtra(PUT_EXTRA_URL_VAR_2, resultTxt2 );
-			this.setResult( RESULT_GALLERY_FILTER_FINISH, intent );
+			this.setResult( MainActivity.RESULT_GALLERY_FILTER_FINISH, intent );
 			this.finish();
 		}else if( v instanceof MetroListTextView ){
 			MetroListTextView metroData = (MetroListTextView) v;

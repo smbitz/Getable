@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" android:background="#7F000000">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/wishlistsFilterTitleAToZButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Title (A to Z)" />
+
+        <Button
+            android:id="@+id/wishlistsFilterPriceLowToHighButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Price (low to high)" />
+
+        <Button
+            android:id="@+id/wishlistsFilterPriceHighToLowButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Price (high to low)" />
+
+        <Button
+            android:id="@+id/wishlistsFilterDataAddedButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Date added" />
+
+        <Button
+            android:id="@+id/wishlistsFilterDistanceButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Distance" />
+
+    </LinearLayout>
+
+</LinearLayout>

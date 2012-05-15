@@ -16,11 +16,11 @@ public class ProductData {
 	
 	public ProductData(JSONObject jsonObject) {
 		try {
-			brand = new BrandData( (JSONObject) jsonObject.get("brand") );
-			category = new CategoryData( (JSONObject) jsonObject.get("category") );
-			store = new StoreData( (JSONObject) jsonObject.get("store") );
-			picture = new ProductPicture( (JSONObject) jsonObject.get("picture") );
-			gender = new ProductGender( (JSONObject) jsonObject.get("gender") );
+			brand = new BrandData( jsonObject.getJSONObject("brand") );
+			category = new CategoryData( jsonObject.getJSONObject("category") );
+			store = new StoreData( jsonObject.getJSONObject("store") );
+			picture = new ProductPicture( jsonObject.getJSONObject("picture") );
+			gender = new ProductGender( jsonObject.getJSONObject("gender") );
 			price = jsonObject.optString("price");
 			keywords = jsonObject.optString("keywords");
 			description = jsonObject.optString("description");

@@ -7,7 +7,7 @@
 
     <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="match_parent" >
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -51,12 +51,11 @@
                         android:layout_weight="1"
                         android:orientation="vertical" >
 
-                        <TextView
-                            android:id="@+id/productDetailName"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Product Name"
-                            android:textAppearance="?android:attr/textAppearanceLarge" />
+                            android:orientation="vertical" android:id="@+id/productDetailNameLayout">
+                        </LinearLayout>
 
                         <TextView
                             android:id="@+id/productDetailDescription"
@@ -71,7 +70,7 @@
                         android:layout_weight="1" >
 
                         <Button
-                            android:id="@+id/button1"
+                            android:id="@+id/productDetailLikeButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Like" />
@@ -83,7 +82,7 @@
                             android:text="Wishlist" />
 
                         <Button
-                            android:id="@+id/button3"
+                            android:id="@+id/productDetailCommentButton"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Comment" />
@@ -107,35 +106,36 @@
                             android:layout_height="wrap_content"
                             android:text="Price" />
 
-                        <TextView
-                            android:id="@+id/productDetailAddress"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Address" />
+                            android:orientation="vertical" android:id="@+id/productDetailAddressLayout">
+                        </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/productDetailNumLike"
-                            android:layout_width="wrap_content"
+                        <LinearLayout
+                            android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:text="Num Like" />
+                            android:orientation="vertical" android:id="@+id/productDetailLikeNumLayout">
+                        </LinearLayout>
 
                         <TextView
                             android:id="@+id/productDetailNumMentions"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Num Mentions" />
-
-                        <TextView
-                            android:id="@+id/productDetailNumComments"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="Num Comment" />
+                            android:text="Num Mentions" android:visibility="gone"/>
 
                         <LinearLayout
                             android:layout_width="match_parent"
-                            android:layout_height="match_parent" android:id="@+id/productDetailCommentLayout">
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical" android:id="@+id/productDetailCommentNumLayout">
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" android:id="@+id/productDetailCommentLayout" android:orientation="vertical">
                         </LinearLayout>
                     </LinearLayout>
+
                 </LinearLayout>
             </ScrollView>
         </LinearLayout>
@@ -170,6 +170,42 @@
                     android:layout_height="match_parent" android:background="#ffffff">
                 </LinearLayout>
             </SlidingDrawer>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" android:layout_weight="1">
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/productDetailCommentTextBoxLayout"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:visibility="gone">
+
+                <EditText
+                    android:id="@+id/productDetailCommentTextBoxEditText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:ems="10" >
+
+                    <requestFocus />
+                </EditText>
+
+                <Button
+                    android:id="@+id/productDetailCommentTextBokSubmit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Button" />
+            </LinearLayout>
 
         </LinearLayout>
 

@@ -27,17 +27,19 @@ public class ImageLoader {
         photoLoaderThread.setPriority(Thread.NORM_PRIORITY-1);
 	}
 	
-	public void DisplayImage( String imageURL, Activity currentAct , ImageView imageView, Boolean isUseCache ){
+	public Bitmap DisplayImage( String imageURL, Activity currentAct , ImageView imageView, Boolean isUseCache ){
 		imageViews.put( imageView, imageURL );
+		Bitmap bitmap = null;
 		if( isUseCache ){
-			Bitmap bitmap = memoryCache.get( imageURL );
+			bitmap = memoryCache.get( imageURL );
 			if( bitmap != null ){
 				imageView.setImageBitmap( bitmap );
-				return;
+				return bitmap;
 			}
 		}
 		
 		queuePhoto( imageURL, currentAct, imageView);
+		return bitmap;
 	}
 
 	private void queuePhoto(String imageURL, Activity currentAct, ImageView imageView) {
