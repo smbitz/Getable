@@ -4,6 +4,7 @@ import com.codegears.getable.R;
 import com.codegears.getable.data.BrandData;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
 import android.widget.TextView;
 
@@ -13,6 +14,7 @@ public class ProductBrandName extends TextView {
 	
 	public ProductBrandName(Context context) {
 		super(context);
+		this.setTextColor( Color.parseColor( this.getResources().getString( R.color.NameColorBlue ) ) );
 	}
 	
 	public void setBrandData( BrandData setData ){

@@ -5,6 +5,7 @@ import com.codegears.getable.data.BrandData;
 import com.codegears.getable.data.ProductActivityData;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
 import android.widget.TextView;
 
@@ -14,6 +15,7 @@ public class ProductNumLike extends TextView {
 	
 	public ProductNumLike(Context context) {
 		super(context);
+		this.setTextColor( Color.parseColor( this.getResources().getString( R.color.NameColorBlue ) ) );
 	}
 	
 	public void setProductData( ProductActivityData setData ){

@@ -1,44 +1,128 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="match_parent"
-	android:layout_height="match_parent" android:background="#7F000000">
-	<TextView android:text="TextView" android:layout_height="wrap_content"
-		android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium"
-		android:id="@+id/textView1"></TextView>
-	<LinearLayout android:layout_height="wrap_content"
-		android:id="@+id/linearLayout1" android:layout_width="match_parent">
-		<ToggleButton android:text="Local" android:id="@+id/galleryFilterLocalButton"
-			android:layout_width="wrap_content" android:layout_height="wrap_content" android:textOn="Local" android:textOff="Local" android:checked="true"></ToggleButton>
-		<ToggleButton android:text="ToggleButton" android:id="@+id/galleryFilterAllButton"
-			android:layout_width="wrap_content" android:layout_height="wrap_content" android:textOff="All" android:textOn="All"></ToggleButton>
-		<ToggleButton android:text="ToggleButton" android:id="@+id/galleryFilterCityButton"
-			android:layout_width="wrap_content" android:layout_height="wrap_content" android:textOff="City" android:textOn="City"></ToggleButton>
+	android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="85dp"
+        android:orientation="vertical">
+    </LinearLayout>
+
+	<LinearLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="wrap_content"
+	    android:orientation="vertical" android:background="#887f79">
+
+	    <LinearLayout
+	        android:id="@+id/linearLayout1"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content" >
+
+	        <LinearLayout
+	            android:layout_width="wrap_content"
+	            android:layout_height="match_parent" android:layout_weight="1">
+
+	            <TextView
+	                android:id="@+id/textView1"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:text="Location"
+	                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+	        </LinearLayout>
+
+	        <ToggleButton
+	            android:id="@+id/galleryFilterLocalButton"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:checked="true"
+	            android:text="Local"
+	            android:textOff="Local"
+	            android:textOn="Local" />
+
+	        <ToggleButton
+	            android:id="@+id/galleryFilterAllButton"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="ToggleButton"
+	            android:textOff="All"
+	            android:textOn="All" />
+
+	        <ToggleButton
+	            android:id="@+id/galleryFilterCityButton"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="ToggleButton"
+	            android:textOff="City"
+	            android:textOn="City" />
+
+	    </LinearLayout>
+
+	    <LinearLayout
+	        android:id="@+id/galleryFilterMetroLayout"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content"
+	        android:layout_weight="1"
+	        android:orientation="vertical"
+	        android:visibility="gone" >
+
+	        <ListView
+	            android:id="@+id/galleryFilterMetrosList"
+	            android:layout_width="match_parent"
+	            android:layout_height="wrap_content" >
+	        </ListView>
+
+	    </LinearLayout>
+
+	    <LinearLayout
+	        android:id="@+id/linearLayout2"
+	        android:layout_width="match_parent"
+	        android:layout_height="wrap_content" >
+
+	        <LinearLayout
+	            android:layout_width="wrap_content"
+	            android:layout_height="match_parent" android:layout_weight="1">
+
+	            <TextView
+	                android:id="@+id/textView2"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:text="Sort"
+	                android:textAppearance="?android:attr/textAppearanceMedium" />
+
+	        </LinearLayout>
+
+	        <ToggleButton
+	            android:id="@+id/galleryFilterPopularButton"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:checked="true"
+	            android:text="ToggleButton"
+	            android:textOff="Popular"
+	            android:textOn="Popular" />
+
+	        <ToggleButton
+	            android:id="@+id/galleryFilterRecentButton"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:text="ToggleButton"
+	            android:textOff="Recent"
+	            android:textOn="Recent" />
+	    </LinearLayout>
+
+	    <Button
+	        android:id="@+id/galleryFilterCloseButton"
+	        android:layout_width="wrap_content"
+	        android:layout_height="wrap_content"
+	        android:text="Done" android:layout_gravity="right"/>
 	</LinearLayout>
 
 	<LinearLayout
 	    android:layout_width="match_parent"
-	    android:layout_height="wrap_content"
-	    android:orientation="vertical" android:layout_weight="1" android:id="@+id/galleryFilterMetroLayout" android:visibility="gone">
-
-		<ListView
-		    android:id="@+id/galleryFilterMetrosList"
-		    android:layout_width="match_parent"
-		    android:layout_height="wrap_content">
-		</ListView>
-
+	    android:layout_height="match_parent"
+	    android:layout_weight="1"
+	    android:orientation="vertical" >
 	</LinearLayout>
-
-	<TextView android:text="TextView" android:layout_height="wrap_content"
-		android:layout_width="wrap_content" android:textAppearance="?android:attr/textAppearanceMedium"
-		android:id="@+id/textView2"></TextView>
-	<LinearLayout android:layout_height="wrap_content"
-		android:id="@+id/linearLayout2" android:layout_width="match_parent">
-		<ToggleButton android:text="ToggleButton" android:id="@+id/galleryFilterPopularButton"
-			android:layout_width="wrap_content" android:layout_height="wrap_content" android:textOff="Popular" android:textOn="Popular" android:checked="true"></ToggleButton>
-		<ToggleButton android:text="ToggleButton" android:id="@+id/galleryFilterRecentButton"
-			android:layout_width="wrap_content" android:layout_height="wrap_content" android:textOff="Recent" android:textOn="Recent"></ToggleButton>
-	</LinearLayout>
-	<Button android:text="Done" android:id="@+id/galleryFilterCloseButton"
-		android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_gravity="right"></Button>
 
 </LinearLayout>

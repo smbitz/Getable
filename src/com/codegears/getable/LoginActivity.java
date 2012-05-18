@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import com.codegears.getable.util.NetworkThreadUtil;
@@ -43,7 +45,16 @@ public class LoginActivity extends Activity implements NetworkThreadListener {
 
 	@Override
 	public void onNetworkRawSuccess(String urlString, String result) {
+		JSONObject jsonObject = null;
+		try {
+			jsonObject = new JSONObject( result );
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
 		app.setAppCookie( NetworkUtil.lastCookie );
+		app.setUserId( jsonObject.optString( "id" ) );
 		
 		Intent intent = new Intent( this, MainActivity.class );
 		this.startActivity( intent );
@@ -69,7 +80,7 @@ public class LoginActivity extends Activity implements NetworkThreadListener {
 	@Override
 	public void onNetworkFail(String urlString) {
 		// TODO Auto-generated method stub
-		
+		System.out.println("Login Network Fail !!");
 	}
 	
 }

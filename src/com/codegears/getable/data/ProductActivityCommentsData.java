@@ -11,6 +11,7 @@ public class ProductActivityCommentsData {
 	private ActorData actor;
 	private ProductActivityStat statistic;
 	private ProductCommentData comment;
+	private MyRelationData myRelation;
 	
 	public ProductActivityCommentsData(JSONObject setObject) {
 		try {
@@ -21,6 +22,10 @@ public class ProductActivityCommentsData {
 			actor = new ActorData( setObject.getJSONObject("actor") );
 			statistic = new ProductActivityStat( setObject.getJSONObject("statistic") );
 			comment = new ProductCommentData( setObject.getJSONObject("comment") );
+			
+			if( setObject.getJSONObject("myRelation") != null ){
+				myRelation = new MyRelationData( setObject.getJSONObject("myRelation") );
+			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();

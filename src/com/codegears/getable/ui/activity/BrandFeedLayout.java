@@ -23,6 +23,7 @@ import android.widget.ListView;
 
 import com.codegears.getable.BodyLayoutStackListener;
 import com.codegears.getable.MainActivity;
+import com.codegears.getable.MyApp;
 import com.codegears.getable.data.ProductActivityData;
 import com.codegears.getable.data.ProductBrandFeedData;
 import com.codegears.getable.ui.AbstractViewLayout;
@@ -67,7 +68,7 @@ public class BrandFeedLayout extends AbstractViewLayout implements NetworkThread
 		
 		this.addView( brandListView );
 		
-		String getBrandFeedData = config.get( MainActivity.URL_DEFAULT ).toString()+"brands/"+brandId+"/activities.json";
+		String getBrandFeedData = config.get( MyApp.URL_DEFAULT ).toString()+"brands/"+brandId+"/activities.json";
 		
 		NetworkThreadUtil.getRawData( getBrandFeedData, null, this );
 	}

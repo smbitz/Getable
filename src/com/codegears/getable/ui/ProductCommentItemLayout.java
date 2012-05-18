@@ -4,6 +4,7 @@ import com.codegears.getable.R;
 import com.codegears.getable.data.ProductActivityCommentsData;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -25,6 +26,8 @@ public class ProductCommentItemLayout extends LinearLayout {
 		userName = (TextView) findViewById( R.id.productCommentItemUserName );
 		commentText = (TextView) findViewById( R.id.productCommentItemCommentText );
 		commentTime = (TextView) findViewById( R.id.productCommentItemCommentTime );
+		
+		userName.setTextColor( Color.parseColor( this.getResources().getString( R.color.NameColorBlue ) ) );
 	}
 	
 	public void setUserName( String setString ){

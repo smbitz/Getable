@@ -11,6 +11,7 @@ public class ProductActorLikeData {
 	private ProductActivityType type;
 	private String activityTime;
 	private String url;
+	private MyRelationData myRelation;
 	
 	public ProductActorLikeData( JSONObject setObject ) {
 		try {
@@ -21,6 +22,10 @@ public class ProductActorLikeData {
 			type = new ProductActivityType( setObject.getJSONObject("type") );
 			activityTime = setObject.optString("activityTime");
 			url = setObject.optString("url");
+			
+			if( setObject.optJSONObject("myRelation") != null ){
+				myRelation = new MyRelationData( setObject.optJSONObject("myRelation") );
+			}
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -33,6 +38,10 @@ public class ProductActorLikeData {
 	
 	public ActorData getActor(){
 		return this.actor;
+	}
+	
+	public MyRelationData getMyRelation(){
+		return this.myRelation;
 	}
 	
 }

@@ -12,4 +12,13 @@ public class ProductActivityType {
 		id = jsonObject.optString("id");
 		name = jsonObject.optString("name");
 	}
+	
+	public String getId(){
+		return id;
+	}
+	
+	public String getName(){
+		return name;
+	}
+	
 }

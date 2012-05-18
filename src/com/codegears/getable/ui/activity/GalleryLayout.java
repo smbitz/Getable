@@ -32,7 +32,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.inputmethodservice.Keyboard.Key;
 import android.preference.PreferenceManager.OnActivityResultListener;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
@@ -219,5 +221,5 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 		urlVar3 = getData.getExtras().getString( GalleryFilterActivity.PUT_EXTRA_URL_VAR_2 );
 		loadData();
 	}
-
+	
 }

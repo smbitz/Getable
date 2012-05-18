@@ -3,5 +3,6 @@
 
     <string name="hello">Hello World, MainActivity!</string>
     <string name="app_name">Getable</string>
+    <color name="NameColorBlue">#63bfec</color>
 
 </resources>

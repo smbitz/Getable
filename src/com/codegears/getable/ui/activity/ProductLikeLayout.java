@@ -22,6 +22,7 @@ import android.widget.ListView;
 import com.codegears.getable.BodyLayoutStackListener;
 import com.codegears.getable.MainActivity;
 import com.codegears.getable.MyApp;
+import com.codegears.getable.data.ActorData;
 import com.codegears.getable.data.ProductActivityCommentsData;
 import com.codegears.getable.data.ProductActorLikeData;
 import com.codegears.getable.ui.AbstractViewLayout;
@@ -50,6 +51,7 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 	private ImageLoader imageLoader;
 	private String getLikeDataURL;
 	private String followUserURL;
+	private String unFollowUserURL;
 	private MyApp app;
 	private List<String> appCookie;
 	
@@ -69,7 +71,7 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 		
 		this.addView( likeListView );
 		
-		getLikeDataURL = config.get( MainActivity.URL_DEFAULT ).toString()+"activities/"+productId+"/likes.json";
+		getLikeDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+productId+"/likes.json";
 		
 		NetworkThreadUtil.getRawDataWithCookie(getLikeDataURL, null, appCookie, this);
 	}
@@ -116,6 +118,7 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 				returnView = new UserFollowItemLayout( ProductLikeLayout.this.getContext() );
 			}else{
 				returnView = (UserFollowItemLayout) convertView;
+				returnView.getFollowButton().setVisibility( View.VISIBLE );
 			}
 			
 			String getUserImageURL = data.get( position ).getLike().getActivityData().getActor().getPicture().getImageUrls().getImageURLT();
@@ -127,9 +130,24 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 			returnView.setLikeUserData( data.get( position ) );
 			returnView.setOnClickListener( ProductLikeLayout.this );
 			
+			//FollowButton
 			FollowButton followButton = returnView.getFollowButton();
-			followButton.setActorData( data.get( position ).getLike().getActivityData().getActor() );
-			followButton.setOnClickListener( ProductLikeLayout.this );
+			if( app.getUserId().equals( data.get( position ).getActor().getId() ) ){
+				followButton.setVisibility( View.INVISIBLE );
+			}else{
+				followButton.setActorData( data.get( position ).getActor() );
+				
+				//Set text/image follow/following
+				if( data.get( position ).getActor().getMyRelation().getFollowActivity() != null ){
+					followButton.setText( "Following" );
+					followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
+				}else{
+					followButton.setText( "Follow" );
+					followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
+				}
+				
+				followButton.setOnClickListener( ProductLikeLayout.this );
+			}
 			
 			return returnView;
 		}
@@ -164,8 +182,6 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 					likeListView.setAdapter( listLikeAdapter );
 				}
 			});
-		}else if( urlString.equals( followUserURL ) ){
-			//On click follow result.
 		}
 	}
 
@@ -178,21 +194,99 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 	@Override
 	public void onClick(View v) {
 		if( v instanceof FollowButton ){
-			FollowButton followButton = (FollowButton) v;
-			String followUserId = followButton.getActorData().getId();
-			
-			followUserURL = config.get( MainActivity.URL_DEFAULT ).toString()+"users/"+followUserId+"/followers.json";
-			Map< String, String > newMapData = new HashMap<String, String>();
-			newMapData.put( "_a", "follow" );
-			String postData = NetworkUtil.createPostData( newMapData );
-			
-			NetworkThreadUtil.getRawDataWithCookie(followUserURL, postData, appCookie, this);
+			final FollowButton followButton = (FollowButton) v;
+			followButton.setEnabled( false );
+			if( followButton.getFollowButtonStatus() == FollowButton.BUTTON_STATUS_UNFOLLOW ){
+				String followUserId = followButton.getActorData().getId();
+				
+				followUserURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+followUserId+"/followers.json";
+				Map< String, String > newMapData = new HashMap<String, String>();
+				newMapData.put( "_a", "follow" );
+				String postData = NetworkUtil.createPostData( newMapData );
+				
+				NetworkThreadUtil.getRawDataWithCookie(followUserURL, postData, appCookie, new NetworkThreadListener() {
+					
+					@Override
+					public void onNetworkRawSuccess(String urlString, String result) {
+						try {
+							JSONObject jsonObject = new JSONObject(result);
+							ActorData actorData = null;
+							if( jsonObject.optJSONObject("followedUser") != null ){
+								actorData = new ActorData( jsonObject.optJSONObject("followedUser") );
+							}
+							followButton.setActorData( actorData );
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						ProductLikeLayout.this.getActivity().runOnUiThread( new Runnable() {
+							@Override
+							public void run() {
+								followButton.setEnabled( true );
+							}
+						});
+					}
+					
+					@Override
+					public void onNetworkFail(String urlString) {
+						// TODO Auto-generated method stub
+						
+					}
+					
+					@Override
+					public void onNetworkDocSuccess(String urlString, Document document) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+				
+				//Set text/image follow/following
+				followButton.setText( "Following" );
+				followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
+			}else if( followButton.getFollowButtonStatus() == FollowButton.BUTTON_STATUS_FOLLOWING ){
+				String followActivityId = followButton.getActorData().getMyRelation().getFollowActivity().getId();
+				
+				unFollowUserURL = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+followActivityId+".json";
+				Map< String, String > newMapData = new HashMap<String, String>();
+				newMapData.put( "_a", "delete" );
+				String postData = NetworkUtil.createPostData( newMapData );
+				
+				NetworkThreadUtil.getRawDataWithCookie(unFollowUserURL, postData, appCookie, new NetworkThreadListener() {
+					
+					@Override
+					public void onNetworkRawSuccess(String urlString, String result) {
+						ProductLikeLayout.this.getActivity().runOnUiThread( new Runnable() {
+							@Override
+							public void run() {
+								followButton.setEnabled( true );
+							}
+						});
+					}
+					
+					@Override
+					public void onNetworkFail(String urlString) {
+						// TODO Auto-generated method stub
+						
+					}
+					
+					@Override
+					public void onNetworkDocSuccess(String urlString, Document document) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+				
+				//Set text/image follow/following
+				followButton.setText( "Follow" );
+				followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
+			}
 		}else if(listener != null){
 			if( v instanceof UserFollowItemLayout ){
 				UserFollowItemLayout userFollowItemLayout = (UserFollowItemLayout) v;
 				SharedPreferences myPref = this.getActivity().getSharedPreferences( UserProfileLayout.SHARE_PREF_VALUE_USER_ID, this.getActivity().MODE_PRIVATE );
 				SharedPreferences.Editor prefsEditor = myPref.edit();
-				prefsEditor.putString( UserProfileLayout.SHARE_PREF_KEY_USER_ID, userFollowItemLayout.getLikeUserData().getLike().getActivityData().getActor().getId() );
+				prefsEditor.putString( UserProfileLayout.SHARE_PREF_KEY_USER_ID, userFollowItemLayout.getLikeUserData().getActor().getId() );
 		        prefsEditor.commit();
 			}
 			listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_USERPROFILE );

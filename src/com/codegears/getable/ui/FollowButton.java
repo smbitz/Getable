@@ -7,7 +7,11 @@ import android.widget.Button;
 
 public class FollowButton extends Button {
 	
+	public static final int BUTTON_STATUS_UNFOLLOW = 0;
+	public static final int BUTTON_STATUS_FOLLOWING = 1;
+	
 	private ActorData actorData;
+	private int status;
 	
 	public FollowButton(Context context) {
 		super(context);
@@ -20,6 +24,14 @@ public class FollowButton extends Button {
 	
 	public ActorData getActorData(){
 		return actorData;
+	}
+	
+	public void setFollowButtonStatus( int setStatus ){
+		status = setStatus;
+	}
+	
+	public int getFollowButtonStatus(){
+		return status;
 	}
 
 }

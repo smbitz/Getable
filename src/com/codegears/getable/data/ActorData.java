@@ -17,6 +17,7 @@ public class ActorData {
 	private String phoneNumber;
 	private ActorPicture picture;
 	private Boolean firstLogin;
+	private MyRelationData myRelation;
 	
 	public ActorData(JSONObject jsonObject) {
 		try {
@@ -32,6 +33,11 @@ public class ActorData {
 			phoneNumber = jsonObject.optString("phoneNumber");
 			picture = new ActorPicture( jsonObject.getJSONObject("picture") );
 			firstLogin = jsonObject.optBoolean("firstLogin");
+			
+			if( jsonObject.optJSONObject("myRelation") != null ){
+				myRelation = new MyRelationData( jsonObject.optJSONObject("myRelation") );
+			}
+			
 		} catch (JSONException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -57,4 +63,9 @@ public class ActorData {
 	public String getPhone(){
 		return phoneNumber;
 	}
+	
+	public MyRelationData getMyRelation(){
+		return this.myRelation;
+	}
+	
 }

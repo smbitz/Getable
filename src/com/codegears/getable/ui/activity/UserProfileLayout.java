@@ -75,6 +75,7 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 	private ProgressDialog loadingDialog;
 	private FollowButton userHeaderFollowButton;
 	private String followUserURL;
+	private String unFollowUserURL;
 	private List<String> appCookie;
 	private MyApp app;
 	
@@ -86,7 +87,7 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 		userId = myPreferences.getString( SHARE_PREF_KEY_USER_ID, null );
 		
 		loadingDialog = ProgressDialog.show(this.getActivity(), "", 
-	               "Loading. Please wait...", true);
+	               "Loading. Please wait...", true, true);
 		
 		userHeader = new UserProfileHeader( this.getContext() );
 		config = new Config( this.getActivity() );
@@ -105,11 +106,11 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 		tabBar.setBodyLayout( bodyLayout );
 		
 		//Set URL data.
-		String getPhotosDataURL = config.get( MainActivity.URL_DEFAULT ).toString()+"users/"+userId+"/activities.json?page.number=1&page.size=32";
-		String getLikesDataURL = config.get( MainActivity.URL_DEFAULT ).toString()+"users/"+userId+"/activities.json?page.number=1&page.size=32&type=3";
-		String getWishlistsDataURL = config.get( MainActivity.URL_DEFAULT ).toString()+"users/"+userId+"/wishlists.json?page.number=1&page.size=32";
-		String getFollowersDataURL = config.get( MainActivity.URL_DEFAULT ).toString()+"users/"+userId+"/followers.json?page.number=1&page.size=32";
-		String getFollowingsDataURL = config.get( MainActivity.URL_DEFAULT ).toString()+"users/"+userId+"/followings.json?page.number=1&page.size=32";
+		String getPhotosDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+userId+"/activities.json?page.number=1&page.size=32";
+		String getLikesDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+userId+"/activities.json?page.number=1&page.size=32&type=3";
+		String getWishlistsDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+userId+"/wishlists.json?page.number=1&page.size=32";
+		String getFollowersDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+userId+"/followers.json?page.number=1&page.size=32";
+		String getFollowingsDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+userId+"/followings.json?page.number=1&page.size=32";
 		
 		//---- First Layout ----//
 		photoColumnButton = new ToggleButton( this.getContext() );
@@ -150,7 +151,7 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
         followersColumnButton.setTextSize(9);
         followersColumnButton.setTextOn( followersTextButton );
         followersColumnButton.setTextOff( followersTextButton );
-        userFollowersLayout = new UserFollowLayout( this.getActivity(), getFollowersDataURL );
+        userFollowersLayout = new UserFollowLayout( this.getActivity(), getFollowersDataURL, UserFollowLayout.GET_FOLLOWERS );
         userFollowersLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         userFollowersLayout.setBackgroundColor( 0xFFFFFFFF );
         tabBar.addTab( followersColumnButton, userFollowersLayout );
@@ -161,14 +162,14 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
         followingsColumnButton.setTextSize(8);
         followingsColumnButton.setTextOn( followingsTextButton );
         followingsColumnButton.setTextOff( followingsTextButton );
-        userFollowingsLayout = new UserFollowLayout( this.getActivity(), getFollowingsDataURL );
+        userFollowingsLayout = new UserFollowLayout( this.getActivity(), getFollowingsDataURL, UserFollowLayout.GET_FOLLOWINGS );
         userFollowingsLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         userFollowingsLayout.setBackgroundColor( 0xFFFFFFFF );
         tabBar.addTab( followingsColumnButton, userFollowingsLayout );
         
-        getUserDataURL = config.get( MainActivity.URL_DEFAULT ).toString()+"users/"+userId+".json";
+        getUserDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+userId+".json";
         
-        NetworkThreadUtil.getRawData( getUserDataURL, null, this);
+        NetworkThreadUtil.getRawDataWithCookie(getUserDataURL, null, appCookie, this);
 	}
 	
 	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener){
@@ -183,14 +184,93 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 	@Override
 	public void onClick( View v ) {
 		if( v.equals( userHeaderFollowButton ) ){
-			String followUserId = userHeaderFollowButton.getActorData().getId();
-			
-			followUserURL = config.get( MainActivity.URL_DEFAULT ).toString()+"users/"+followUserId+"/followers.json";
-			Map< String, String > newMapData = new HashMap<String, String>();
-			newMapData.put( "_a", "follow" );
-			String postData = NetworkUtil.createPostData( newMapData );
-			
-			NetworkThreadUtil.getRawDataWithCookie(followUserURL, postData, appCookie, this);
+			final FollowButton followButton = (FollowButton) v;
+			followButton.setEnabled( false );
+			if( followButton.getFollowButtonStatus() == FollowButton.BUTTON_STATUS_UNFOLLOW ){
+				String followUserId = followButton.getActorData().getId();
+				
+				followUserURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+followUserId+"/followers.json";
+				Map< String, String > newMapData = new HashMap<String, String>();
+				newMapData.put( "_a", "follow" );
+				String postData = NetworkUtil.createPostData( newMapData );
+				
+				NetworkThreadUtil.getRawDataWithCookie(followUserURL, postData, appCookie, new NetworkThreadListener() {
+					
+					@Override
+					public void onNetworkRawSuccess(String urlString, String result) {
+						try {
+							JSONObject jsonObject = new JSONObject(result);
+							ActorData actorData = null;
+							if( jsonObject.optJSONObject("followedUser") != null ){
+								actorData = new ActorData( jsonObject.optJSONObject("followedUser") );
+							}
+							followButton.setActorData( actorData );
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+						
+						UserProfileLayout.this.getActivity().runOnUiThread( new Runnable() {
+							@Override
+							public void run() {
+								followButton.setEnabled( true );
+							}
+						});
+					}
+					
+					@Override
+					public void onNetworkFail(String urlString) {
+						// TODO Auto-generated method stub
+						
+					}
+					
+					@Override
+					public void onNetworkDocSuccess(String urlString, Document document) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+				
+				//Set text/image follow/following
+				followButton.setText( "Following" );
+				followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
+			}else if( followButton.getFollowButtonStatus() == FollowButton.BUTTON_STATUS_FOLLOWING ){
+				String followActivityId = followButton.getActorData().getMyRelation().getFollowActivity().getId();
+				
+				unFollowUserURL = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+followActivityId+".json";
+				Map< String, String > newMapData = new HashMap<String, String>();
+				newMapData.put( "_a", "delete" );
+				String postData = NetworkUtil.createPostData( newMapData );
+				
+				NetworkThreadUtil.getRawDataWithCookie(unFollowUserURL, postData, appCookie, new NetworkThreadListener() {
+					
+					@Override
+					public void onNetworkRawSuccess(String urlString, String result) {
+						UserProfileLayout.this.getActivity().runOnUiThread( new Runnable() {
+							@Override
+							public void run() {
+								followButton.setEnabled( true );
+							}
+						});
+					}
+					
+					@Override
+					public void onNetworkFail(String urlString) {
+						// TODO Auto-generated method stub
+						
+					}
+					
+					@Override
+					public void onNetworkDocSuccess(String urlString, Document document) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+				
+				//Set text/image follow/following
+				followButton.setText( "Follow" );
+				followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
+			}
 		}
 	}
 
@@ -271,7 +351,21 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 					userHeader.setName( setUserName );
 					userHeader.setData( setActorData );
 					userProfileImageLayout.setUserImage( setUserImage );
-					userHeaderFollowButton.setActorData( setActorData );
+					
+					if( app.getUserId().equals( setActorData.getId() ) ){
+						userHeaderFollowButton.setVisibility( View.INVISIBLE );
+					}else{
+						userHeaderFollowButton.setActorData( setActorData );
+						
+						//Set text/image follow/following
+						if( setActorData.getMyRelation().getFollowActivity() != null ){
+							userHeaderFollowButton.setText( "Following" );
+							userHeaderFollowButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
+						}else{
+							userHeaderFollowButton.setText( "Follow" );
+							userHeaderFollowButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
+						}
+					}
 					
 					//Set number of likes.
 					photoColumnButton.setText( setNumberPhotos+"\nPHOTOS" );

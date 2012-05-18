@@ -75,7 +75,7 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 		
 		String urlVar1 = MyApp.DEFAULT_URL_VAR_1;
 		
-		getCommentDataURL = config.get( MainActivity.URL_DEFAULT ).toString()+"activities/"+productId+"/comments.json"+urlVar1;
+		getCommentDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+productId+"/comments.json"+urlVar1;
 		
 		NetworkThreadUtil.getRawData(getCommentDataURL, null, this);
 	}

@@ -18,6 +18,7 @@ import com.codegears.getable.MainActivity;
 import com.codegears.getable.MyApp;
 import com.codegears.getable.ProductPhotoOptions;
 import com.codegears.getable.R;
+import com.codegears.getable.WishlistsFilterActivity;
 import com.codegears.getable.data.ActorData;
 import com.codegears.getable.data.BrandData;
 import com.codegears.getable.data.ProductActivityCommentsData;
@@ -26,10 +27,12 @@ import com.codegears.getable.data.StoreData;
 import com.codegears.getable.ui.AbstractViewLayout;
 import com.codegears.getable.ui.CommentRowLayout;
 import com.codegears.getable.ui.FollowButton;
+import com.codegears.getable.ui.LikeButton;
 import com.codegears.getable.ui.ProductNumComment;
 import com.codegears.getable.ui.ProductNumLike;
 import com.codegears.getable.ui.ProductStoreAddress;
 import com.codegears.getable.ui.ProductBrandName;
+import com.codegears.getable.ui.UserName;
 import com.codegears.getable.ui.UserProfileHeader;
 import com.codegears.getable.ui.UserProfileImageLayout;
 import com.codegears.getable.util.Config;
@@ -87,10 +90,12 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 	private Button commentSubmitButton;
 	private Button commentButton;
 	private MyApp app;
-	private Button likeButton;
+	private LinearLayout likeButtonLayout;
+	private LikeButton likeButton;
 	private List<String> appCookie;
 	private FollowButton userHeaderFollowButton;
 	private String followUserURL;
+	private LinearLayout userHeaderFollowButtonLayout;
 	
 	public ProductDetailLayout( Activity activity ) {
 		super( activity );
@@ -108,20 +113,25 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		arrayCommentLayout = new ArrayList<CommentRowLayout>();
 		appCookie = app.getAppCookie();
 		
+		userProfileImageLayout = (UserProfileImageLayout) userHeader.getUserProfileImageLayout();
+		userHeaderFollowButtonLayout = (LinearLayout) userHeader.getFollowButtonLayout();
+		userHeaderFollowButtonLayout.setVisibility( View.GONE );
+		userHeaderFollowButton = (FollowButton) userHeader.getFollowButton();
+		headerLayout = (LinearLayout) findViewById( R.id.productDetailHeadLayout );
+		userHeader.setLayoutParams( new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT ) );
+		headerLayout.addView( userHeader );
 		productImage = (ImageView) findViewById( R.id.productDetailImage );
 		productDescription = (TextView) findViewById( R.id.productDetailDescription );
 		productPrice = (TextView) findViewById( R.id.productDetailPrice );
 		commentLayout = (LinearLayout) findViewById( R.id.productDetailCommentLayout );
 		photoOptionsButton = (Button) findViewById( R.id.productDetailPhotoOptionsButton );
-		userProfileImageLayout = (UserProfileImageLayout) userHeader.getUserProfileImageLayout();
-		userHeaderFollowButton = (FollowButton) userHeader.getFollowButton();
-		headerLayout = (LinearLayout) findViewById( R.id.productDetailHeadLayout );
-		headerLayout.addView( userHeader );
 		commentTextBoxLayout = (LinearLayout) findViewById( R.id.productDetailCommentTextBoxLayout );
 		commentEditText = (EditText) findViewById( R.id.productDetailCommentTextBoxEditText );
 		commentSubmitButton = (Button) findViewById( R.id.productDetailCommentTextBokSubmit );
 		commentButton = (Button) findViewById( R.id.productDetailCommentButton );
-		likeButton = (Button) findViewById( R.id.productDetailLikeButton );
+		likeButtonLayout = (LinearLayout) findViewById( R.id.productDetailLikeButtonLayout );
+		likeButton = new LikeButton( this.getContext() );
+		likeButtonLayout.addView( likeButton );
 		
 		productBrandNameLayout = (LinearLayout) findViewById( R.id.productDetailNameLayout );
 		productBrandName = new ProductBrandName( this.getContext() );
@@ -155,7 +165,7 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		
 		getProductDataURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+".json"+urlVar1;
 		getProductCommentURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/comments.json"+urlVar1;
-		getProductLikeURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/likes.json"+urlVar1;
+		getProductLikeURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/likes.json";
 		
 		NetworkThreadUtil.getRawDataWithCookie( getProductDataURL, null, appCookie, this );
 		NetworkThreadUtil.getRawData( getProductCommentURL, null, this);
@@ -178,7 +188,8 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 			}
 		}else if( v.equals( photoOptionsButton ) ){
 			Intent newIntent = new Intent( this.getContext(), ProductPhotoOptions.class );
-			this.getActivity().startActivity( newIntent );
+			newIntent.putExtra( ProductPhotoOptions.PUT_EXTRA_ACTIVITY_ID, productActivityId );
+			this.getActivity().startActivityForResult(newIntent, MainActivity.REQUEST_PHOTO_OPTION_TO_MANAGE_COMMENT);
 		}else if( v.equals( productBrandName ) ){
 			if(listener != null){
 				ProductBrandName productBrandName = (ProductBrandName) v;
@@ -235,12 +246,21 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		}else if( v.equals( userHeaderFollowButton ) ){
 			String followUserId = userHeaderFollowButton.getActorData().getId();
 			
-			followUserURL = config.get( MainActivity.URL_DEFAULT ).toString()+"users/"+followUserId+"/followers.json";
+			followUserURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+followUserId+"/followers.json";
 			Map< String, String > newMapData = new HashMap<String, String>();
 			newMapData.put( "_a", "follow" );
 			String postData = NetworkUtil.createPostData( newMapData );
 			
 			NetworkThreadUtil.getRawDataWithCookie(followUserURL, postData, appCookie, this);
+		}else if( v instanceof UserName ){
+			if(listener != null){
+				UserName name = (UserName) v;
+				SharedPreferences myPreferences = this.getActivity().getSharedPreferences( UserProfileLayout.SHARE_PREF_VALUE_USER_ID, this.getActivity().MODE_PRIVATE );
+				SharedPreferences.Editor prefsEditor = myPreferences.edit();
+				prefsEditor.putString( UserProfileLayout.SHARE_PREF_KEY_USER_ID, name.getActor().getId() );
+				prefsEditor.commit();
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_USERPROFILE );
+			}
 		}
 	}
 
@@ -325,6 +345,12 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 					userProfileImageLayout.setUserImage( setUserImage );
 					userProfileImageLayout.setUserId( setUserData.getId() );
 					userHeaderFollowButton.setActorData( setUserData );
+					
+					//Set image like button.
+					if( setProductData.getMyRelation().getLike() != "" ){
+						//Set image liked
+						likeButton.setText( "liked" );
+					}
 				}
 			});
 			
@@ -342,6 +368,12 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 					CommentRowLayout newCommentRowLayout = new CommentRowLayout( this.getContext() );
 					newCommentRowLayout.setUserName( newData.getActor().getName() );
 					newCommentRowLayout.setCommentText( newData.getComment().getCommentText() );
+					
+					//Set onClick name send to user profile.
+					UserName userName = newCommentRowLayout.getUserNameTextView();
+					userName.setActorData( newData.getActor() );
+					userName.setOnClickListener( this );
+					
 					arrayCommentLayout.add( newCommentRowLayout );
 				}else{
 					for(int i = 0; i<newArray.length(); i++){
@@ -350,6 +382,12 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 						CommentRowLayout newCommentRowLayout = new CommentRowLayout( this.getContext() );
 						newCommentRowLayout.setUserName( newData.getActor().getName() );
 						newCommentRowLayout.setCommentText( newData.getComment().getCommentText() );
+						
+						//Set onClick name send to user profile.
+						UserName userName = newCommentRowLayout.getUserNameTextView();
+						userName.setActorData( newData.getActor() );
+						userName.setOnClickListener( this );
+						
 						arrayCommentLayout.add( newCommentRowLayout );
 					}
 				}
@@ -386,4 +424,5 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		// TODO Auto-generated method stub
 		
 	}
+
 }

@@ -50,4 +50,7 @@ public class UserProfileHeader extends LinearLayout {
 		return followButton;
 	}
 	
+	public LinearLayout getFollowButtonLayout(){
+		return followButtonLayout;
+	}
 }

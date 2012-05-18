@@ -11,20 +11,48 @@ public class ProductActivityData {
 	private ActorData actor;
 	private ProductActivityStat statistic;
 	private ProductData product;
+	private MyRelationData myRelation;
+	private ActorData followedUser;
+	private ActorLikeActivity like;
+	private ProductCommentData comment;
 	
 	public ProductActivityData(JSONObject setObject) {
-		try {
-			id = setObject.optString("id");
-			url = setObject.optString("url");
-			activityTime = setObject.optString("activityTime");
-			type = new ProductActivityType( setObject.getJSONObject("type") );
-			actor = new ActorData( setObject.getJSONObject("actor") );
-			statistic = new ProductActivityStat( setObject.getJSONObject("statistic") );
-			product = new ProductData( setObject.getJSONObject("product") );
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		id = setObject.optString("id");
+		url = setObject.optString("url");
+		activityTime = setObject.optString("activityTime");
+		
+		if( setObject.optJSONObject("type") != null ){
+			type = new ProductActivityType( setObject.optJSONObject("type") );
 		}
+		
+		if( setObject.optJSONObject("actor") != null ){
+			actor = new ActorData( setObject.optJSONObject("actor") );
+		}
+		
+		if( setObject.optJSONObject("statistic") != null ){
+			statistic = new ProductActivityStat( setObject.optJSONObject("statistic") );
+		}
+		
+		if( setObject.optJSONObject("product") != null ){
+			product = new ProductData( setObject.optJSONObject("product") );
+		}
+		
+		if( setObject.optJSONObject("myRelation") != null ){
+			myRelation = new MyRelationData( setObject.optJSONObject("myRelation") );
+		}
+		
+		if( setObject.optJSONObject("followedUser") != null ){
+			followedUser = new ActorData( setObject.optJSONObject("followedUser") );
+		}
+		
+		if( setObject.optJSONObject("like") != null ){
+			like = new ActorLikeActivity( setObject.optJSONObject("like") );
+		}
+		
+		if( setObject.optJSONObject("comment") != null ){
+			comment = new ProductCommentData( setObject.optJSONObject("comment") );
+		}
+		
 	}
 	
 	public ProductData getProduct(){
@@ -42,4 +70,29 @@ public class ProductActivityData {
 	public ActorData getActor(){
 		return actor;
 	}
+	
+	public String getURL(){
+		return url;
+	}
+	
+	public MyRelationData getMyRelation(){
+		return myRelation;
+	}
+	
+	public ActorData getFollowedUser(){
+		return followedUser;
+	}
+	
+	public ActorLikeActivity getLike(){
+		return this.like;
+	}
+	
+	public ProductCommentData getComment(){
+		return comment;
+	}
+	
+	public ProductActivityType getType(){
+		return type;
+	}
+	
 }
