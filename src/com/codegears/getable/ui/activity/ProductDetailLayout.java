@@ -28,6 +28,7 @@ import com.codegears.getable.ui.AbstractViewLayout;
 import com.codegears.getable.ui.CommentRowLayout;
 import com.codegears.getable.ui.FollowButton;
 import com.codegears.getable.ui.LikeButton;
+import com.codegears.getable.ui.ProductImageThumbnail;
 import com.codegears.getable.ui.ProductNumComment;
 import com.codegears.getable.ui.ProductNumLike;
 import com.codegears.getable.ui.ProductStoreAddress;
@@ -36,6 +37,7 @@ import com.codegears.getable.ui.UserName;
 import com.codegears.getable.ui.UserProfileHeader;
 import com.codegears.getable.ui.UserProfileImageLayout;
 import com.codegears.getable.util.Config;
+import com.codegears.getable.util.ImageLoader;
 import com.codegears.getable.util.NetworkThreadUtil;
 import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
 import com.codegears.getable.util.NetworkUtil;
@@ -49,13 +51,18 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Gallery;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
-public class ProductDetailLayout extends AbstractViewLayout implements OnClickListener, NetworkThreadListener {
+public class ProductDetailLayout extends AbstractViewLayout implements OnClickListener, NetworkThreadListener, OnItemClickListener {
 
 	private static final String URL_GET_PRODUCT_ACTIVITIES_BY_ID = "URL_GET_PRODUCT_ACTIVITIES_BY_ID";
 	public static final String SHARE_PREF_PRODUCT_ACT_ID = "SHARE_PREF_PRODUCT_ACT_ID";
@@ -71,10 +78,13 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 	private String getProductDataURL;
 	private String getProductCommentURL;
 	private String getProductLikeURL;
+	private String getRelatedProductURL;
+	private String getProductUnLikeURL;
 	private LinearLayout headerLayout;
 	private UserProfileHeader userHeader;
 	private LinearLayout commentLayout;
 	private Button photoOptionsButton;
+	private Button wishlistButton;
 	private UserProfileImageLayout userProfileImageLayout;
 	private ProgressDialog loadingDialog;
 	private LinearLayout productBrandNameLayout;
@@ -96,6 +106,11 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 	private FollowButton userHeaderFollowButton;
 	private String followUserURL;
 	private LinearLayout userHeaderFollowButtonLayout;
+	private String wishlistId;
+	private ArrayList<ProductActivityData> relateActivityData;
+	private ImageLoader imageLoader;
+	private Gallery relatedGallery;
+	private RelatedAdapter relatedAdapter;
 	
 	public ProductDetailLayout( Activity activity ) {
 		super( activity );
@@ -112,6 +127,9 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		config = new Config( this.getContext() );
 		arrayCommentLayout = new ArrayList<CommentRowLayout>();
 		appCookie = app.getAppCookie();
+		relateActivityData = new ArrayList<ProductActivityData>();
+		imageLoader = new ImageLoader( this.getContext() );
+		relatedAdapter = new RelatedAdapter();
 		
 		userProfileImageLayout = (UserProfileImageLayout) userHeader.getUserProfileImageLayout();
 		userHeaderFollowButtonLayout = (LinearLayout) userHeader.getFollowButtonLayout();
@@ -132,6 +150,8 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		likeButtonLayout = (LinearLayout) findViewById( R.id.productDetailLikeButtonLayout );
 		likeButton = new LikeButton( this.getContext() );
 		likeButtonLayout.addView( likeButton );
+		wishlistButton = (Button) findViewById( R.id.productDetailWishlistButton );
+		relatedGallery = (Gallery) findViewById( R.id.productDetailRelatedGallery );
 		
 		productBrandNameLayout = (LinearLayout) findViewById( R.id.productDetailNameLayout );
 		productBrandName = new ProductBrandName( this.getContext() );
@@ -160,15 +180,19 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		commentButton.setOnClickListener( this );
 		likeButton.setOnClickListener( this );
 		userHeaderFollowButton.setOnClickListener( this );
+		wishlistButton.setOnClickListener( this );
+		relatedGallery.setOnItemClickListener( this );
 		
 		String urlVar1 = MyApp.DEFAULT_URL_VAR_1;
 		
 		getProductDataURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+".json"+urlVar1;
 		getProductCommentURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/comments.json"+urlVar1;
 		getProductLikeURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/likes.json";
+		getRelatedProductURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/recommended.json"+urlVar1;
 		
 		NetworkThreadUtil.getRawDataWithCookie( getProductDataURL, null, appCookie, this );
 		NetworkThreadUtil.getRawData( getProductCommentURL, null, this);
+		NetworkThreadUtil.getRawDataWithCookie( getRelatedProductURL, null, appCookie, this );
 	}
 
 	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener){
@@ -242,7 +266,22 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 				NetworkThreadUtil.getRawDataWithCookie(getProductCommentURL, postData, appCookie, this);
 			}
 		}else if( v.equals( likeButton ) ){
-			NetworkThreadUtil.getRawDataWithCookie(getProductLikeURL, null, appCookie, this);
+			if( likeButton.getButtonStatus() == LikeButton.BUTTON_STATUS_LIKE ){
+				HashMap< String, String > likeDataMap = new HashMap<String, String>();
+				likeDataMap.put( "emtpy", "emtpy" );
+				String likePostData = NetworkUtil.createPostData( likeDataMap );
+				
+				NetworkThreadUtil.getRawDataWithCookie(getProductLikeURL, likePostData, appCookie, this);
+			}else if( likeButton.getButtonStatus() == LikeButton.BUTTON_STATUS_LIKED ){
+				String likeActivityId = likeButton.getLikeId();
+				getProductUnLikeURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+"/"+likeActivityId+".json";
+				
+				HashMap< String, String > likeDataMap = new HashMap<String, String>();
+				likeDataMap.put( "_a", "delete" );
+				String likePostData = NetworkUtil.createPostData( likeDataMap );
+				
+				NetworkThreadUtil.getRawDataWithCookie(getProductUnLikeURL, likePostData, appCookie, this);
+			}
 		}else if( v.equals( userHeaderFollowButton ) ){
 			String followUserId = userHeaderFollowButton.getActorData().getId();
 			
@@ -260,6 +299,15 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 				prefsEditor.putString( UserProfileLayout.SHARE_PREF_KEY_USER_ID, name.getActor().getId() );
 				prefsEditor.commit();
 				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_USERPROFILE );
+			}
+		}else if( v.equals( wishlistButton ) ){
+			if(listener != null){
+				SharedPreferences myPreferences = this.getActivity().getSharedPreferences( ProductWishlistLayout.SHARE_PREF_WISHLLIST_VALUE, this.getActivity().MODE_PRIVATE );
+				SharedPreferences.Editor prefsEditor = myPreferences.edit();
+				prefsEditor.putString( ProductWishlistLayout.SHARE_PREF_KEY_PRODUCT_ID, productActivityId );
+				prefsEditor.putString( ProductWishlistLayout.SHARE_PREF_KEY_WISHLIST_ID, wishlistId );
+				prefsEditor.commit();
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PRODUCT_WISHLIST );
 			}
 		}
 	}
@@ -347,9 +395,24 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 					userHeaderFollowButton.setActorData( setUserData );
 					
 					//Set image like button.
-					if( setProductData.getMyRelation().getLike() != "" ){
-						//Set image liked
+					if( setProductData.getMyRelation() != null &&
+						setProductData.getMyRelation().getLike() != "" ){
+						//Set image liked.
 						likeButton.setText( "liked" );
+						likeButton.setLikeId( setProductData.getMyRelation().getLike() );
+						likeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKED );
+					}else{
+						//Set image like.
+						likeButton.setText( "like" );
+						likeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKE );
+					}
+					
+					//Set image wishlist
+					if( setProductData.getMyRelation() != null &&
+						setProductData.getMyRelation().getArrayWishlistId() != null ){
+						//Set image wishlist
+						wishlistButton.setText( "wishlistAdd" );
+						wishlistId = setProductData.getMyRelation().getArrayWishlistId().toString();
 					}
 				}
 			});
@@ -413,9 +476,58 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 				}
 			});
 		}else if( urlString.equals( getProductLikeURL ) ){
+			//Set product data.
+			try {
+				JSONObject jsonObject = new JSONObject( result );
+				ProductActivityData newData = new ProductActivityData( jsonObject );
+				String likeId = newData.getLike().getActivityData().getId();
+				likeButton.setLikeId( likeId );
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			
 			//On click like result.
+			//Set image liked
+			this.getActivity().runOnUiThread( new Runnable() {
+				@Override
+				public void run() {
+					likeButton.setText( "liked" );
+					likeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKED );
+				}
+			});
+		}else if( urlString.equals( getProductUnLikeURL ) ){
+			//On click like result.
+			//Set image liked
+			this.getActivity().runOnUiThread( new Runnable() {
+				@Override
+				public void run() {
+					likeButton.setText( "like" );
+					likeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKE );
+				}
+			});
 		}else if( urlString.equals( followUserURL ) ){
 			//On click follow result.
+		}else if( urlString.equals( getRelatedProductURL ) ){
+			try {
+				JSONObject jsonObject = new JSONObject(result);
+				JSONArray newArray = jsonObject.getJSONArray("entities");
+				for(int i = 0; i<newArray.length(); i++){
+					//Load Product Data
+					ProductActivityData newData = new ProductActivityData( (JSONObject) newArray.get(i) );
+					relateActivityData.add(newData);
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			
+			relatedAdapter.setData( relateActivityData );
+			relatedGallery.setSpacing( 5 );
+			this.getActivity().runOnUiThread( new Runnable() {
+				@Override
+				public void run() {
+					relatedGallery.setAdapter( relatedAdapter );
+				}
+			});
 		}
 	}
 
@@ -423,6 +535,64 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 	public void onNetworkFail(String urlString) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	private class RelatedAdapter extends BaseAdapter {
+
+		private ArrayList<ProductActivityData> data;
+		
+		public void setData(ArrayList<ProductActivityData> relateActivityData) {
+			data = relateActivityData;
+		}
+		
+		@Override
+		public int getCount() {
+			return data.size();
+		}
+
+		@Override
+		public Object getItem(int position) {
+			return data.get( position );
+		}
+
+		@Override
+		public long getItemId(int position) {
+			return position;
+		}
+
+		@Override
+		public View getView(int position, View convertView, ViewGroup arg2) {
+			
+			ProductImageThumbnail returnView;
+			
+			if( convertView == null ){
+				returnView = new ProductImageThumbnail( ProductDetailLayout.this.getContext() );
+			}else{
+				returnView = (ProductImageThumbnail) convertView;
+			}
+			
+			String imageURL = data.get( position ).getProduct().getProductPicture().getImageUrls().getImageURLT();
+			
+			returnView.setProductData( data.get( position ) );
+			imageLoader.DisplayImage( imageURL, ProductDetailLayout.this.getActivity(), returnView.getProductImageView(), true );
+			
+			return returnView;
+		}
+		
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View v, int arg2, long arg3) {
+		if(listener != null){
+			if( v instanceof  ProductImageThumbnail ){
+				ProductImageThumbnail productSelect = (ProductImageThumbnail) v;
+				SharedPreferences myPref = this.getActivity().getSharedPreferences( ProductDetailLayout.SHARE_PREF_PRODUCT_ACT_ID, this.getActivity().MODE_PRIVATE );
+				SharedPreferences.Editor prefsEditor = myPref.edit();
+				prefsEditor.putString( ProductDetailLayout.SHARE_PREF_KEY_ACTIVITY_ID, productSelect.getProductData().getId() );
+		        prefsEditor.commit();
+		        listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PRODUCTDETAIL );
+			}
+		}
 	}
 
 }

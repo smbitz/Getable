@@ -27,6 +27,7 @@ import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
 import com.codegears.getable.data.ProductActivityCommentsData;
 import com.codegears.getable.ui.AbstractViewLayout;
+import com.codegears.getable.ui.CommentDeleteButton;
 import com.codegears.getable.ui.CommentRowLayout;
 import com.codegears.getable.ui.ProductCommentItemLayout;
 import com.codegears.getable.ui.UserFollowItemLayout;
@@ -42,6 +43,8 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 	
 	public static final String SHARE_PREF_VALUE_PRODUCT_ID = "SHARE_PREF_VALUE_PRODUCT_ID";
 	public static final String SHARE_PREF_KEY_PRODUCT_ID = "SHARE_PREF_KEY_PRODUCT_ID";
+	private static final int DELETE_BUTTON_STATUS_HIDE = 0;
+	private static final int DELETE_BUTTON_STATUS_SHOW = 1;
 	
 	private BodyLayoutStackListener listener;
 	private ListView commentListView;
@@ -53,7 +56,11 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 	private EditText commentText;
 	private Button submitButton;
 	private String getCommentDataURL;
+	private String deleteCommentUrl;
 	private MyApp app;
+	private Button editButton;
+	private int deleteButtonStatus;
+	private List<String> appCookie;
 	
 	public ProductCommentLayout(Activity activity) {
 		super(activity);
@@ -63,6 +70,7 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 		productId = myPreferences.getString( SHARE_PREF_KEY_PRODUCT_ID, null );
 		
 		app = (MyApp) this.getActivity().getApplication();
+		appCookie = app.getAppCookie();
 		commentListView = (ListView) findViewById( R.id.productCommentLayoutListView );
 		commentText = (EditText) findViewById( R.id.productCommentLayoutText );
 		submitButton = (Button) findViewById( R.id.productCommentLayoutSubmitButton );
@@ -70,8 +78,12 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 		activityCommentsData = new ArrayList<ProductActivityCommentsData>();
 		commentAdapter = new CommentAdapter();
 		imageLoader = new ImageLoader( this.getContext() );
+		editButton = (Button) findViewById( R.id.productCommentLayoutEditButton );
 		
 		submitButton.setOnClickListener( this );
+		editButton.setOnClickListener( this );
+		
+		deleteButtonStatus = DELETE_BUTTON_STATUS_HIDE;
 		
 		String urlVar1 = MyApp.DEFAULT_URL_VAR_1;
 		
@@ -98,34 +110,71 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 
 	@Override
 	public void onNetworkRawSuccess(String urlString, String result) {
-		JSONArray newArray = null;
-		try {
-			JSONObject jsonObject = new JSONObject( result );
-			newArray = jsonObject.optJSONArray("entities");
-			
-			ProductActivityCommentsData newData;
-			if( newArray == null ){
-				newData = new ProductActivityCommentsData( jsonObject );
-				activityCommentsData.add( newData );
-			}else{
-				for(int i = 0; i<newArray.length(); i++){
-					//Load Product Data
-					newData = new ProductActivityCommentsData( (JSONObject) newArray.get(i) );
+		if( urlString.equals( getCommentDataURL ) ){
+			JSONArray newArray = null;
+			try {
+				JSONObject jsonObject = new JSONObject( result );
+				newArray = jsonObject.optJSONArray("entities");
+				
+				ProductActivityCommentsData newData;
+				if( newArray == null ){
+					newData = new ProductActivityCommentsData( jsonObject );
 					activityCommentsData.add( newData );
+				}else{
+					for(int i = 0; i<newArray.length(); i++){
+						//Load Product Data
+						newData = new ProductActivityCommentsData( (JSONObject) newArray.get(i) );
+						activityCommentsData.add( newData );
+					}
+				}
+			} catch (JSONException e) {
+				e.printStackTrace();
+			}
+			
+			commentAdapter.setData( activityCommentsData );
+			this.getActivity().runOnUiThread( new Runnable() {
+				@Override
+				public void run() {
+					commentText.setText("");
+					commentListView.setAdapter( commentAdapter );
+				}
+			});
+		}else if( urlString.equals( deleteCommentUrl ) ){
+			JSONObject jsonObject = null;
+			try {
+				jsonObject = new JSONObject( result ).optJSONObject( "status" );
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+			
+			if( jsonObject != null ){
+				String deleteCommentId = jsonObject.optString( "id" );
+				/*for( ProductActivityCommentsData fetchData:activityCommentsData ){
+					String currentCommentId = fetchData.getComment().getProductActivityData().getId();
+					if( deleteCommentId.equals( currentCommentId ) ){
+						activityCommentsData.remove( fetchData );
+					}
+				}*/
+				while( activityCommentsData.iterator().hasNext() ){
+					ProductActivityCommentsData currentCommentData = activityCommentsData.iterator().next();
+					String currentCommentId = currentCommentData.getComment().getProductActivityData().getId();
+					if( deleteCommentId.equals( currentCommentId ) ){
+						activityCommentsData.remove( currentCommentData );
+					}
 				}
 			}
-		} catch (JSONException e) {
-			e.printStackTrace();
+			
+			commentAdapter.notifyDataSetChanged();
+			//commentAdapter.setData( activityCommentsData );
+			this.getActivity().runOnUiThread( new Runnable() {
+				@Override
+				public void run() {
+					commentText.setText("");
+					commentListView.setAdapter( commentAdapter );
+				}
+			});
 		}
-		
-		commentAdapter.setData( activityCommentsData );
-		this.getActivity().runOnUiThread( new Runnable() {
-			@Override
-			public void run() {
-				commentText.setText("");
-				commentListView.setAdapter( commentAdapter );
-			}
-		});
 		
 	}
 	
@@ -141,7 +190,7 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 	
 	private class CommentAdapter extends BaseAdapter {
 		
-		ArrayList<ProductActivityCommentsData> data;
+		private ArrayList<ProductActivityCommentsData> data;
 		
 		public void setData(ArrayList<ProductActivityCommentsData> activityCommentsData) {
 			data = activityCommentsData;
@@ -182,7 +231,15 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 			returnView.setCommentText( setCommentText );
 			returnView.setOnClickListener( ProductCommentLayout.this );
 			returnView.setProductCommentActivityData( data.get( position ) );
+			returnView.getDeleteButton().setActivityCommentsData( data.get( position ) );
+			returnView.getDeleteButton().setOnClickListener( ProductCommentLayout.this );
 			//returnView.setCommentTime(  );
+			
+			if( deleteButtonStatus == DELETE_BUTTON_STATUS_HIDE ){
+				returnView.setDeleteButtonLayout( ProductCommentItemLayout.DELETE_LAYOUT_INVISIBLE );
+			}else if( deleteButtonStatus == DELETE_BUTTON_STATUS_SHOW ){
+				returnView.setDeleteButtonLayout( ProductCommentItemLayout.DELETE_LAYOUT_VISIBLE );
+			}
 			
 			return returnView;
 		}
@@ -194,13 +251,30 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 		if( v.equals( submitButton ) ){
 			String text = commentText.getText().toString();
 			if( !(text.equals("")) && !(text.equals(null)) ){
-				List<String> cookie = app.getAppCookie();
 				HashMap< String, String > dataMap = new HashMap<String, String>();
 				dataMap.put( "text", text );
 				String postData = NetworkUtil.createPostData( dataMap );
 				
-				NetworkThreadUtil.getRawDataWithCookie(getCommentDataURL, postData, cookie, this);
+				NetworkThreadUtil.getRawDataWithCookie(getCommentDataURL, postData, appCookie, this);
 			}
+		}else if( v.equals( editButton ) ){
+			if( deleteButtonStatus == DELETE_BUTTON_STATUS_HIDE ){
+				deleteButtonStatus = DELETE_BUTTON_STATUS_SHOW;
+			}else if( deleteButtonStatus == DELETE_BUTTON_STATUS_SHOW ){
+				deleteButtonStatus = DELETE_BUTTON_STATUS_HIDE;
+			}
+			
+			commentListView.invalidateViews();
+		}else if( v instanceof CommentDeleteButton ){
+			CommentDeleteButton commentDeleteButton = (CommentDeleteButton) v;
+			String commentActivityId = commentDeleteButton.getActivityCommentsData().getComment().getProductActivityData().getId();
+			deleteCommentUrl = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+commentActivityId+".json";
+			
+			HashMap< String, String > dataMap = new HashMap<String, String>();
+			dataMap.put( "_a", "delete" );
+			String postData = NetworkUtil.createPostData( dataMap );
+			
+			NetworkThreadUtil.getRawDataWithCookie( deleteCommentUrl, postData, appCookie, this );
 		}else if(listener != null){
 			if( v instanceof ProductCommentItemLayout ){
 				ProductCommentItemLayout productCommentItemLayout = (ProductCommentItemLayout) v;
@@ -208,8 +282,8 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 				SharedPreferences.Editor prefsEditor = myPref.edit();
 				prefsEditor.putString( UserProfileLayout.SHARE_PREF_KEY_USER_ID, productCommentItemLayout.getProductCommentActivityData().getActor().getId() );
 		        prefsEditor.commit();
+		        listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_USERPROFILE );
 			}
-			listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_USERPROFILE );
 		}
 	}
 	

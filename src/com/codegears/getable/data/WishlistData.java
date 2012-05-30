@@ -11,15 +11,17 @@ public class WishlistData {
 	private WishlistsPicture picture;
 	
 	public WishlistData(JSONObject jsonObject) {
-		try {
-			id = jsonObject.optString("id");
-			name = jsonObject.optString("name");
-			statisic = new WishlistStat( jsonObject.getJSONObject( "statistic" ) );
-			picture = new WishlistsPicture( jsonObject.getJSONObject( "picture" ) );
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		id = jsonObject.optString("id");
+		name = jsonObject.optString("name");
+		
+		if( jsonObject.optJSONObject( "statistic" ) != null ){
+			statisic = new WishlistStat( jsonObject.optJSONObject( "statistic" ) );
 		}
+		
+		if( jsonObject.optJSONObject( "picture" ) != null ){
+			picture = new WishlistsPicture( jsonObject.optJSONObject( "picture" ) );
+		}
+		
 	}
 	
 	public WishlistsPicture getPicture(){

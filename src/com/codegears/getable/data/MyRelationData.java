@@ -1,5 +1,6 @@
 package com.codegears.getable.data;
 
+import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class MyRelationData {
@@ -8,12 +9,17 @@ public class MyRelationData {
 	private ProductActivityData followActivity;
 	private Boolean followed;
 	private String liked;
+	private JSONArray wishlists;
 	
 	public MyRelationData( JSONObject jsonObject ){
 		me = jsonObject.optBoolean( "me" );
 		
 		if( jsonObject.optJSONObject( "followActivity" ) != null ){
 			followActivity = new ProductActivityData( jsonObject.optJSONObject( "followActivity" ) );
+		}
+		
+		if( jsonObject.optJSONArray( "wishlists" ) != null ){
+			wishlists = jsonObject.optJSONArray( "wishlists" );
 		}
 		
 		followed = jsonObject.optBoolean( "followed" );
@@ -26,6 +32,10 @@ public class MyRelationData {
 	
 	public String getLike(){
 		return liked;
+	}
+	
+	public JSONArray getArrayWishlistId(){
+		return wishlists;
 	}
 	
 }

@@ -12,11 +12,16 @@ import android.widget.TextView;
 
 public class ProductCommentItemLayout extends LinearLayout {
 	
+	public static final int DELETE_LAYOUT_INVISIBLE = 0;
+	public static final int DELETE_LAYOUT_VISIBLE = 1;
+	
 	private ImageView userImage;
 	private TextView userName;
 	private TextView commentText;
 	private TextView commentTime;
 	private ProductActivityCommentsData productCommentActivityData;
+	private LinearLayout deleteButtonLayout;
+	private CommentDeleteButton deleteButton;
 	
 	public ProductCommentItemLayout(Context context) {
 		super(context);
@@ -26,6 +31,10 @@ public class ProductCommentItemLayout extends LinearLayout {
 		userName = (TextView) findViewById( R.id.productCommentItemUserName );
 		commentText = (TextView) findViewById( R.id.productCommentItemCommentText );
 		commentTime = (TextView) findViewById( R.id.productCommentItemCommentTime );
+		deleteButtonLayout = (LinearLayout) findViewById( R.id.productCommentItemDeleteButtonLayout );
+		deleteButton = new CommentDeleteButton( context );
+		
+		deleteButtonLayout.addView( deleteButton );
 		
 		userName.setTextColor( Color.parseColor( this.getResources().getString( R.color.NameColorBlue ) ) );
 	}
@@ -52,6 +61,18 @@ public class ProductCommentItemLayout extends LinearLayout {
 	
 	public ProductActivityCommentsData getProductCommentActivityData(){
 		return productCommentActivityData;
+	}
+	
+	public CommentDeleteButton getDeleteButton(){
+		return deleteButton;
+	}
+	
+	public void setDeleteButtonLayout(int setValue) {
+		if( setValue == DELETE_LAYOUT_INVISIBLE ){
+			deleteButtonLayout.setVisibility( View.INVISIBLE );
+		}else if( setValue == DELETE_LAYOUT_VISIBLE ){
+			deleteButtonLayout.setVisibility( View.VISIBLE );
+		}
 	}
 	
 }

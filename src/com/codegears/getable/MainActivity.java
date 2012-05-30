@@ -1,5 +1,8 @@
 package com.codegears.getable;
 
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -12,9 +15,13 @@ import com.codegears.getable.ui.ProductNumComment;
 import com.codegears.getable.ui.activity.BrandFeedLayout;
 import com.codegears.getable.ui.activity.GalleryLayout;
 import com.codegears.getable.ui.activity.MyFeedLayout;
+import com.codegears.getable.ui.activity.NearbyLayout;
 import com.codegears.getable.ui.activity.ProductCommentLayout;
 import com.codegears.getable.ui.activity.ProductDetailLayout;
 import com.codegears.getable.ui.activity.ProductLikeLayout;
+import com.codegears.getable.ui.activity.ProductWishlistLayout;
+import com.codegears.getable.ui.activity.ShareImageCropLayout;
+import com.codegears.getable.ui.activity.ShareImageDetailLayout;
 import com.codegears.getable.ui.activity.StoreMainLayout;
 import com.codegears.getable.ui.activity.UserProfileLayout;
 import com.codegears.getable.ui.activity.WishlistsGalleryLayout;
@@ -26,19 +33,25 @@ import com.codegears.getable.util.NetworkUtil;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.KeyEvent;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class MainActivity extends Activity implements BodyLayoutStackListener {
+public class MainActivity extends Activity implements BodyLayoutStackListener, OnClickListener {
 	
 	public static final int REQUEST_GALLERY_FILTER = 1;
 	public static final int REQUEST_WISHLISTS_FILTER = 2;
@@ -52,22 +65,30 @@ public class MainActivity extends Activity implements BodyLayoutStackListener {
 	public static final int LAYOUTCHANGE_STORE_MAIN = 6;
 	public static final int LAYOUTCHANGE_PRODUCT_LIKE_USER_LIST = 7;
 	public static final int LAYOUTCHANGE_PRODUCT_COMMENT_USER_LIST = 8;
+	public static final int LAYOUTCHANGE_PRODUCT_WISHLIST = 9;
+	public static final int LAYOUTCHANGE_SHARE_IMAGE_DETAIL = 10;
 	
 	public static final int RESULT_GALLERY_FILTER_FINISH = 1;
 	public static final int RESULT_WISHLISTS_FILTER_FINISH = 2;
 	public static final int RESULT_PHOTO_OPTION_TO_MANAGE_COMMENT = 3;
+	public static final int REQUEST_NEARBY_FILTER = 4;
+	private static final int REQUEST_SHARE_TAKE_IMAGE = 5;
+	private static final int REQUEST_SHARE_CHOOSE_IMAGE = 6;
 	
 	private TabBar tabBar;
 	private ViewGroup bodyLayout;
 	private Stack<View> layoutStack;
 	private GalleryLayout galleryLayout;
 	private MyFeedLayout myFeedLayout;
+	private NearbyLayout nearbyLayout;
 	private WishlistsGalleryLayout wishlistsGalleryLayout;
 	private BrandFeedLayout brandFeedLayout;
 	private StoreMainLayout storeMainLayout;
 	private ProductLikeLayout productLikeLayout;
 	private ProductCommentLayout productCommentLayout;
 	private ProductDetailLayout productDetailLayout;
+	private Button shareCameraButton;
+	private Button shareGalleryButton;
 	
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -113,7 +134,20 @@ public class MainActivity extends Activity implements BodyLayoutStackListener {
         TextView text3 = new TextView(this);
         text3.setText( "ShareView" );
         text3.setTextColor( 0xFFFFFFFF );
+        
+        shareCameraButton = new Button( this );
+        shareCameraButton.setText( "cameraButton" );
+        
+        shareGalleryButton = new Button( this );
+        shareGalleryButton.setText( "galleryButton" );
+        
+        shareCameraButton.setOnClickListener( this );
+        shareGalleryButton.setOnClickListener( this );
+        
+        l3.addView( shareCameraButton );
+        l3.addView( shareGalleryButton );
         l3.addView( text3 );
+        
         tabBar.addTab( b3, l3 );
         
         //---- Fourth Layout ----//
@@ -122,13 +156,10 @@ public class MainActivity extends Activity implements BodyLayoutStackListener {
         b4.setTextOn( "" );
         b4.setBackgroundResource( R.drawable.nearby_button );
         b4.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
-        LinearLayout l4 = new LinearLayout(this);
-        l4.setBackgroundColor( 0xFF0000FF );
-        TextView text4 = new TextView(this);
-        text4.setText( "NearByView" );
-        text4.setTextColor( 0xFFFFFFFF );
-        l4.addView( text4 );
-        tabBar.addTab( b4, l4 );
+        nearbyLayout = new NearbyLayout(this);
+        nearbyLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
+        nearbyLayout.setBodyLayoutChangeListener( this );
+        tabBar.addTab( b4, nearbyLayout );
         
         //---- Fifth Layout ----//
         ToggleButton b5 = new ToggleButton(this);
@@ -203,6 +234,18 @@ public class MainActivity extends Activity implements BodyLayoutStackListener {
 			bodyLayout.removeAllViews();
 			bodyLayout.addView( productCommentLayout );
 			bodyLayout.requestLayout();
+		}else if(requestId == LAYOUTCHANGE_PRODUCT_WISHLIST){
+			layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
+			ProductWishlistLayout productWishlistLayout = new ProductWishlistLayout( this );
+			bodyLayout.removeAllViews();
+			bodyLayout.addView( productWishlistLayout );
+			bodyLayout.requestLayout();
+		}else if(requestId == LAYOUTCHANGE_SHARE_IMAGE_DETAIL){
+			layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
+			ShareImageDetailLayout shareImageDetailLayout = new ShareImageDetailLayout( this );
+			bodyLayout.removeAllViews();
+			bodyLayout.addView( shareImageDetailLayout );
+			bodyLayout.requestLayout();
 		}
 	}
 	
@@ -233,6 +276,53 @@ public class MainActivity extends Activity implements BodyLayoutStackListener {
 			prefsEditor.putString( ProductCommentLayout.SHARE_PREF_KEY_PRODUCT_ID, actId );
 			prefsEditor.commit();
 			this.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PRODUCT_COMMENT_USER_LIST );
+		}else if( requestCode == REQUEST_NEARBY_FILTER ){
+			
+		}else if( requestCode == REQUEST_SHARE_TAKE_IMAGE ){
+			Bitmap photo = (Bitmap) data.getExtras().get("data");
+			
+			layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
+			ShareImageCropLayout shareImageCropLayout = new ShareImageCropLayout( this );
+			shareImageCropLayout.setImage( photo );
+			shareImageCropLayout.setBodyLayoutChangeListener( this );
+			bodyLayout.removeAllViews();
+			bodyLayout.addView( shareImageCropLayout );
+			bodyLayout.requestLayout();
+		}else if( requestCode == REQUEST_SHARE_CHOOSE_IMAGE ){
+			Bitmap bitmap = null;
+			if(resultCode == RESULT_OK){  
+	            Uri selectedImage = data.getData();
+	            try {
+					bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), selectedImage);
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+			
+			layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
+			ShareImageCropLayout shareImageCropLayout = new ShareImageCropLayout( this );
+			shareImageCropLayout.setImage( bitmap );
+			shareImageCropLayout.setBodyLayoutChangeListener( this );
+			bodyLayout.removeAllViews();
+			bodyLayout.addView( shareImageCropLayout );
+			bodyLayout.requestLayout();
+		}
+	}
+
+	@Override
+	public void onClick(View v) {
+		if( v.equals( shareCameraButton ) ){
+			Intent cameraIntent = new Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE); 
+            startActivityForResult(cameraIntent, REQUEST_SHARE_TAKE_IMAGE ); 
+		}else if( v.equals( shareGalleryButton ) ){
+			Intent galleryIntent = new Intent();
+			galleryIntent.setType("image/*");
+			galleryIntent.setAction(Intent.ACTION_GET_CONTENT);
+			startActivityForResult( Intent.createChooser(galleryIntent, "Select Picture"), REQUEST_SHARE_CHOOSE_IMAGE );
 		}
 	}
 	

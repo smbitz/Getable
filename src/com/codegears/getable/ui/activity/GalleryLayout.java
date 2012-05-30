@@ -70,15 +70,15 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 		
 		View.inflate( activity, R.layout.gallerylayout, this );
 		filterButton = (Button)this.findViewById( R.id.FilterButton );
-		filterButton.setOnClickListener( this );
 		galleryGrid = (GridView)this.findViewById( R.id.GalleryGrid );
 		galleryAdapter = new GalleryAdapter();
-		galleryGrid.setOnItemClickListener( this );
-		
 		arrayProductData = new ArrayList<ProductActivityData>();
 		config = new Config( this.getContext() );
 		getCurrentLocation = new GetCurrentLocation( this.getContext() );
 		imageLoader = new ImageLoader( this.getContext() );
+		
+		filterButton.setOnClickListener( this );
+		galleryGrid.setOnItemClickListener( this );
 		
 		currentLat = getCurrentLocation.getCurrentLat();
 		currentLng = getCurrentLocation.getCurrentLng();
@@ -131,8 +131,8 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 				SharedPreferences.Editor prefsEditor = myPref.edit();
 				prefsEditor.putString( ProductDetailLayout.SHARE_PREF_KEY_ACTIVITY_ID, productSelect.getProductData().getId() );
 		        prefsEditor.commit();
+		        listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PRODUCTDETAIL );
 			}
-			listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PRODUCTDETAIL );
 		}
 	}
 

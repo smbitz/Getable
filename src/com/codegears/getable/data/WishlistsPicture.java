@@ -10,14 +10,12 @@ public class WishlistsPicture {
 	//private Bitmap image;
 	
 	public WishlistsPicture(JSONObject jsonObject) {
-		try {
-			urls = new PictureDataUrls( (JSONObject) jsonObject.get("urls") );
-			description = jsonObject.optString("description");
-			uploadTime  = jsonObject.optString("uploadTime");
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if( jsonObject.optJSONObject("urls") != null ){
+			urls = new PictureDataUrls( jsonObject.optJSONObject("urls") );
 		}
+		
+		description = jsonObject.optString("description");
+		uploadTime  = jsonObject.optString("uploadTime");
 	}
 	/*
 	public void loadImage(){

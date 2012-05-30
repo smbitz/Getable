@@ -37,4 +37,8 @@ public class StoreData {
 		return id;
 	}
 	
+	public String getPostalCode(){
+		return postalCode;
+	}
+	
 }
