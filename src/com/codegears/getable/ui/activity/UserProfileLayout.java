@@ -99,6 +99,7 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 		userProfileImageLayout = (UserProfileImageLayout) userHeader.getUserProfileImageLayout();
 		userHeaderFollowButton = (FollowButton) userHeader.getFollowButton();
 		headerLayout = (LinearLayout) findViewById( R.id.userProfileHeaderLayout );
+		userHeader.setLayoutParams( new LayoutParams( LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT ) );
 		headerLayout.addView( userHeader );
 		
 		userHeaderFollowButton.setOnClickListener( this );
@@ -118,6 +119,8 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 		photoColumnButton.setTextSize(9);
 		photoColumnButton.setTextOn( photoTextButton );
 		photoColumnButton.setTextOff( photoTextButton );
+		photoColumnButton.setBackgroundResource( R.drawable.user_layout_button );
+		photoColumnButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
 		userGalleryLayoutPhotos = new UserGalleryLayout( this.getActivity(), getPhotosDataURL, UserGalleryLayout.USER_GALLERY_VIEW_TYPE_PHOTOS );
 		userGalleryLayoutPhotos.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
 		userGalleryLayoutPhotos.setBackgroundColor( 0xFFFF0000 );
@@ -129,6 +132,8 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
         likesColumnButton.setTextSize(9);
         likesColumnButton.setTextOn( likesTextButton );
         likesColumnButton.setTextOff( likesTextButton );
+        likesColumnButton.setBackgroundResource( R.drawable.user_layout_button );
+        likesColumnButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
         userGalleryLayoutLikes = new UserGalleryLayout( this.getActivity(), getLikesDataURL, UserGalleryLayout.USER_GALLERY_VIEW_TYPE_LIKES );
         userGalleryLayoutLikes.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         userGalleryLayoutLikes.setBackgroundColor( 0xFFFF0000 );
@@ -140,9 +145,11 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
         wishlistsColumnButton.setTextSize(9);
         wishlistsColumnButton.setTextOn( wishlistsTextButton );
         wishlistsColumnButton.setTextOff( wishlistsTextButton );
+        wishlistsColumnButton.setBackgroundResource( R.drawable.user_layout_button );
+        wishlistsColumnButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
         userWishlistsLayout = new UserWishlistsLayout( this.getActivity(), getWishlistsDataURL );
         userWishlistsLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
-        userWishlistsLayout.setBackgroundColor( 0xFFFFFFFF );
+        userWishlistsLayout.setBackgroundColor( 0xFFFF0000 );
         tabBar.addTab( wishlistsColumnButton, userWishlistsLayout );
         
         //---- Fourth Layout ----//
@@ -151,6 +158,8 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
         followersColumnButton.setTextSize(9);
         followersColumnButton.setTextOn( followersTextButton );
         followersColumnButton.setTextOff( followersTextButton );
+        followersColumnButton.setBackgroundResource( R.drawable.user_layout_button );
+        followersColumnButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
         userFollowersLayout = new UserFollowLayout( this.getActivity(), getFollowersDataURL, UserFollowLayout.GET_FOLLOWERS );
         userFollowersLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         userFollowersLayout.setBackgroundColor( 0xFFFFFFFF );
@@ -162,6 +171,8 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
         followingsColumnButton.setTextSize(8);
         followingsColumnButton.setTextOn( followingsTextButton );
         followingsColumnButton.setTextOff( followingsTextButton );
+        followingsColumnButton.setBackgroundResource( R.drawable.user_layout_button );
+        followingsColumnButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
         userFollowingsLayout = new UserFollowLayout( this.getActivity(), getFollowingsDataURL, UserFollowLayout.GET_FOLLOWINGS );
         userFollowingsLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         userFollowingsLayout.setBackgroundColor( 0xFFFFFFFF );
@@ -232,7 +243,8 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 				});
 				
 				//Set text/image follow/following
-				followButton.setText( "Following" );
+				//followButton.setText( "Following" );
+				followButton.setBackgroundResource( R.drawable.button_following );
 				followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
 			}else if( followButton.getFollowButtonStatus() == FollowButton.BUTTON_STATUS_FOLLOWING ){
 				String followActivityId = followButton.getActorData().getMyRelation().getFollowActivity().getId();
@@ -268,7 +280,8 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 				});
 				
 				//Set text/image follow/following
-				followButton.setText( "Follow" );
+				//followButton.setText( "Follow" );
+				followButton.setBackgroundResource( R.drawable.button_follow );
 				followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
 			}
 		}
@@ -276,6 +289,12 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 
 	@Override
 	public void refreshView(Intent getData) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void refreshView() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -359,10 +378,12 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 						
 						//Set text/image follow/following
 						if( setActorData.getMyRelation().getFollowActivity() != null ){
-							userHeaderFollowButton.setText( "Following" );
+							//userHeaderFollowButton.setText( "Following" );
+							userHeaderFollowButton.setBackgroundResource( R.drawable.button_following );
 							userHeaderFollowButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
 						}else{
-							userHeaderFollowButton.setText( "Follow" );
+							//userHeaderFollowButton.setText( "Follow" );
+							userHeaderFollowButton.setBackgroundResource( R.drawable.button_follow );
 							userHeaderFollowButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
 						}
 					}

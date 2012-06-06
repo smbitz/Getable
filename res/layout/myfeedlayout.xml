@@ -3,18 +3,10 @@
 	android:orientation="vertical" android:layout_width="match_parent"
 	android:layout_height="match_parent">
 	
-    <LinearLayout
-        android:layout_width="match_parent"
+    <com.codegears.getable.ui.AppHeader
         android:layout_height="wrap_content"
-        android:orientation="vertical" android:background="#63bfec">
-
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/logo_name" android:layout_gravity="center"/>
-
-    </LinearLayout>
+        android:layout_width="match_parent">
+    </com.codegears.getable.ui.AppHeader>
     
     <ListView
         android:id="@+id/myFeedLayoutListView"

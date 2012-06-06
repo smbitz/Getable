@@ -46,4 +46,8 @@ public class UserWishlistsGrouptItem extends LinearLayout {
 		return wishlistData;
 	}
 	
+	public ImageView getWishlistsImageView(){
+		return wishlistsImage;
+	}
+	
 }

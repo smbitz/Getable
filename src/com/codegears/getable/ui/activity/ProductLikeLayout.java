@@ -22,6 +22,7 @@ import android.widget.ListView;
 import com.codegears.getable.BodyLayoutStackListener;
 import com.codegears.getable.MainActivity;
 import com.codegears.getable.MyApp;
+import com.codegears.getable.R;
 import com.codegears.getable.data.ActorData;
 import com.codegears.getable.data.ProductActivityCommentsData;
 import com.codegears.getable.data.ProductActorLikeData;
@@ -78,6 +79,12 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 
 	@Override
 	public void refreshView(Intent getData) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void refreshView() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -139,10 +146,12 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 				
 				//Set text/image follow/following
 				if( data.get( position ).getActor().getMyRelation().getFollowActivity() != null ){
-					followButton.setText( "Following" );
+					//followButton.setText( "Following" );
+					followButton.setBackgroundResource( R.drawable.button_following );
 					followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
 				}else{
-					followButton.setText( "Follow" );
+					//followButton.setText( "Follow" );
+					followButton.setBackgroundResource( R.drawable.button_follow );
 					followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
 				}
 				
@@ -242,7 +251,8 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 				});
 				
 				//Set text/image follow/following
-				followButton.setText( "Following" );
+				//followButton.setText( "Following" );
+				followButton.setBackgroundResource( R.drawable.button_following );
 				followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
 			}else if( followButton.getFollowButtonStatus() == FollowButton.BUTTON_STATUS_FOLLOWING ){
 				String followActivityId = followButton.getActorData().getMyRelation().getFollowActivity().getId();
@@ -278,7 +288,8 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 				});
 				
 				//Set text/image follow/following
-				followButton.setText( "Follow" );
+				//followButton.setText( "Follow" );
+				followButton.setBackgroundResource( R.drawable.button_follow );
 				followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
 			}
 		}else if(listener != null){

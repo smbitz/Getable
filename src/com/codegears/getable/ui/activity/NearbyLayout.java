@@ -75,6 +75,12 @@ public class NearbyLayout extends AbstractViewLayout implements NetworkThreadLis
 		
 	}
 	
+	@Override
+	public void refreshView() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener) {
 		this.listener = listener;
 	}

@@ -7,6 +7,7 @@ import android.app.Application;
 public class MyApp extends Application {
 	
 	public static final String URL_DEFAULT = "URL_DEFAULT";
+	public static final String URL_GET_PRODUCT_ACTIVITIES_BY_ID = "URL_GET_PRODUCT_ACTIVITIES_BY_ID";
 	public static final String DEFAULT_URL_VAR_1 = "?page.number=1&page.size=32";
 	
 	private List<String> appCookie;

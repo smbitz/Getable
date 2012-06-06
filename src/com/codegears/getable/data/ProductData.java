@@ -15,20 +15,29 @@ public class ProductData {
 	private String description;
 	
 	public ProductData(JSONObject jsonObject) {
-		try {
-			brand = new BrandData( jsonObject.getJSONObject("brand") );
-			category = new CategoryData( jsonObject.getJSONObject("category") );
-			store = new StoreData( jsonObject.getJSONObject("store") );
-			picture = new ProductPicture( jsonObject.getJSONObject("picture") );
-			gender = new ProductGender( jsonObject.getJSONObject("gender") );
-			price = jsonObject.optString("price");
-			keywords = jsonObject.optString("keywords");
-			description = jsonObject.optString("description");
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		if( jsonObject.optJSONObject("brand") != null ){
+			brand = new BrandData( jsonObject.optJSONObject("brand") );
 		}
-		//keywords
+		
+		if( jsonObject.optJSONObject("category") != null ){
+			category = new CategoryData( jsonObject.optJSONObject("category") );
+		}
+		
+		if( jsonObject.optJSONObject("store") != null ){
+			store = new StoreData( jsonObject.optJSONObject("store") );
+		}
+		
+		if( jsonObject.optJSONObject("picture") != null ){
+			picture = new ProductPicture( jsonObject.optJSONObject("picture") );
+		}
+		
+		if( jsonObject.optJSONObject("gender") != null ){
+			gender = new ProductGender( jsonObject.optJSONObject("gender") );
+		}
+
+		price = jsonObject.optString("price");
+		keywords = jsonObject.optString("keywords");
+		description = jsonObject.optString("description");
 	}
 	
 	public ProductPicture getProductPicture(){

@@ -19,6 +19,12 @@ public class MyFeedAddNewProductRow extends LinearLayout {
 	private TextView numLike;
 	private TextView numComment;
 	private ProductActivityData activityData;
+	private LinearLayout likeButtonLayout;
+	private LinearLayout commentButtonLayout;
+	private LinearLayout wishlistButtonLayout;
+	private MyFeedLikeButton likeButton;
+	private MyFeedCommentButton commentButton;
+	private MyfeedWishlistButton wishlistButton;
 	
 	public MyFeedAddNewProductRow(Context context) {
 		super(context);
@@ -30,17 +36,20 @@ public class MyFeedAddNewProductRow extends LinearLayout {
 		productName = (TextView) findViewById( R.id.myFeedAddNewProductRowProductName );
 		numLike = (TextView) findViewById( R.id.myFeedAddNewProductRowLikeNum );
 		numComment = (TextView) findViewById( R.id.myFeedAddNewProductRowCommentNum );
+		likeButtonLayout = (LinearLayout) findViewById( R.id.myFeedAddNewProductRowLikeImageLayout );
+		commentButtonLayout = (LinearLayout) findViewById( R.id.myFeedAddNewProductRowCommentImageLayout );
+		wishlistButtonLayout = (LinearLayout) findViewById( R.id.myFeedAddNewProductRowWishlistImageLayout );
+		
+		likeButton = new MyFeedLikeButton( this.getContext() );
+		commentButton = new MyFeedCommentButton( this.getContext() );
+		wishlistButton = new MyfeedWishlistButton( this.getContext() );
+		
+		likeButtonLayout.addView( likeButton );
+		commentButtonLayout.addView( commentButton );
+		wishlistButtonLayout.addView( wishlistButton );
 		
 		userName.setTextColor( Color.parseColor( this.getResources().getString( R.color.NameColorBlue ) ) );
 		productName.setTextColor( Color.parseColor( this.getResources().getString( R.color.NameColorBlue ) ) );
-	}
-	
-	public ImageView getUserImageView(){
-		return userImageView;
-	}
-
-	public ImageView getProducImageView(){
-		return productImageView;
 	}
 
 	public void setUserName(String setUserName) {
@@ -65,6 +74,26 @@ public class MyFeedAddNewProductRow extends LinearLayout {
 	
 	public ProductActivityData getActivityData(){
 		return activityData;
+	}
+	
+	public ImageView getUserImageView(){
+		return userImageView;
+	}
+
+	public ImageView getProducImageView(){
+		return productImageView;
+	}
+	
+	public MyFeedLikeButton getLikeButton(){
+		return likeButton;
+	}
+	
+	public MyFeedCommentButton getCommentButton(){
+		return commentButton;
+	}
+	
+	public MyfeedWishlistButton getWishlistButton(){
+		return wishlistButton;
 	}
 	
 }

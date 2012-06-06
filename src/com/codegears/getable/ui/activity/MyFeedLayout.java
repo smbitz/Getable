@@ -1,6 +1,7 @@
 package com.codegears.getable.ui.activity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import org.json.JSONArray;
@@ -24,14 +25,20 @@ import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
 import com.codegears.getable.data.ProductActivityData;
 import com.codegears.getable.ui.AbstractViewLayout;
+import com.codegears.getable.ui.LikeButton;
 import com.codegears.getable.ui.MyFeedAddNewProductRow;
+import com.codegears.getable.ui.MyFeedCommentButton;
 import com.codegears.getable.ui.MyFeedCommentRow;
 import com.codegears.getable.ui.MyFeedFollowingRow;
+import com.codegears.getable.ui.MyFeedLikeButton;
 import com.codegears.getable.ui.MyFeedLikeRow;
+import com.codegears.getable.ui.MyfeedWishlistButton;
 import com.codegears.getable.ui.ProductImageThumbnail;
+import com.codegears.getable.ui.ProductNumComment;
 import com.codegears.getable.util.Config;
 import com.codegears.getable.util.ImageLoader;
 import com.codegears.getable.util.NetworkThreadUtil;
+import com.codegears.getable.util.NetworkUtil;
 import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
 import android.view.View.OnClickListener;
 
@@ -45,11 +52,14 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 	private BodyLayoutStackListener listener;
 	private Config config;
 	private MyApp app;
-	private List<String> cookie;
+	private List<String> appCookie;
 	private ArrayList<ProductActivityData> arrayFeedData;
 	private ListView feedListView;
 	private FeedAdapter feedAdapter;
 	private ImageLoader imageLoader;
+	private String getProductLikeURL;
+	private String getProductUnLikeURL;
+	private String getFeedURL;
 	
 	public MyFeedLayout(Activity activity) {
 		super(activity);
@@ -62,14 +72,20 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 		feedAdapter = new FeedAdapter();
 		imageLoader = new ImageLoader( this.getContext() );
 		
-		String getFeedURL = config.get( MyApp.URL_DEFAULT ).toString()+"me/feed.json"+MyApp.DEFAULT_URL_VAR_1;
-		cookie = app.getAppCookie();
+		getFeedURL = config.get( MyApp.URL_DEFAULT ).toString()+"me/feed.json"+MyApp.DEFAULT_URL_VAR_1;
+		appCookie = app.getAppCookie();
 		
-		NetworkThreadUtil.getRawDataWithCookie(getFeedURL, null, cookie, this);
+		NetworkThreadUtil.getRawDataWithCookie(getFeedURL, null, appCookie, this);
 	}
 
 	@Override
 	public void refreshView(Intent getData) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void refreshView() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -86,30 +102,32 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 
 	@Override
 	public void onNetworkRawSuccess(String urlString, String result) {
-		try {
-			//Check type of feed.
-			JSONObject resultObject = new JSONObject( result );
-			if( resultObject.optJSONArray( "entities" ) != null ){
-				JSONArray newArray = resultObject.optJSONArray( "entities" );
-				
-				for(int i = 0; i<newArray.length(); i++){
-					JSONObject entitiesObject = (JSONObject) newArray.get(i);
+		if( urlString.equals( getFeedURL ) ){
+			try {
+				//Check type of feed.
+				JSONObject resultObject = new JSONObject( result );
+				if( resultObject.optJSONArray( "entities" ) != null ){
+					JSONArray newArray = resultObject.optJSONArray( "entities" );
 					
-					ProductActivityData activityData = new ProductActivityData( entitiesObject );
-					arrayFeedData.add( activityData );
+					for(int i = 0; i<newArray.length(); i++){
+						JSONObject entitiesObject = (JSONObject) newArray.get(i);
+						
+						ProductActivityData activityData = new ProductActivityData( entitiesObject );
+						arrayFeedData.add( activityData );
+					}
 				}
+				
+				feedAdapter.setData( arrayFeedData );
+				this.getActivity().runOnUiThread( new Runnable() {
+					@Override
+					public void run() {
+						feedListView.setAdapter( feedAdapter );
+					}
+				});
+			} catch (JSONException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-			
-			feedAdapter.setData( arrayFeedData );
-			this.getActivity().runOnUiThread( new Runnable() {
-				@Override
-				public void run() {
-					feedListView.setAdapter( feedAdapter );
-				}
-			});
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
 		}
 	}
 
@@ -163,6 +181,39 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 				newProductRow.setProductName( productName );
 				newProductRow.setNumLike( numLike );
 				newProductRow.setNumComment( numComment );
+				
+				//Set Like, Comment, Wishlist Button
+				MyFeedLikeButton feedLikeButton = newProductRow.getLikeButton();
+				MyFeedCommentButton feedCommentButton = newProductRow.getCommentButton();
+				MyfeedWishlistButton feedWishlistButton = newProductRow.getWishlistButton();
+				
+				feedLikeButton.setOnClickListener( MyFeedLayout.this );
+				feedCommentButton.setOnClickListener( MyFeedLayout.this );
+				feedWishlistButton.setOnClickListener( MyFeedLayout.this );
+				
+				//Set Like, Comment, Wishlist Data
+				//Set image like button.
+				if( feedData.getMyRelation() != null &&
+					feedData.getMyRelation().getLike() != "" ){
+					//Set image liked.
+					//likeButton.setText( "liked" );
+					feedLikeButton.setBackgroundResource( R.drawable.myfeed_liked_icon );
+					feedLikeButton.setLikeId( feedData.getMyRelation().getLike() );
+					feedLikeButton.setActivityData( feedData );
+					feedLikeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKED );
+				}else{
+					//Set image like.
+					//likeButton.setText( "like" );
+					feedLikeButton.setBackgroundResource( R.drawable.myfeed_like_icon );
+					feedLikeButton.setActivityData( feedData );
+					feedLikeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKE );
+				}
+				
+				//Set comment button.
+				feedCommentButton.setProductData( feedData );
+				
+				//Set wishlist button.
+				feedWishlistButton.setActivityData( feedData );
 				
 				//Set Data
 				newProductRow.setActivityData( feedData );
@@ -260,7 +311,116 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 
 	@Override
 	public void onClick(View v) {
-		if(listener != null){
+		if( v instanceof MyFeedLikeButton ){
+			final MyFeedLikeButton feedLikeButton = (MyFeedLikeButton) v;
+			String productActivityId = feedLikeButton.getActivityData().getId();
+			getProductLikeURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/likes.json";
+			
+			if( feedLikeButton.getButtonStatus() == LikeButton.BUTTON_STATUS_LIKE ){
+				HashMap< String, String > likeDataMap = new HashMap<String, String>();
+				likeDataMap.put( "emtpy", "emtpy" );
+				String likePostData = NetworkUtil.createPostData( likeDataMap );
+				
+				NetworkThreadUtil.getRawDataWithCookie(getProductLikeURL, likePostData, appCookie, new NetworkThreadListener() {
+					
+					@Override
+					public void onNetworkRawSuccess(String urlString, String result) {
+						//Set product data.
+						try {
+							JSONObject jsonObject = new JSONObject( result );
+							ProductActivityData newData = new ProductActivityData( jsonObject );
+							String likeId = newData.getLike().getActivityData().getId();
+							feedLikeButton.setLikeId( likeId );
+						} catch (JSONException e) {
+							e.printStackTrace();
+						}
+						
+						//On click like result.
+						//Set image liked
+						MyFeedLayout.this.getActivity().runOnUiThread( new Runnable() {
+							@Override
+							public void run() {
+								feedLikeButton.setBackgroundResource( R.drawable.myfeed_liked_icon );
+								feedLikeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKED );
+							}
+						});
+					}
+					
+					@Override
+					public void onNetworkFail(String urlString) {
+						// TODO Auto-generated method stub
+						
+					}
+					
+					@Override
+					public void onNetworkDocSuccess(String urlString, Document document) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+			}else if( feedLikeButton.getButtonStatus() == LikeButton.BUTTON_STATUS_LIKED ){
+				String likeActivityId = feedLikeButton.getLikeId();
+				getProductUnLikeURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+"/"+likeActivityId+".json";
+				
+				HashMap< String, String > likeDataMap = new HashMap<String, String>();
+				likeDataMap.put( "_a", "delete" );
+				String likePostData = NetworkUtil.createPostData( likeDataMap );
+				
+				NetworkThreadUtil.getRawDataWithCookie(getProductUnLikeURL, likePostData, appCookie, new NetworkThreadListener() {
+					
+					@Override
+					public void onNetworkRawSuccess(String urlString, String result) {
+						//On click like result.
+						//Set image liked
+						MyFeedLayout.this.getActivity().runOnUiThread( new Runnable() {
+							@Override
+							public void run() {
+								feedLikeButton.setBackgroundResource( R.drawable.myfeed_like_icon );
+								feedLikeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKE );
+							}
+						});
+					}
+					
+					@Override
+					public void onNetworkFail(String urlString) {
+						// TODO Auto-generated method stub
+						
+					}
+					
+					@Override
+					public void onNetworkDocSuccess(String urlString, Document document) {
+						// TODO Auto-generated method stub
+						
+					}
+				});
+			}
+		}else if( v instanceof MyFeedCommentButton ){
+			if(listener != null){
+				MyFeedCommentButton feedCommentButton = (MyFeedCommentButton) v;
+				SharedPreferences myPreferences = this.getActivity().getSharedPreferences( ProductCommentLayout.SHARE_PREF_VALUE_PRODUCT_ID, this.getActivity().MODE_PRIVATE );
+				SharedPreferences.Editor prefsEditor = myPreferences.edit();
+				prefsEditor.putString( ProductCommentLayout.SHARE_PREF_KEY_PRODUCT_ID, feedCommentButton.getProductData().getId() );
+				prefsEditor.putString( ProductCommentLayout.SHARE_PREF_KEY_USER_ID, feedCommentButton.getProductData().getActor().getId() );
+				prefsEditor.commit();
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PRODUCT_COMMENT_USER_LIST );
+			}
+		}else if( v instanceof MyfeedWishlistButton ){
+			if(listener != null){
+				MyfeedWishlistButton feedWishlistButton = (MyfeedWishlistButton) v;
+				String wishlistId = null;
+				String productActivityId = feedWishlistButton.getActivityData().getId();
+				if( feedWishlistButton.getActivityData().getMyRelation() != null &&
+					feedWishlistButton.getActivityData().getMyRelation().getArrayWishlistId() != null ){
+					wishlistId = feedWishlistButton.getActivityData().getMyRelation().getArrayWishlistId().toString();
+				}
+				SharedPreferences myPreferences = this.getActivity().getSharedPreferences( ProductWishlistLayout.SHARE_PREF_WISHLLIST_VALUE, this.getActivity().MODE_PRIVATE );
+				SharedPreferences.Editor prefsEditor = myPreferences.edit();
+				prefsEditor.putString( ProductWishlistLayout.SHARE_PREF_KEY_PRODUCT_ID, productActivityId );
+				prefsEditor.putString( ProductWishlistLayout.SHARE_PREF_KEY_WISHLIST_ID, wishlistId );
+				prefsEditor.commit();
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PRODUCT_WISHLIST );
+			}
+		}else if(listener != null){
 			if( v instanceof  MyFeedAddNewProductRow ){
 				MyFeedAddNewProductRow newProductRow = (MyFeedAddNewProductRow) v;
 				SharedPreferences myPref = this.getActivity().getSharedPreferences( ProductDetailLayout.SHARE_PREF_PRODUCT_ACT_ID, this.getActivity().MODE_PRIVATE );

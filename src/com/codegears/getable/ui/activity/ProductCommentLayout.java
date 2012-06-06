@@ -43,6 +43,7 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 	
 	public static final String SHARE_PREF_VALUE_PRODUCT_ID = "SHARE_PREF_VALUE_PRODUCT_ID";
 	public static final String SHARE_PREF_KEY_PRODUCT_ID = "SHARE_PREF_KEY_PRODUCT_ID";
+	public static final String SHARE_PREF_KEY_USER_ID = "SHARE_PREF_KEY_USER_ID";
 	private static final int DELETE_BUTTON_STATUS_HIDE = 0;
 	private static final int DELETE_BUTTON_STATUS_SHOW = 1;
 	
@@ -61,6 +62,7 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 	private Button editButton;
 	private int deleteButtonStatus;
 	private List<String> appCookie;
+	private String activityUserId;
 	
 	public ProductCommentLayout(Activity activity) {
 		super(activity);
@@ -68,6 +70,7 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 		
 		SharedPreferences myPreferences = this.getActivity().getSharedPreferences( SHARE_PREF_VALUE_PRODUCT_ID, this.getActivity().MODE_PRIVATE );
 		productId = myPreferences.getString( SHARE_PREF_KEY_PRODUCT_ID, null );
+		activityUserId = myPreferences.getString( SHARE_PREF_KEY_USER_ID, null );
 		
 		app = (MyApp) this.getActivity().getApplication();
 		appCookie = app.getAppCookie();
@@ -83,6 +86,10 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 		submitButton.setOnClickListener( this );
 		editButton.setOnClickListener( this );
 		
+		if( app.getUserId().equals( activityUserId ) ){
+			editButton.setVisibility( View.VISIBLE );
+		}
+		
 		deleteButtonStatus = DELETE_BUTTON_STATUS_HIDE;
 		
 		String urlVar1 = MyApp.DEFAULT_URL_VAR_1;
@@ -94,6 +101,12 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 
 	@Override
 	public void refreshView(Intent getData) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void refreshView() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -150,28 +163,23 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 			
 			if( jsonObject != null ){
 				String deleteCommentId = jsonObject.optString( "id" );
-				/*for( ProductActivityCommentsData fetchData:activityCommentsData ){
-					String currentCommentId = fetchData.getComment().getProductActivityData().getId();
-					if( deleteCommentId.equals( currentCommentId ) ){
-						activityCommentsData.remove( fetchData );
-					}
-				}*/
-				while( activityCommentsData.iterator().hasNext() ){
-					ProductActivityCommentsData currentCommentData = activityCommentsData.iterator().next();
-					String currentCommentId = currentCommentData.getComment().getProductActivityData().getId();
-					if( deleteCommentId.equals( currentCommentId ) ){
-						activityCommentsData.remove( currentCommentData );
+				ArrayList<ProductActivityCommentsData> newActivityCommentsData = new ArrayList<ProductActivityCommentsData>();
+				for( ProductActivityCommentsData fetchData:activityCommentsData ){
+					String currentCommentId = fetchData.getId();
+					if( !(deleteCommentId.equals( currentCommentId )) ){
+						newActivityCommentsData.add( fetchData );
 					}
 				}
+				activityCommentsData = newActivityCommentsData;
 			}
 			
-			commentAdapter.notifyDataSetChanged();
-			//commentAdapter.setData( activityCommentsData );
+			commentAdapter.setData( activityCommentsData );
 			this.getActivity().runOnUiThread( new Runnable() {
 				@Override
 				public void run() {
 					commentText.setText("");
 					commentListView.setAdapter( commentAdapter );
+					commentListView.invalidateViews();
 				}
 			});
 		}
@@ -213,7 +221,6 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup parent) {
-			
 			ProductCommentItemLayout returnView;
 			
 			if( convertView == null ){
@@ -267,7 +274,7 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 			commentListView.invalidateViews();
 		}else if( v instanceof CommentDeleteButton ){
 			CommentDeleteButton commentDeleteButton = (CommentDeleteButton) v;
-			String commentActivityId = commentDeleteButton.getActivityCommentsData().getComment().getProductActivityData().getId();
+			String commentActivityId = commentDeleteButton.getActivityCommentsData().getId();
 			deleteCommentUrl = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+commentActivityId+".json";
 			
 			HashMap< String, String > dataMap = new HashMap<String, String>();

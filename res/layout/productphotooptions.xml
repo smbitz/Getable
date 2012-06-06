@@ -17,38 +17,38 @@
         android:orientation="vertical" android:id="@+id/productDetailPhotoOptionsOtherLayout" android:visibility="gone">
 
         <Button
-            android:id="@+id/button1"
-            android:layout_width="wrap_content"
+            android:id="@+id/productDetailPhotoOptionsFlagReviewButton"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Flag for Review" android:layout_gravity="center"/>
 
         <Button
             android:id="@+id/Button01"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Share Post" android:layout_gravity="center"/>
 
         <Button
             android:id="@+id/productDetailPhotoOptionsCopyURLButton"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Copy Share URL" android:layout_gravity="center"/>
 
         <Button
             android:id="@+id/productDetailPhotoOptionsSendEmailButton"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Email Photo" android:layout_gravity="center"/>
 
         <Button
             android:id="@+id/productDetailPhotoOptionsSendTextButton"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Text Photo" android:layout_gravity="center"/>
 
         <Button
             android:id="@+id/productDetailPhotoOptionsCloseButton"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Cancel" android:layout_gravity="center"/>
 
@@ -61,42 +61,42 @@
 
         <Button
             android:id="@+id/productDetailPhotoOptionsDeleteActButton"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Delete" android:layout_gravity="center"/>
 
         <Button
             android:id="@+id/button3"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Share Post" android:layout_gravity="center"/>
 
         <Button
             android:id="@+id/productDetailPhotoOptionsCopyURLButton"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Copy share URL" android:layout_gravity="center"/>
 
         <Button
             android:id="@+id/productDetailPhotoOptionsSendEmailButton"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Email Photo" android:layout_gravity="center"/>
 
         <Button
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Text Photo" android:layout_gravity="center" android:id="@+id/productDetailPhotoOptionsSendTextButton"/>
 
         <Button
             android:id="@+id/productDetailPhotoOptionsManageCommentButton"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Manage Comments" android:layout_gravity="center"/>
 
         <Button
-            android:id="@+id/productDetailPhotoOptionsCloseButton"
-            android:layout_width="wrap_content"
+            android:id="@+id/productDetailPhotoOptionsOwnCloseButton"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:text="Cancel" android:layout_gravity="center"/>
 

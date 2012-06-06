@@ -16,6 +16,7 @@ import org.w3c.dom.Document;
 import com.codegears.getable.BodyLayoutStackListener;
 import com.codegears.getable.MainActivity;
 import com.codegears.getable.MyApp;
+import com.codegears.getable.R;
 import com.codegears.getable.data.ActorData;
 import com.codegears.getable.data.ProductActorFollowData;
 import com.codegears.getable.data.WishlistData;
@@ -24,6 +25,7 @@ import com.codegears.getable.ui.FollowButton;
 import com.codegears.getable.ui.UserFollowItemLayout;
 import com.codegears.getable.ui.UserWishlistsGrouptItem;
 import com.codegears.getable.util.Config;
+import com.codegears.getable.util.ImageLoader;
 import com.codegears.getable.util.NetworkThreadUtil;
 import com.codegears.getable.util.NetworkUtil;
 import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
@@ -37,6 +39,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ListView;
+import android.widget.LinearLayout.LayoutParams;
 import android.view.View.OnClickListener;
 
 public class UserFollowLayout extends AbstractViewLayout implements NetworkThreadListener, OnClickListener {
@@ -46,7 +49,6 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 	
 	private ListView followListView;
 	private FollowAdapter followAdapter;
-	private ArrayList<Bitmap> arrayUserImage;
 	private ArrayList<ProductActorFollowData> arrayFollowData;
 	private BodyLayoutStackListener listener;
 	private Config config;
@@ -56,20 +58,20 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 	private List<String> appCookie;
 	private String defaultGetDataURL;
 	private int requestPageType;
+	private ImageLoader imageLoader;
 	
 	public UserFollowLayout(Activity activity, String getDataFollowTypeURL, int getRequestPageType) {
 		super(activity);
+		View.inflate( this.getContext(), R.layout.userfollowlayout, this );
 		
 		app = (MyApp) this.getActivity().getApplication();
 		appCookie = app.getAppCookie();
 		config = new Config( this.getContext() );
-		followListView = new ListView( this.getContext() );
+		followListView = (ListView) findViewById( R.id.userFollowLayoutListView );
 		followAdapter = new FollowAdapter();
-		arrayUserImage = new ArrayList<Bitmap>();
 		arrayFollowData = new ArrayList<ProductActorFollowData>();
 		requestPageType = getRequestPageType;
-		
-		this.addView( followListView );
+		imageLoader = new ImageLoader( this.getContext() );
 		
 		defaultGetDataURL = getDataFollowTypeURL;
 		
@@ -78,7 +80,14 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 
 	@Override
 	public void refreshView(Intent getData) {
-
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void refreshView() {
+		// TODO Auto-generated method stub
+		
 	}
 	
 	private class FollowAdapter extends BaseAdapter{
@@ -105,7 +114,7 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 		}
 
 		@Override
-		public View getView(int position, View convertView, ViewGroup arg2) {
+		public View getView(int position, View convertView, ViewGroup parent) {
 			UserFollowItemLayout userFollowItemLayout;
 			
 			if( convertView == null ){
@@ -117,7 +126,9 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 			
 			FollowButton userFollowButton = userFollowItemLayout.getFollowButton();
 			
-			userFollowItemLayout.setUserImage( arrayUserImage.get( position ) );
+			String imageURL = data.get( position ).getActor().getPicture().getImageUrls().getImageURLT();
+			
+			imageLoader.DisplayImage( imageURL, UserFollowLayout.this.getActivity(), userFollowItemLayout.getUserImageView(), true );
 			userFollowItemLayout.setFollowUserData( data.get( position ) );
 			
 			if( requestPageType == GET_FOLLOWERS ){
@@ -127,10 +138,12 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 				
 				//Set text/image follow/following
 				if( data.get( position ).getActor().getMyRelation().getFollowActivity() != null ){
-					userFollowButton.setText( "Following" );
+					//userFollowButton.setText( "Following" );
+					userFollowButton.setBackgroundResource( R.drawable.button_following );
 					userFollowButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
 				}else{
-					userFollowButton.setText( "Follow" );
+					//userFollowButton.setText( "Follow" );
+					userFollowButton.setBackgroundResource( R.drawable.button_follow );
 					userFollowButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
 				}
 			}else if( requestPageType == GET_FOLLOWINGS ){
@@ -140,10 +153,12 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 				
 				//Set text/image follow/following
 				if( data.get( position ).getFollowedUser().getMyRelation().getFollowActivity() != null ){
-					userFollowButton.setText( "Following" );
+					//userFollowButton.setText( "Following" );
+					userFollowButton.setBackgroundResource( R.drawable.button_following );
 					userFollowButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
 				}else{
-					userFollowButton.setText( "Follow" );
+					//userFollowButton.setText( "Follow" );
+					userFollowButton.setBackgroundResource( R.drawable.button_follow );
 					userFollowButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
 				}
 			}
@@ -176,23 +191,6 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 					//Load Follow Data
 					ProductActorFollowData newData = new ProductActorFollowData( (JSONObject) newArray.get(i) );
 					JSONObject object = (JSONObject) newArray.get(i);
-					
-					//Load Follow Image
-					URL mainPictureURL = null;
-					Bitmap imageBitmap = null;
-					try {
-						mainPictureURL = new URL( newData.getFollowedUser().getPicture().getImageUrls().getImageURLT() );
-					} catch (MalformedURLException e) {
-						e.printStackTrace();
-					}
-					
-					try {
-						imageBitmap = BitmapFactory.decodeStream( mainPictureURL.openConnection().getInputStream() );
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-	
-					arrayUserImage.add(imageBitmap);
 					arrayFollowData.add(newData);
 				}
 			} catch (JSONException e) {
@@ -272,7 +270,8 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 				});
 				
 				//Set text/image follow/following
-				followButton.setText( "Following" );
+				//followButton.setText( "Following" );
+				followButton.setBackgroundResource( R.drawable.button_following );
 				followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
 			}else if( followButton.getFollowButtonStatus() == FollowButton.BUTTON_STATUS_FOLLOWING ){
 				String followActivityId = followButton.getActorData().getMyRelation().getFollowActivity().getId();
@@ -308,7 +307,8 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 				});
 				
 				//Set text/image follow/following
-				followButton.setText( "Follow" );
+				//followButton.setText( "Follow" );
+				followButton.setBackgroundResource( R.drawable.button_follow );
 				followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
 			}
 		}else if(listener != null){

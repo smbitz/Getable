@@ -22,6 +22,7 @@ import com.codegears.getable.ui.activity.ProductLikeLayout;
 import com.codegears.getable.ui.activity.ProductWishlistLayout;
 import com.codegears.getable.ui.activity.ShareImageCropLayout;
 import com.codegears.getable.ui.activity.ShareImageDetailLayout;
+import com.codegears.getable.ui.activity.ShareProductSearchLayout;
 import com.codegears.getable.ui.activity.StoreMainLayout;
 import com.codegears.getable.ui.activity.UserProfileLayout;
 import com.codegears.getable.ui.activity.WishlistsGalleryLayout;
@@ -67,6 +68,8 @@ public class MainActivity extends Activity implements BodyLayoutStackListener, O
 	public static final int LAYOUTCHANGE_PRODUCT_COMMENT_USER_LIST = 8;
 	public static final int LAYOUTCHANGE_PRODUCT_WISHLIST = 9;
 	public static final int LAYOUTCHANGE_SHARE_IMAGE_DETAIL = 10;
+	public static final int LAYOUTCHANGE_SHARE_IMAGE_DETAIL_SEARCH_VALUE = 11;
+	public static final int LAYOUTCHANGE_SHARE_IMAGE_DETAIL_WITH_RESULT = 12;
 	
 	public static final int RESULT_GALLERY_FILTER_FINISH = 1;
 	public static final int RESULT_WISHLISTS_FILTER_FINISH = 2;
@@ -87,6 +90,8 @@ public class MainActivity extends Activity implements BodyLayoutStackListener, O
 	private ProductLikeLayout productLikeLayout;
 	private ProductCommentLayout productCommentLayout;
 	private ProductDetailLayout productDetailLayout;
+	private ShareImageDetailLayout shareImageDetailLayout;
+	private ShareProductSearchLayout productSearchLayout;
 	private Button shareCameraButton;
 	private Button shareGalleryButton;
 	
@@ -242,10 +247,29 @@ public class MainActivity extends Activity implements BodyLayoutStackListener, O
 			bodyLayout.requestLayout();
 		}else if(requestId == LAYOUTCHANGE_SHARE_IMAGE_DETAIL){
 			layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
-			ShareImageDetailLayout shareImageDetailLayout = new ShareImageDetailLayout( this );
+			shareImageDetailLayout = new ShareImageDetailLayout( this );
+			shareImageDetailLayout.setBodyLayoutChangeListener( this );
 			bodyLayout.removeAllViews();
 			bodyLayout.addView( shareImageDetailLayout );
 			bodyLayout.requestLayout();
+		}else if(requestId == LAYOUTCHANGE_SHARE_IMAGE_DETAIL_SEARCH_VALUE){
+			layoutStack.push( bodyLayout.getChildAt( 0 ) );		//store bodylayout in stack
+			productSearchLayout = new ShareProductSearchLayout( this );
+			productSearchLayout.setBodyLayoutChangeListener( this );
+			bodyLayout.removeAllViews();
+			bodyLayout.addView( productSearchLayout );
+			bodyLayout.requestLayout();
+		}else if(requestId == LAYOUTCHANGE_SHARE_IMAGE_DETAIL_WITH_RESULT){
+			if(!layoutStack.isEmpty()){
+				View view = layoutStack.pop();
+				while( !(view.equals( shareImageDetailLayout )) ){
+					view = layoutStack.pop();
+				}
+				bodyLayout.removeAllViews();
+				bodyLayout.addView( view );
+				bodyLayout.requestLayout();
+			}
+			shareImageDetailLayout.refreshView();
 		}
 	}
 	
@@ -270,10 +294,13 @@ public class MainActivity extends Activity implements BodyLayoutStackListener, O
 		}else if( requestCode == REQUEST_WISHLISTS_FILTER ){
 			wishlistsGalleryLayout.refreshView( data );
 		}else if( requestCode == REQUEST_PHOTO_OPTION_TO_MANAGE_COMMENT && resultCode == RESULT_PHOTO_OPTION_TO_MANAGE_COMMENT ){
-			String actId = data.getExtras().getString( ProductPhotoOptions.MANAGE_COMMENT_PUT_EXTRA_ACTIVITY_ID );
+			String getExtra[] = data.getExtras().getStringArray( ProductPhotoOptions.MANAGE_COMMENT_PUT_EXTRA );
+			String actId = getExtra[0];
+			String userId = getExtra[1];
 			SharedPreferences myPreferences = this.getSharedPreferences( ProductCommentLayout.SHARE_PREF_VALUE_PRODUCT_ID, this.MODE_PRIVATE );
 			SharedPreferences.Editor prefsEditor = myPreferences.edit();
 			prefsEditor.putString( ProductCommentLayout.SHARE_PREF_KEY_PRODUCT_ID, actId );
+			prefsEditor.putString( ProductCommentLayout.SHARE_PREF_KEY_USER_ID, userId );
 			prefsEditor.commit();
 			this.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PRODUCT_COMMENT_USER_LIST );
 		}else if( requestCode == REQUEST_NEARBY_FILTER ){

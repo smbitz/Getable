@@ -18,4 +18,5 @@ public abstract class AbstractViewLayout extends LinearLayout {
 	}
 	
 	public abstract void refreshView( Intent getData );
+	public abstract void refreshView( );
 }

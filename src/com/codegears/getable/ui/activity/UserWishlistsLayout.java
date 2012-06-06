@@ -12,9 +12,11 @@ import org.w3c.dom.Document;
 
 import com.codegears.getable.BodyLayoutStackListener;
 import com.codegears.getable.MainActivity;
+import com.codegears.getable.R;
 import com.codegears.getable.data.WishlistData;
 import com.codegears.getable.ui.AbstractViewLayout;
 import com.codegears.getable.ui.UserWishlistsGrouptItem;
+import com.codegears.getable.util.ImageLoader;
 import com.codegears.getable.util.NetworkThreadUtil;
 import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
 
@@ -38,18 +40,17 @@ public class UserWishlistsLayout extends AbstractViewLayout implements NetworkTh
 	private ListView wishlistsGallery;
 	private WishlistsAdapter wishlistsAdapter;
 	private ArrayList<WishlistData> arrayWishlistsData;
-	private ArrayList<Bitmap> arrayWishlistsImage;
 	private BodyLayoutStackListener listener;
+	private ImageLoader imageLoader;
 	
 	public UserWishlistsLayout(Activity activity, String getWishlistsDataURL) {
 		super(activity);
+		View.inflate( this.getContext(), R.layout.userwishlistslayout, this );
 		
-		wishlistsGallery = new ListView(this.getContext());
+		wishlistsGallery = (ListView) findViewById( R.id.userWishlistsLayoutListView );
 		arrayWishlistsData = new ArrayList<WishlistData>();
-		arrayWishlistsImage = new ArrayList<Bitmap>();
 		wishlistsAdapter = new WishlistsAdapter();
-		
-		this.addView( wishlistsGallery );
+		imageLoader = new ImageLoader( this.getContext() );
 		
 		NetworkThreadUtil.getRawData( getWishlistsDataURL, null, this);
 	}
@@ -91,7 +92,9 @@ public class UserWishlistsLayout extends AbstractViewLayout implements NetworkTh
 			String wishlistsGroupItemName = arrayWishlistsData.get( position ).getName();
 			String wishlistsGroupItemNumber = String.valueOf( arrayWishlistsData.get( position ).getStatistic().getNumberOfActivities() );
 			
-			userWishlistGrouptItem.setWishlistsImage( arrayWishlistsImage.get( position ) );
+			String imageURL = data.get( position ).getPicture().getImageUrls().getImageURLT();
+			
+			imageLoader.DisplayImage( imageURL, UserWishlistsLayout.this.getActivity(), userWishlistGrouptItem.getWishlistsImageView(), true );
 			userWishlistGrouptItem.setWishlistsName( wishlistsGroupItemName );
 			userWishlistGrouptItem.setWishlistsItemNumber( wishlistsGroupItemNumber+" items" );
 			userWishlistGrouptItem.setWishlistData( arrayWishlistsData.get( position ) );
@@ -116,23 +119,6 @@ public class UserWishlistsLayout extends AbstractViewLayout implements NetworkTh
 				//Load Wishlists Data
 				WishlistData newData = new WishlistData( (JSONObject) newArray.get(i) );
 				JSONObject object = (JSONObject) newArray.get(i);
-				
-				//Load Wishlists Image
-				URL mainPictureURL = null;
-				Bitmap imageBitmap = null;
-				try {
-					mainPictureURL = new URL( newData.getPicture().getImageUrls().getImageURLT() );
-				} catch (MalformedURLException e) {
-					e.printStackTrace();
-				}
-				
-				try {
-					imageBitmap = BitmapFactory.decodeStream( mainPictureURL.openConnection().getInputStream() );
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-				
-				arrayWishlistsImage.add(imageBitmap);
 				arrayWishlistsData.add(newData);
 			}
 		} catch (JSONException e) {
@@ -156,6 +142,12 @@ public class UserWishlistsLayout extends AbstractViewLayout implements NetworkTh
 
 	@Override
 	public void refreshView(Intent getData) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void refreshView() {
 		// TODO Auto-generated method stub
 		
 	}

@@ -29,6 +29,12 @@ public class StoreMainLayout extends AbstractViewLayout {
 	public void refreshView(Intent getData) {
 		
 	}
+	
+	@Override
+	public void refreshView() {
+		// TODO Auto-generated method stub
+		
+	}
 
 	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener){
 		this.listener = listener;

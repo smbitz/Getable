@@ -6,6 +6,7 @@ import com.codegears.getable.data.ProductActorLikeData;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -31,6 +32,9 @@ public class UserFollowItemLayout extends LinearLayout {
 		secondText = (TextView) findViewById( R.id.userFollowSecondText );
 		followButtonLayout = (LinearLayout) findViewById( R.id.userFollowItemFollowbuttonLayout );
 		followButton = new FollowButton( context );
+		LayoutParams params = new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT );
+		params.gravity = Gravity.CENTER;
+		followButton.setLayoutParams( params );
 		followButtonLayout.addView( followButton );
 	}
 	

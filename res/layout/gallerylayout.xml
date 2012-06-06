@@ -2,19 +2,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 	android:orientation="vertical" android:layout_width="match_parent"
 	android:layout_height="match_parent" android:background="#ffffff">
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    
+    <com.codegears.getable.ui.AppHeader
         android:layout_height="wrap_content"
-        android:orientation="vertical" android:background="#63bfec">
-
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/logo_name" android:layout_gravity="center"/>
-
-    </LinearLayout>
+        android:layout_width="match_parent">
+    </com.codegears.getable.ui.AppHeader>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -26,21 +18,67 @@
             android:layout_height="wrap_content"
             android:src="@drawable/arrow_head" android:layout_gravity="center"/>
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent" android:layout_weight="1">
-        </LinearLayout>
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" >
 
-        <Button
-            android:id="@+id/FilterButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Filter" android:background="@null" android:textColor="#ffffff" android:layout_gravity="center"/>
+            <Button
+                android:id="@+id/FilterButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@null"
+                android:textColor="#ffffff" />
 
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent" android:layout_weight="10">
-        </LinearLayout>
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" android:layout_weight="1">
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" >
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent" android:layout_weight="1">
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/textView1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="FilterText"
+                            android:textColor="#ffffff" />
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent" android:layout_weight="10">
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" android:layout_weight="1">
+                </LinearLayout>
+
+            </LinearLayout>
+
+        </FrameLayout>
 
     </LinearLayout>
 

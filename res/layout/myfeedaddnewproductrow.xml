@@ -15,7 +15,7 @@
                 android:id="@+id/myFeedAddNewProductRowUserImage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_launcher" />
+                android:src="@drawable/user_image_default" />
 
         </LinearLayout>
 
@@ -31,8 +31,7 @@
                 <TextView
                     android:id="@+id/myFeedAddNewProductRowUserName"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="UserName" />
+                    android:layout_height="wrap_content"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -63,8 +62,7 @@
                     <ImageView
                         android:id="@+id/myFeedAddNewProductRowProductImage"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/ic_launcher" />
+                        android:layout_height="wrap_content"/>
 
                 </LinearLayout>
 
@@ -76,8 +74,7 @@
                     <TextView
                         android:id="@+id/myFeedAddNewProductRowProductName"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="ProductName" />
+                        android:layout_height="wrap_content"/>
 
                     <TextView
                         android:id="@+id/myFeedAddNewProductRowProductDescription"
@@ -89,35 +86,72 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" >
 
-                        <ImageView
-                            android:id="@+id/myFeedAddNewProductRowLikeImage"
+                        <LinearLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_launcher" />
+                            android:layout_height="match_parent" android:id="@+id/myFeedAddNewProductRowLikeImageLayout">
 
-                        <TextView
-                            android:id="@+id/myFeedAddNewProductRowLikeNum"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="LikeNum" />
+                        </LinearLayout>
 
-                        <ImageView
-                            android:id="@+id/myFeedAddNewProductRowCommentImage"
+                        <LinearLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_launcher" />
+                            android:layout_height="match_parent" android:layout_weight="0.5">
 
-                        <TextView
-                            android:id="@+id/myFeedAddNewProductRowCommentNum"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="CommentNum" />
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent" android:layout_weight="1">
+                            </LinearLayout>
 
-                        <ImageView
-                            android:id="@+id/myFeedAddNewProductRowWishlistImage"
+                            <TextView
+                                android:id="@+id/myFeedAddNewProductRowLikeNum"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:textColor="#ec4ab9"/>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="2" >
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <LinearLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_launcher" />
+                            android:layout_height="match_parent" android:id="@+id/myFeedAddNewProductRowCommentImageLayout">
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent" android:layout_weight="0.5">
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent" android:layout_weight="1">
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/myFeedAddNewProductRowCommentNum"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:textColor="#ec4ab9"/>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="2" >
+                            </LinearLayout>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent" android:id="@+id/myFeedAddNewProductRowWishlistImageLayout">
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent" android:layout_weight="1">
+                        </LinearLayout>
 
                     </LinearLayout>
 
@@ -141,5 +175,11 @@
         </LinearLayout>
 
     </LinearLayout>
+
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/image_line" />
 
 </LinearLayout>

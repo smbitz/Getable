@@ -83,6 +83,12 @@ public class GalleryFilterActivity extends Activity implements CompoundButtonGro
       popularButton = (ToggleButton) findViewById( R.id.galleryFilterPopularButton );
       recentButton = (ToggleButton) findViewById( R.id.galleryFilterRecentButton );
       
+      localButton.setBackgroundResource( R.drawable.gallery_filter_local_button );
+      allButton.setBackgroundResource( R.drawable.gallery_filter_all_button );
+      cityButton.setBackgroundResource( R.drawable.gallery_filter_city_button );
+      popularButton.setBackgroundResource( R.drawable.gallery_filter_popular_button );
+      recentButton.setBackgroundResource( R.drawable.gallery_filter_recent_button );
+      
       locationButtonGroup.addButton( localButton );
       locationButtonGroup.addButton( allButton );
       locationButtonGroup.addButton( cityButton );

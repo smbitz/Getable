@@ -221,5 +221,11 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 		urlVar3 = getData.getExtras().getString( GalleryFilterActivity.PUT_EXTRA_URL_VAR_2 );
 		loadData();
 	}
+
+	@Override
+	public void refreshView() {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

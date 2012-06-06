@@ -97,6 +97,12 @@ public class ProductWishlistLayout extends AbstractViewLayout implements Network
 		// TODO Auto-generated method stub
 		
 	}
+	
+	@Override
+	public void refreshView() {
+		// TODO Auto-generated method stub
+		
+	}
 
 	@Override
 	public void onNetworkDocSuccess(String urlString, Document document) {

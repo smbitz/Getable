@@ -17,6 +17,7 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.http.entity.mime.MultipartEntity;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -162,6 +163,46 @@ public class NetworkUtil {
 				wr.flush();
 				wr.close();
 			}
+			connection.connect();
+			InputStream i = connection.getInputStream();
+			BufferedReader bReader = new BufferedReader( new InputStreamReader( i ) );
+			String line = bReader.readLine();
+			while ( line != null ) {
+				rawData += line;
+				line = bReader.readLine();
+			}
+		} catch ( MalformedURLException e ) {
+			e.printStackTrace();
+		} catch ( IOException e ) {
+			e.printStackTrace();
+		}
+		return rawData;
+	}
+	
+	public static String getRawData( String urlString, String postData, List< String > cookies, MultipartEntity entity ) {
+		String rawData = "";
+		try {
+			URL url = new URL( urlString );
+			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
+			connection.setDoInput( true );
+			connection.setUseCaches( false );
+			for (String cookie : cookies) {
+				connection.addRequestProperty("Cookie", cookie.split(";", 2)[0]);
+			}
+			
+			if ( postData != null ) {
+				connection.setRequestMethod( "POST" );
+				connection.setDoOutput( true );
+				DataOutputStream wr = new DataOutputStream( connection.getOutputStream() );
+				wr.writeBytes( postData );
+				wr.flush();
+				wr.close();
+			}
+			
+			//Upload image.
+			String stringForLength = new String();
+			//stringForLength += "Content-Type: multipart/form-data;boundary=" + boundary;
+			
 			connection.connect();
 			InputStream i = connection.getInputStream();
 			BufferedReader bReader = new BufferedReader( new InputStreamReader( i ) );

@@ -3,6 +3,7 @@ package com.codegears.getable.ui.activity;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -49,8 +50,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.text.InputType;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
@@ -64,7 +68,6 @@ import android.widget.TextView;
 
 public class ProductDetailLayout extends AbstractViewLayout implements OnClickListener, NetworkThreadListener, OnItemClickListener {
 
-	private static final String URL_GET_PRODUCT_ACTIVITIES_BY_ID = "URL_GET_PRODUCT_ACTIVITIES_BY_ID";
 	public static final String SHARE_PREF_PRODUCT_ACT_ID = "SHARE_PREF_PRODUCT_ACT_ID";
 	public static final String SHARE_PREF_KEY_ACTIVITY_ID = "SHARE_PREF_KEY_ACTIVITY_ID";
 	
@@ -183,12 +186,26 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		wishlistButton.setOnClickListener( this );
 		relatedGallery.setOnItemClickListener( this );
 		
+		commentEditText.setOnKeyListener(new OnKeyListener() {
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				// If the event is a key-down event on the "enter" button
+		        if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+		            (keyCode == KeyEvent.KEYCODE_ENTER)) {
+		          // Perform action on key press
+		          submitCommentText();
+		          return true;
+		        }
+		        return false;
+			}
+		});
+		
 		String urlVar1 = MyApp.DEFAULT_URL_VAR_1;
 		
-		getProductDataURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+".json"+urlVar1;
-		getProductCommentURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/comments.json"+urlVar1;
-		getProductLikeURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/likes.json";
-		getRelatedProductURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/recommended.json"+urlVar1;
+		getProductDataURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+".json"+urlVar1;
+		getProductCommentURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/comments.json"+urlVar1;
+		getProductLikeURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/likes.json";
+		getRelatedProductURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/recommended.json"+urlVar1;
 		
 		NetworkThreadUtil.getRawDataWithCookie( getProductDataURL, null, appCookie, this );
 		NetworkThreadUtil.getRawData( getProductCommentURL, null, this);
@@ -247,24 +264,20 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 				SharedPreferences myPreferences = this.getActivity().getSharedPreferences( ProductCommentLayout.SHARE_PREF_VALUE_PRODUCT_ID, this.getActivity().MODE_PRIVATE );
 				SharedPreferences.Editor prefsEditor = myPreferences.edit();
 				prefsEditor.putString( ProductCommentLayout.SHARE_PREF_KEY_PRODUCT_ID, productNumComment.getProductData().getId() );
+				prefsEditor.putString( ProductCommentLayout.SHARE_PREF_KEY_USER_ID, productNumComment.getProductData().getActor().getId() );
 				prefsEditor.commit();
 				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PRODUCT_COMMENT_USER_LIST );
 			}
 		}else if( v.equals( commentButton ) ){
 			if( commentTextBoxLayout.getVisibility() != View.VISIBLE ){
 				commentTextBoxLayout.setVisibility( View.VISIBLE );
+				//Show Keybord
+			    ((InputMethodManager) this.getActivity().getSystemService(Context.INPUT_METHOD_SERVICE)).showSoftInput(commentEditText, 0);
 			}else{
 				commentTextBoxLayout.setVisibility( View.GONE );
 			}
 		}else if( v.equals( commentSubmitButton ) ){
-			String text = commentEditText.getText().toString();
-			if( !(text.equals("")) && !(text.equals(null)) ){
-				HashMap< String, String > dataMap = new HashMap<String, String>();
-				dataMap.put( "text", text );
-				String postData = NetworkUtil.createPostData( dataMap );
-				
-				NetworkThreadUtil.getRawDataWithCookie(getProductCommentURL, postData, appCookie, this);
-			}
+			submitCommentText(); 
 		}else if( v.equals( likeButton ) ){
 			if( likeButton.getButtonStatus() == LikeButton.BUTTON_STATUS_LIKE ){
 				HashMap< String, String > likeDataMap = new HashMap<String, String>();
@@ -274,7 +287,7 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 				NetworkThreadUtil.getRawDataWithCookie(getProductLikeURL, likePostData, appCookie, this);
 			}else if( likeButton.getButtonStatus() == LikeButton.BUTTON_STATUS_LIKED ){
 				String likeActivityId = likeButton.getLikeId();
-				getProductUnLikeURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+"/"+likeActivityId+".json";
+				getProductUnLikeURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+"/"+likeActivityId+".json";
 				
 				HashMap< String, String > likeDataMap = new HashMap<String, String>();
 				likeDataMap.put( "_a", "delete" );
@@ -312,8 +325,31 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		}
 	}
 
+	private void submitCommentText() {
+		//Hide Keybord
+	    ((InputMethodManager) this.getActivity().getSystemService(Context.INPUT_METHOD_SERVICE)).hideSoftInputFromWindow(commentEditText.getWindowToken(), 0); 
+		
+	    //Hide Comment Layout
+	    commentTextBoxLayout.setVisibility( View.GONE );
+	    
+		String text = commentEditText.getText().toString();
+		if( !(text.equals("")) && !(text.equals(null)) ){
+			HashMap< String, String > dataMap = new HashMap<String, String>();
+			dataMap.put( "text", text );
+			String postData = NetworkUtil.createPostData( dataMap );
+			
+			NetworkThreadUtil.getRawDataWithCookie(getProductCommentURL, postData, appCookie, this);
+		}
+	}
+
 	@Override
 	public void refreshView(Intent getData) {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	@Override
+	public void refreshView() {
 		// TODO Auto-generated method stub
 		
 	}
@@ -381,7 +417,15 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 					productStoreAddress.setText( setAddress );
 					productStoreAddress.setStoreData( setStoreData );
 					productDescription.setText( setDescription );
-					productPrice.setText( setPrice );
+					
+					//Price text
+					if( (setPrice.equals("")) && setPrice != null ){
+						DecimalFormat decimalFormat = new DecimalFormat( "0.00" );
+						productPrice.setText( decimalFormat.format( Double.parseDouble( setPrice ) ) );
+					}else{
+						productPrice.setText( "-" );
+					}
+					
 					productNumLike.setText( setNumLike );
 					productNumLike.setProductData( setProductData );
 					productNumComment.setText( setNumComment );
@@ -390,7 +434,9 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 					//Set User Header
 					userHeader.setName( setUserName );
 					userHeader.setData( setUserData );
-					userProfileImageLayout.setUserImage( setUserImage );
+					if( setUserImage != null ){
+						userProfileImageLayout.setUserImage( setUserImage );
+					}
 					userProfileImageLayout.setUserId( setUserData.getId() );
 					userHeaderFollowButton.setActorData( setUserData );
 					
@@ -398,12 +444,14 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 					if( setProductData.getMyRelation() != null &&
 						setProductData.getMyRelation().getLike() != "" ){
 						//Set image liked.
-						likeButton.setText( "liked" );
+						//likeButton.setText( "liked" );
+						likeButton.setBackgroundResource( R.drawable.button_liked );
 						likeButton.setLikeId( setProductData.getMyRelation().getLike() );
 						likeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKED );
 					}else{
 						//Set image like.
-						likeButton.setText( "like" );
+						//likeButton.setText( "like" );
+						likeButton.setBackgroundResource( R.drawable.button_like );
 						likeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKE );
 					}
 					
@@ -411,7 +459,8 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 					if( setProductData.getMyRelation() != null &&
 						setProductData.getMyRelation().getArrayWishlistId() != null ){
 						//Set image wishlist
-						wishlistButton.setText( "wishlistAdd" );
+						//wishlistButton.setText( "wishlistAdd" );
+						wishlistButton.setBackgroundResource( R.drawable.button_wishlish_added );
 						wishlistId = setProductData.getMyRelation().getArrayWishlistId().toString();
 					}
 				}
@@ -431,6 +480,7 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 					CommentRowLayout newCommentRowLayout = new CommentRowLayout( this.getContext() );
 					newCommentRowLayout.setUserName( newData.getActor().getName() );
 					newCommentRowLayout.setCommentText( newData.getComment().getCommentText() );
+					newCommentRowLayout.setActivityData( newData );
 					
 					//Set onClick name send to user profile.
 					UserName userName = newCommentRowLayout.getUserNameTextView();
@@ -445,6 +495,7 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 						CommentRowLayout newCommentRowLayout = new CommentRowLayout( this.getContext() );
 						newCommentRowLayout.setUserName( newData.getActor().getName() );
 						newCommentRowLayout.setCommentText( newData.getComment().getCommentText() );
+						newCommentRowLayout.setActivityData( newData );
 						
 						//Set onClick name send to user profile.
 						UserName userName = newCommentRowLayout.getUserNameTextView();
@@ -468,6 +519,10 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 					//Remove and add new view.
 					commentLayout.removeAllViews();
 					for( CommentRowLayout fetchLayout:arrayCommentLayout ){
+						//Set Image
+						String imageURL = fetchLayout.getActivityData().getActor().getPicture().getImageUrls().getImageURLT();
+						imageLoader.DisplayImage( imageURL, ProductDetailLayout.this.getActivity(), fetchLayout.getUserImageView(), true );
+						
 						commentLayout.addView( fetchLayout );
 					}
 					
@@ -491,7 +546,7 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 			this.getActivity().runOnUiThread( new Runnable() {
 				@Override
 				public void run() {
-					likeButton.setText( "liked" );
+					likeButton.setBackgroundResource( R.drawable.button_liked );
 					likeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKED );
 				}
 			});
@@ -501,7 +556,7 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 			this.getActivity().runOnUiThread( new Runnable() {
 				@Override
 				public void run() {
-					likeButton.setText( "like" );
+					likeButton.setBackgroundResource( R.drawable.button_like );
 					likeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKE );
 				}
 			});

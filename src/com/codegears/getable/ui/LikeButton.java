@@ -1,5 +1,6 @@
 package com.codegears.getable.ui;
 
+import com.codegears.getable.R;
 import com.codegears.getable.data.ProductActivityData;
 
 import android.content.Context;
@@ -15,7 +16,8 @@ public class LikeButton extends Button {
 	
 	public LikeButton(Context context) {
 		super(context);
-		this.setText( "Like" );
+		//this.setText( "Like" );
+		this.setBackgroundResource( R.drawable.button_like );
 	}
 
 	public void setButtonStatus(int buttonStatusLike) {

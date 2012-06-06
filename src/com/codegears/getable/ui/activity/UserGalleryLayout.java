@@ -82,6 +82,12 @@ public class UserGalleryLayout extends AbstractViewLayout implements OnItemClick
 		
 	}
 	
+	@Override
+	public void refreshView() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	public void setBodyLayoutStackListener( BodyLayoutStackListener setListener ){
 		this.listener = setListener;
 	}

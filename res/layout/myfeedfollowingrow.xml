@@ -15,7 +15,7 @@
                 android:id="@+id/myFeedFollowingUserImage"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/ic_launcher" />
+                android:src="@drawable/user_image_default" />
 
         </LinearLayout>
 
@@ -82,5 +82,11 @@
         </LinearLayout>
 
     </LinearLayout>
-
+	
+    <ImageView
+        android:id="@+id/imageView1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:src="@drawable/image_line" />
+    
 </LinearLayout>

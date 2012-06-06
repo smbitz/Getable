@@ -95,6 +95,12 @@ public class WishlistsGalleryLayout extends AbstractViewLayout implements OnItem
 		loadData();
 	}
 	
+	@Override
+	public void refreshView() {
+		// TODO Auto-generated method stub
+		
+	}
+	
 	public void setBodyLayoutChangeListener( BodyLayoutStackListener setListener ){
 		this.listener = setListener;
 	}

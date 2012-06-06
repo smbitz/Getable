@@ -1,5 +1,6 @@
 package com.codegears.getable.ui;
 
+import com.codegears.getable.R;
 import com.codegears.getable.data.ActorData;
 
 import android.content.Context;
@@ -15,7 +16,7 @@ public class FollowButton extends Button {
 	
 	public FollowButton(Context context) {
 		super(context);
-		this.setText( "Follow" );
+		this.setBackgroundResource( R.drawable.button_follow );
 	}
 	
 	public void setActorData( ActorData setActorData ){

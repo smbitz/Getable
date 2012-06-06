@@ -7,13 +7,29 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" android:background="#63bfec">
+        android:orientation="horizontal" android:background="#63bfec">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" android:layout_weight="2.3">
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/imageView1"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:src="@drawable/logo_name" android:layout_gravity="center"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" android:layout_weight="1">
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/shareImageDetailLayoutShareButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Share" android:layout_gravity="center"/>
 
     </LinearLayout>
     
@@ -40,10 +56,10 @@
                 android:layout_height="wrap_content" >
 
                 <Button
-                    android:id="@+id/button1"
+                    android:id="@+id/shareImageDetailLayoutProductButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Shoes" />
+                    android:text="Product" />
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -51,7 +67,7 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/textView2"
+                    android:id="@+id/shareImageDetailLayoutProductName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="TextView" />
@@ -63,7 +79,7 @@
                 android:layout_height="wrap_content" >
 
                 <Button
-                    android:id="@+id/button2"
+                    android:id="@+id/shareImageDetailLayoutBrandButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Brand" />
@@ -75,7 +91,7 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/TextView01"
+                    android:id="@+id/shareImageDetailLayoutBrandName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="TextView" />
@@ -86,7 +102,7 @@
                 android:layout_height="wrap_content" >
 
                 <Button
-                    android:id="@+id/button3"
+                    android:id="@+id/shareImageDetailLayoutLocationButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Location" />
@@ -97,7 +113,7 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/TextView02"
+                    android:id="@+id/shareImageDetailLayoutLocationName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="TextView" />
@@ -109,7 +125,7 @@
                 android:layout_height="wrap_content" >
 
                 <Button
-                    android:id="@+id/button4"
+                    android:id="@+id/shareImageDetailLayoutGenderButton"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Gender" />
@@ -120,7 +136,7 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/textView3"
+                    android:id="@+id/shareImageDetailLayoutGenderName"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="TextView" />
@@ -128,16 +144,14 @@
             </LinearLayout>
 
             <EditText
-                android:id="@+id/editText1"
+                android:id="@+id/shareImageDetailLayoutPriceEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10" android:text="Price">
-
-                <requestFocus />
             </EditText>
 
             <EditText
-                android:id="@+id/editText2"
+                android:id="@+id/shareImageDetailLayoutCaptionEditText"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10" android:text="Caption"/>
