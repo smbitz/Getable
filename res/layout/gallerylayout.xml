@@ -10,7 +10,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent" android:background="#887f79" android:layout_weight="5">
+        android:layout_height="30dp" android:background="#887f79" android:paddingLeft="5dp">
 
         <ImageView
             android:id="@+id/imageView2"
@@ -55,11 +55,24 @@
                         </LinearLayout>
 
                         <TextView
-                            android:id="@+id/textView1"
+                            android:id="@+id/galleryLayoutFilterText1"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="FilterText"
+                            android:text="LOCAL"
                             android:textColor="#ffffff" />
+
+                        <TextView
+                            android:id="@+id/textView2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text=", " android:textColor="#ffffff"/>
+
+                        <TextView
+                            android:id="@+id/galleryLayoutFilterText2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="POPULAR" android:textColor="#ffffff"/>
 
                         <LinearLayout
                             android:layout_width="wrap_content"
@@ -75,6 +88,34 @@
                     android:layout_height="wrap_content"
                     android:orientation="vertical" android:layout_weight="1">
                 </LinearLayout>
+
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" android:paddingRight="5dp">
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent" android:layout_weight="1">
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/galleryLayoutThreeItemViewButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/gallery_3_item_view_selected" android:background="@null" android:layout_gravity="center"/>
+
+                <LinearLayout
+                    android:layout_width="10dp"
+                    android:layout_height="match_parent">
+                </LinearLayout>
+
+                <ImageButton
+                    android:id="@+id/galleryLayoutTwoItemViewButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/gallery_2_item_view" android:background="@null" android:layout_gravity="center"/>
 
             </LinearLayout>
 

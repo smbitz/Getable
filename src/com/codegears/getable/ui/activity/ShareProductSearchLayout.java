@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.text.Editable;
@@ -35,13 +36,15 @@ import com.codegears.getable.data.StoreData;
 import com.codegears.getable.ui.AbstractViewLayout;
 import com.codegears.getable.ui.ShareProductSearchItem;
 import com.codegears.getable.util.Config;
+import com.codegears.getable.util.ConvertURL;
 import com.codegears.getable.util.GetCurrentLocation;
 import com.codegears.getable.util.GetGender;
-import com.codegears.getable.util.NetworkThreadUtil;
-import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
+
 import android.view.View.OnClickListener;
 
-public class ShareProductSearchLayout extends AbstractViewLayout implements NetworkThreadListener, OnClickListener, TextWatcher {
+public class ShareProductSearchLayout extends AbstractViewLayout implements OnClickListener, TextWatcher {
 
 	public static final String SHARE_PREF_SEARCH_TYPE = "SHARE_PREF_SEARCH_TYPE";
 	public static final String SHARE_PREF_KEY_SEARCH_TYPE = "SHARE_PREF_KEY_SEARCH_TYPE";
@@ -60,7 +63,7 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements Netw
 	private String getSubCategoryId;
 	private String getSubCategoryName;
 	private MyApp app;
-	private List<String> appCookie;
+	//private List<String> appCookie;
 	private Config config;
 	private ArrayList<CategoryData> arrayCategoryData;
 	private ArrayList<BrandData> arrayBrandData;
@@ -75,6 +78,8 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements Netw
 	private GetCurrentLocation currentLocation;
 	private GetGender getGender;
 	private String getDataURL;
+	private AsyncHttpClient asyncHttpClient;
+	private ProgressDialog loadingDialog;
 	
 	public ShareProductSearchLayout(Activity activity) {
 		super(activity);
@@ -90,7 +95,8 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements Netw
 		getSubCategoryName = myPrefsSubCate.getString( SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_NAME, null );
 		
 		app = (MyApp) this.getActivity().getApplication();
-		appCookie = app.getAppCookie();
+		//appCookie = app.getAppCookie();
+		asyncHttpClient = app.getAsyncHttpClient();
 		config = new Config( this.getContext() );
 		arrayCategoryData = new ArrayList<CategoryData>();
 		arrayBrandData = new ArrayList<BrandData>();
@@ -105,7 +111,13 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements Netw
 		currentLocation = new GetCurrentLocation( this.getContext() );
 		getGender = new GetGender( this.getContext() );
 		
-		searchEditText.addTextChangedListener( this );
+		//searchEditText.addTextChangedListener( this );
+		
+		loadingDialog = new ProgressDialog( this.getContext() );
+		loadingDialog.setTitle("");
+		loadingDialog.setMessage("Loading. Please wait...");
+		loadingDialog.setIndeterminate( true );
+		loadingDialog.setCancelable( true );
 		
 		String currentLat = currentLocation.getCurrentLat();
 		String currentLng = currentLocation.getCurrentLng();
@@ -134,37 +146,25 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements Netw
 		}
 		
 		if( getDataURL != null ){
-			NetworkThreadUtil.getRawDataWithCookie( getDataURL, null, appCookie, this );
+			loadingDialog.show();
+			
+			asyncHttpClient.get( getDataURL, new JsonHttpResponseHandler(){
+				@Override
+				public void onSuccess(JSONObject getJsonObject) {
+					super.onSuccess(getJsonObject);
+					onGetDataURLSuccess(getJsonObject);
+				}
+			});
 		}
 	}
-
-	@Override
-	public void refreshView(Intent getData) {
-		// TODO Auto-generated method stub
-		
-	}
 	
-	@Override
-	public void refreshView() {
-		// TODO Auto-generated method stub
+	private void onGetDataURLSuccess(JSONObject jsonObject){
+		if( loadingDialog.isShowing() ){
+			loadingDialog.dismiss();
+		}
 		
-	}
-	
-	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener){
-		this.listener = listener;
-	}
-
-	@Override
-	public void onNetworkDocSuccess(String urlString, Document document) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onNetworkRawSuccess(String urlString, String result) {
 		if( searchType.equals( SHARE_PREF_KEY_SEARCH_PRODUCT ) ){
 			try {
-				JSONObject jsonObject = new JSONObject( result );
 				JSONArray newArray = jsonObject.getJSONArray( "entities" );
 				if( (getSubCategoryId != null) &&
 					(getSubCategoryName != null)){
@@ -207,7 +207,6 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements Netw
 			});
 		}else if( searchType.equals( SHARE_PREF_KEY_SEARCH_BRAND ) ){
 			try {
-				JSONObject jsonObject = new JSONObject( result );
 				JSONArray newArray = jsonObject.getJSONArray( "entities" );
 				for(int i = 0; i<newArray.length(); i++){
 					//Load Brand Data
@@ -230,7 +229,7 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements Netw
 			});
 		}else if( searchType.equals( SHARE_PREF_KEY_SEARCH_STORE ) ){
 			try {
-				JSONObject jsonObject = new JSONObject( result ).optJSONObject( "stores" );
+				jsonObject = jsonObject.optJSONObject( "stores" );
 				JSONArray newArrayStoreData = jsonObject.getJSONArray( "entities" );
 				for(int i = 0; i<newArrayStoreData.length(); i++){
 					//Load Store Data
@@ -271,9 +270,19 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements Netw
 	}
 
 	@Override
-	public void onNetworkFail(String urlString) {
+	public void refreshView(Intent getData) {
 		// TODO Auto-generated method stub
 		
+	}
+	
+	@Override
+	public void refreshView() {
+		// TODO Auto-generated method stub
+		
+	}
+	
+	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener){
+		this.listener = listener;
 	}
 	
 	private class ProductNameItemAdapter extends BaseAdapter {
@@ -308,6 +317,13 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements Netw
 				returnView = new ShareProductSearchItem( ShareProductSearchLayout.this.getContext() );
 			}else{
 				returnView = (ShareProductSearchItem) convertView;
+				returnView.setArrowVisibility( View.GONE );
+			}
+			
+			JSONArray jsonItemArray = data.get( position ).getSubCategories();
+			if( (jsonItemArray != null) && 
+				(jsonItemArray.length() > 0) ){
+				returnView.setArrowVisibility( View.VISIBLE );
 			}
 			
 			returnView.setName( data.get( position ).getName() );
@@ -466,7 +482,8 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements Netw
 					}else{
 						SharedPreferences myPref = this.getActivity().getSharedPreferences( ShareImageDetailLayout.SHARE_PREF_DETAIL_VALUE, this.getActivity().MODE_PRIVATE );
 						SharedPreferences.Editor prefsEditor = myPref.edit();
-						prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_PRODUCT_NAME, productSearchItem.getCategoryData().getName() );
+						prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_CATEGORY_NAME, productSearchItem.getCategoryData().getName() );
+						prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_CATEGORY_ID, productSearchItem.getCategoryData().getId() );
 				        prefsEditor.commit();
 				        
 				        //Delete subCategory pref.
@@ -482,7 +499,7 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements Netw
 					SharedPreferences myPref = this.getActivity().getSharedPreferences( ShareImageDetailLayout.SHARE_PREF_DETAIL_VALUE, this.getActivity().MODE_PRIVATE );
 					SharedPreferences.Editor prefsEditor = myPref.edit();
 					prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_BRAND_NAME, productSearchItem.getBrandData().getName() );
-					prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_BRAND_ID, productSearchItem.getBrandData().getId() );
+					//prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_BRAND_ID, productSearchItem.getBrandData().getId() );
 			        prefsEditor.commit();
 			        
 			        listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_SHARE_IMAGE_DETAIL_WITH_RESULT );
@@ -490,6 +507,7 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements Netw
 					SharedPreferences myPref = this.getActivity().getSharedPreferences( ShareImageDetailLayout.SHARE_PREF_DETAIL_VALUE, this.getActivity().MODE_PRIVATE );
 					SharedPreferences.Editor prefsEditor = myPref.edit();
 					prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_STORES_NAME, productSearchItem.getStoreData().getName() );
+					prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_STORES_ID, productSearchItem.getStoreData().getId() );
 					if( productSearchItem.getStoreData().getExternalReference() != null ){
 						prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_STORES_EXTERNAL_ID, productSearchItem.getStoreData().getExternalReference().getId() );
 						prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_STORES_EXTERNAL_TYPE_ID, productSearchItem.getStoreData().getExternalReference().getType().getId() );
@@ -511,8 +529,23 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements Netw
 
 	@Override
 	public void afterTextChanged(Editable s) {
-		// TODO Auto-generated method stub
-		
+		if( !(s.equals("")) && 
+				s != null  &&
+			    (s.length() > 0) ){
+				String searchByNameURL = getDataURL+"q="+s;
+				searchByNameURL = searchByNameURL.replace( " ", "%20" );
+				
+				clearArrayData();
+				
+				//NetworkThreadUtil.getRawDataWithCookie( searchByNameURL, null, appCookie, this );
+				asyncHttpClient.get( searchByNameURL, new JsonHttpResponseHandler(){
+					@Override
+					public void onSuccess(JSONObject getJsonObject) {
+						super.onSuccess(getJsonObject);
+						onGetDataURLSuccess(getJsonObject);
+					}
+				});
+			}
 	}
 
 	@Override
@@ -524,15 +557,8 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements Netw
 
 	@Override
 	public void onTextChanged(CharSequence s, int start, int before, int count) {
-		if( !(s.equals("")) && 
-			s != null  &&
-		    (s.length() > 0) ){
-			String searchByNameURL = getDataURL+"q="+s;
-			
-			clearArrayData();
-			
-			NetworkThreadUtil.getRawDataWithCookie( searchByNameURL, null, appCookie, this );
-		}
+		// TODO Auto-generated method stub
+		
 	}
 
 	private void clearArrayData() {

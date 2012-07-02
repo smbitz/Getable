@@ -26,9 +26,10 @@ import com.codegears.getable.ui.UserFollowItemLayout;
 import com.codegears.getable.ui.UserWishlistsGrouptItem;
 import com.codegears.getable.util.Config;
 import com.codegears.getable.util.ImageLoader;
-import com.codegears.getable.util.NetworkThreadUtil;
-import com.codegears.getable.util.NetworkUtil;
-import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -42,7 +43,7 @@ import android.widget.ListView;
 import android.widget.LinearLayout.LayoutParams;
 import android.view.View.OnClickListener;
 
-public class UserFollowLayout extends AbstractViewLayout implements NetworkThreadListener, OnClickListener {
+public class UserFollowLayout extends AbstractViewLayout implements OnClickListener {
 	
 	public static final int GET_FOLLOWERS = 0;
 	public static final int GET_FOLLOWINGS = 1;
@@ -55,17 +56,19 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 	private String followUserURL;
 	private String unFollowUserURL;
 	private MyApp app;
-	private List<String> appCookie;
+	//private List<String> appCookie;
 	private String defaultGetDataURL;
 	private int requestPageType;
 	private ImageLoader imageLoader;
+	private AsyncHttpClient asyncHttpClient;
 	
 	public UserFollowLayout(Activity activity, String getDataFollowTypeURL, int getRequestPageType) {
 		super(activity);
 		View.inflate( this.getContext(), R.layout.userfollowlayout, this );
 		
 		app = (MyApp) this.getActivity().getApplication();
-		appCookie = app.getAppCookie();
+		//appCookie = app.getAppCookie();
+		asyncHttpClient = app.getAsyncHttpClient();
 		config = new Config( this.getContext() );
 		followListView = (ListView) findViewById( R.id.userFollowLayoutListView );
 		followAdapter = new FollowAdapter();
@@ -75,7 +78,31 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 		
 		defaultGetDataURL = getDataFollowTypeURL;
 		
-		NetworkThreadUtil.getRawDataWithCookie(defaultGetDataURL, null, appCookie, this);
+		//NetworkThreadUtil.getRawDataWithCookie(defaultGetDataURL, null, appCookie, this);
+		asyncHttpClient.get( defaultGetDataURL, new JsonHttpResponseHandler(){
+			@Override
+			public void onSuccess(JSONObject getJsonObject) {
+				super.onSuccess(getJsonObject);
+				onDefaultGetDataURLSuccess(getJsonObject);
+			}
+		});
+	}
+	
+	private void onDefaultGetDataURLSuccess(JSONObject jsonObject){
+		try {
+			JSONArray newArray = jsonObject.getJSONArray("entities");
+			for(int i = 0; i<newArray.length(); i++){
+				//Load Follow Data
+				ProductActorFollowData newData = new ProductActorFollowData( (JSONObject) newArray.get(i) );
+				JSONObject object = (JSONObject) newArray.get(i);
+				arrayFollowData.add(newData);
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+		followAdapter.setData( arrayFollowData );
+		followListView.setAdapter( followAdapter );
 	}
 
 	@Override
@@ -128,7 +155,7 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 			
 			String imageURL = data.get( position ).getActor().getPicture().getImageUrls().getImageURLT();
 			
-			imageLoader.DisplayImage( imageURL, UserFollowLayout.this.getActivity(), userFollowItemLayout.getUserImageView(), true );
+			imageLoader.DisplayImage( imageURL, UserFollowLayout.this.getActivity(), userFollowItemLayout.getUserImageView(), true, asyncHttpClient );
 			userFollowItemLayout.setFollowUserData( data.get( position ) );
 			
 			if( requestPageType == GET_FOLLOWERS ){
@@ -163,9 +190,9 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 				}
 			}
 			
-			if( app.getUserId().equals( data.get( position ).getActor().getId() ) ){
+			/*if( app.getUserId().equals( data.get( position ).getActor().getId() ) ){
 				userFollowButton.setVisibility( View.INVISIBLE );
-			}
+			}*/
 			
 			userFollowItemLayout.setOnClickListener( UserFollowLayout.this );
 			userFollowButton.setOnClickListener( UserFollowLayout.this );
@@ -175,7 +202,7 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 
 	}
 
-	@Override
+	/*@Override
 	public void onNetworkDocSuccess(String urlString, Document document) {
 		// TODO Auto-generated method stub
 		
@@ -213,7 +240,7 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 	public void onNetworkFail(String urlString) {
 		// TODO Auto-generated method stub
 		
-	}
+	}*/
 	
 	public void setBodyLayoutStackListener(BodyLayoutStackListener listener) {
 		this.listener = listener;
@@ -228,7 +255,7 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 				String followUserId = followButton.getActorData().getId();
 				
 				followUserURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+followUserId+"/followers.json";
-				Map< String, String > newMapData = new HashMap<String, String>();
+				/*Map< String, String > newMapData = new HashMap<String, String>();
 				newMapData.put( "_a", "follow" );
 				String postData = NetworkUtil.createPostData( newMapData );
 				
@@ -267,6 +294,23 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 						// TODO Auto-generated method stub
 						
 					}
+				});*/
+				
+				HashMap<String, String> paramMap = new HashMap<String, String>();
+				paramMap.put( "_a", "follow" );
+				RequestParams params = new RequestParams(paramMap);
+				asyncHttpClient.get( followUserURL, params, new JsonHttpResponseHandler(){
+					@Override
+					public void onSuccess(JSONObject jsonObject) {
+						super.onSuccess(jsonObject);
+						ActorData actorData = null;
+						if( jsonObject.optJSONObject("followedUser") != null ){
+							actorData = new ActorData( jsonObject.optJSONObject("followedUser") );
+						}
+						followButton.setActorData( actorData );
+						
+						followButton.setEnabled( true );
+					}
 				});
 				
 				//Set text/image follow/following
@@ -277,7 +321,7 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 				String followActivityId = followButton.getActorData().getMyRelation().getFollowActivity().getId();
 				
 				unFollowUserURL = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+followActivityId+".json";
-				Map< String, String > newMapData = new HashMap<String, String>();
+				/*Map< String, String > newMapData = new HashMap<String, String>();
 				newMapData.put( "_a", "delete" );
 				String postData = NetworkUtil.createPostData( newMapData );
 				
@@ -303,6 +347,17 @@ public class UserFollowLayout extends AbstractViewLayout implements NetworkThrea
 					public void onNetworkDocSuccess(String urlString, Document document) {
 						// TODO Auto-generated method stub
 						
+					}
+				});*/
+				
+				HashMap<String, String> paramMap = new HashMap<String, String>();
+				paramMap.put( "_a", "delete" );
+				RequestParams params = new RequestParams(paramMap);
+				asyncHttpClient.get( unFollowUserURL, params, new AsyncHttpResponseHandler(){
+					@Override
+					public void onSuccess(String arg0) {
+						super.onSuccess(arg0);
+						followButton.setEnabled( true );
 					}
 				});
 				

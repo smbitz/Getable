@@ -17,7 +17,17 @@ import java.util.Set;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.protocol.ClientContext;
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.impl.client.BasicCookieStore;
+import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.protocol.BasicHttpContext;
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
@@ -118,6 +128,7 @@ public class NetworkUtil {
 		} catch ( IOException e ) {
 			e.printStackTrace();
 		}
+		
 		return rawData;
 	}
 
@@ -178,44 +189,33 @@ public class NetworkUtil {
 		}
 		return rawData;
 	}
-	
-	public static String getRawData( String urlString, String postData, List< String > cookies, MultipartEntity entity ) {
-		String rawData = "";
+
+	public static String getRawData(String urlString,
+			MultipartEntity reqEntity, BasicHttpContext appBasicHttpContext) {
+
+		HttpClient httpClient = new DefaultHttpClient();
+        HttpPost postRequest = new HttpPost( urlString );
+        
+        postRequest.setEntity( reqEntity );
+        HttpResponse res;
+        String rawData = "";
 		try {
-			URL url = new URL( urlString );
-			HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-			connection.setDoInput( true );
-			connection.setUseCaches( false );
-			for (String cookie : cookies) {
-				connection.addRequestProperty("Cookie", cookie.split(";", 2)[0]);
-			}
-			
-			if ( postData != null ) {
-				connection.setRequestMethod( "POST" );
-				connection.setDoOutput( true );
-				DataOutputStream wr = new DataOutputStream( connection.getOutputStream() );
-				wr.writeBytes( postData );
-				wr.flush();
-				wr.close();
-			}
-			
-			//Upload image.
-			String stringForLength = new String();
-			//stringForLength += "Content-Type: multipart/form-data;boundary=" + boundary;
-			
-			connection.connect();
-			InputStream i = connection.getInputStream();
-			BufferedReader bReader = new BufferedReader( new InputStreamReader( i ) );
-			String line = bReader.readLine();
+			res = httpClient.execute( postRequest, appBasicHttpContext );
+			BufferedReader reader = new BufferedReader(new InputStreamReader(res.getEntity().getContent(), "UTF-8"));
+			String line = reader.readLine();
 			while ( line != null ) {
 				rawData += line;
-				line = bReader.readLine();
+				line = reader.readLine();
 			}
-		} catch ( MalformedURLException e ) {
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
-		} catch ( IOException e ) {
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		
 		return rawData;
 	}
+
 }

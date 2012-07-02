@@ -26,7 +26,7 @@ public class ProductImageThumbnail extends LinearLayout {
 	}
 	
 	public void setProductImageDefault(){
-		productImage.setImageResource( R.drawable.ic_launcher );
+		productImage.setImageResource( R.drawable.empty_image );
 	}
 	
 	public void setProductData( ProductActivityData setProductActivityData ){

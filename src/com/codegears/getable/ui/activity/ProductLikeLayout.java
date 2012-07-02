@@ -33,12 +33,14 @@ import com.codegears.getable.ui.UserFollowItemLayout;
 import com.codegears.getable.ui.UserWishlistsGrouptItem;
 import com.codegears.getable.util.Config;
 import com.codegears.getable.util.ImageLoader;
-import com.codegears.getable.util.NetworkThreadUtil;
-import com.codegears.getable.util.NetworkUtil;
-import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
 import android.view.View.OnClickListener;
 
-public class ProductLikeLayout extends AbstractViewLayout implements NetworkThreadListener, OnClickListener {
+public class ProductLikeLayout extends AbstractViewLayout implements OnClickListener {
 	
 	public static final String SHARE_PREF_VALUE_PRODUCT_ID = "SHARE_PREF_VALUE_PRODUCT_ID";
 	public static final String SHARE_PREF_KEY_PRODUCT_ID = "SHARE_PREF_KEY_PRODUCT_ID";
@@ -54,27 +56,48 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 	private String followUserURL;
 	private String unFollowUserURL;
 	private MyApp app;
-	private List<String> appCookie;
+	//private List<String> appCookie;
+	private AsyncHttpClient asyncHttpClient;
 	
 	public ProductLikeLayout(Activity activity) {
 		super(activity);
+		View.inflate( this.getContext(), R.layout.productlikelayout, this );
 		
 		SharedPreferences myPreferences = this.getActivity().getSharedPreferences( SHARE_PREF_VALUE_PRODUCT_ID, this.getActivity().MODE_PRIVATE );
 		productId = myPreferences.getString( SHARE_PREF_KEY_PRODUCT_ID, null );
 		
 		app = (MyApp) this.getActivity().getApplication();
-		likeListView = new ListView( this.getContext() );
+		likeListView = (ListView) findViewById( R.id.productLikeLayoutListview );
 		listLikeAdapter = new LikeAdapter();
 		config = new Config( this.getContext() );
 		imageLoader = new ImageLoader( this.getContext() );
 		arrayLikeData = new ArrayList<ProductActorLikeData>();
-		appCookie = app.getAppCookie();
-		
-		this.addView( likeListView );
+		//appCookie = app.getAppCookie();
+		asyncHttpClient = app.getAsyncHttpClient();
 		
 		getLikeDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+productId+"/likes.json";
 		
-		NetworkThreadUtil.getRawDataWithCookie(getLikeDataURL, null, appCookie, this);
+		//NetworkThreadUtil.getRawDataWithCookie(getLikeDataURL, null, appCookie, this);
+		
+		asyncHttpClient.get( getLikeDataURL, new JsonHttpResponseHandler(){
+			@Override
+			public void onSuccess(JSONObject jsonObject) {
+				super.onSuccess(jsonObject);
+				try {
+					JSONArray newArray = jsonObject.getJSONArray("entities");
+					for(int i = 0; i<newArray.length(); i++){
+						//Load Like Data
+						ProductActorLikeData newData = new ProductActorLikeData( (JSONObject) newArray.get(i) );
+						arrayLikeData.add( newData );
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+				}
+				
+				listLikeAdapter.setData( arrayLikeData );
+				likeListView.setAdapter( listLikeAdapter );
+			}
+		});
 	}
 
 	@Override
@@ -131,7 +154,7 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 			String getUserImageURL = data.get( position ).getLike().getActivityData().getActor().getPicture().getImageUrls().getImageURLT();
 			String getUserName = data.get( position ).getActor().getName();
 			
-			imageLoader.DisplayImage(getUserImageURL, ProductLikeLayout.this.getActivity(), returnView.getUserImageView(), true);
+			imageLoader.DisplayImage(getUserImageURL, ProductLikeLayout.this.getActivity(), returnView.getUserImageView(), true, asyncHttpClient );
 			returnView.setMainText( getUserName );
 			returnView.setSecondText( getUserName );
 			returnView.setLikeUserData( data.get( position ) );
@@ -163,7 +186,7 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 		
 	}
 
-	@Override
+	/*@Override
 	public void onNetworkDocSuccess(String urlString, Document document) {
 		// TODO Auto-generated method stub
 		
@@ -198,7 +221,7 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 	public void onNetworkFail(String urlString) {
 		// TODO Auto-generated method stub
 		
-	}
+	}*/
 
 	@Override
 	public void onClick(View v) {
@@ -209,7 +232,7 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 				String followUserId = followButton.getActorData().getId();
 				
 				followUserURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+followUserId+"/followers.json";
-				Map< String, String > newMapData = new HashMap<String, String>();
+				/*Map< String, String > newMapData = new HashMap<String, String>();
 				newMapData.put( "_a", "follow" );
 				String postData = NetworkUtil.createPostData( newMapData );
 				
@@ -248,6 +271,23 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 						// TODO Auto-generated method stub
 						
 					}
+				});*/
+				
+				HashMap<String, String> paramMap = new HashMap<String, String>();
+				paramMap.put( "_a", "follow" );
+				RequestParams params = new RequestParams(paramMap);
+				asyncHttpClient.post( followUserURL, params, new JsonHttpResponseHandler(){
+					@Override
+					public void onSuccess(JSONObject jsonObject) {
+						super.onSuccess(jsonObject);
+						ActorData actorData = null;
+						if( jsonObject.optJSONObject("followedUser") != null ){
+							actorData = new ActorData( jsonObject.optJSONObject("followedUser") );
+						}
+						followButton.setActorData( actorData );
+						
+						followButton.setEnabled( true );
+					}
 				});
 				
 				//Set text/image follow/following
@@ -258,7 +298,7 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 				String followActivityId = followButton.getActorData().getMyRelation().getFollowActivity().getId();
 				
 				unFollowUserURL = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+followActivityId+".json";
-				Map< String, String > newMapData = new HashMap<String, String>();
+				/*Map< String, String > newMapData = new HashMap<String, String>();
 				newMapData.put( "_a", "delete" );
 				String postData = NetworkUtil.createPostData( newMapData );
 				
@@ -284,6 +324,17 @@ public class ProductLikeLayout extends AbstractViewLayout implements NetworkThre
 					public void onNetworkDocSuccess(String urlString, Document document) {
 						// TODO Auto-generated method stub
 						
+					}
+				});*/
+				
+				HashMap<String, String> paramMap = new HashMap<String, String>();
+				paramMap.put( "_a", "delete" );
+				RequestParams params = new RequestParams(paramMap);
+				asyncHttpClient.post( unFollowUserURL, params, new AsyncHttpResponseHandler(){
+					@Override
+					public void onSuccess(String arg0) {
+						super.onSuccess(arg0);
+						followButton.setEnabled( true );
 					}
 				});
 				

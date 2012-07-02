@@ -1,0 +1,275 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" >
+    
+	<com.codegears.getable.ui.AppHeader
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent">
+    </com.codegears.getable.ui.AppHeader>
+
+	<LinearLayout
+	    android:layout_width="match_parent"
+	    android:layout_height="match_parent"
+	    android:orientation="vertical" android:background="#ffffff">
+
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="50dp"
+	        android:background="#ffffff"
+	        android:orientation="vertical" android:id="@+id/profileFindFriendsFromContact">
+
+	        <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent"
+	            android:orientation="horizontal" >
+
+	            <LinearLayout
+	                android:layout_width="5dp"
+	                android:layout_height="match_parent" >
+	            </LinearLayout>
+
+	            <TextView
+	                android:id="@+id/TextView02"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:layout_gravity="center"
+	                android:text="From my contact list"
+	                android:textColor="@color/NameColorGrey" />
+
+	            <LinearLayout
+	                android:layout_width="wrap_content"
+	                android:layout_height="match_parent"
+	                android:layout_weight="1" >
+	            </LinearLayout>
+
+	            <ImageView
+	                android:id="@+id/ImageView03"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:layout_gravity="center"
+	                android:src="@drawable/image_arrow_right" />
+
+	            <LinearLayout
+	                android:layout_width="5dp"
+	                android:layout_height="match_parent" >
+	            </LinearLayout>
+	        </LinearLayout>
+	    </LinearLayout>
+
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="50dp"
+	        android:background="#ffffff"
+	        android:orientation="vertical" android:id="@+id/profileFindFriendsFromFacebook">
+
+	        <ImageView
+	            android:id="@+id/ImageView05"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:src="@drawable/image_line" />
+
+	        <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent"
+	            android:orientation="horizontal" >
+
+	            <LinearLayout
+	                android:layout_width="5dp"
+	                android:layout_height="match_parent" >
+	            </LinearLayout>
+
+	            <TextView
+	                android:id="@+id/TextView01"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:layout_gravity="center"
+	                android:text="Facebook Friends"
+	                android:textColor="@color/NameColorGrey" />
+
+	            <LinearLayout
+	                android:layout_width="wrap_content"
+	                android:layout_height="match_parent"
+	                android:layout_weight="1" >
+	            </LinearLayout>
+
+	            <ImageView
+	                android:id="@+id/ImageView01"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:layout_gravity="center"
+	                android:src="@drawable/image_arrow_right" />
+
+	            <LinearLayout
+	                android:layout_width="5dp"
+	                android:layout_height="match_parent" >
+	            </LinearLayout>
+	        </LinearLayout>
+	    </LinearLayout>
+
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="50dp"
+	        android:background="#ffffff"
+	        android:orientation="vertical" android:id="@+id/profileFindFriendsFromTwitter">
+
+	        <ImageView
+	            android:id="@+id/ImageView02"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:src="@drawable/image_line" />
+
+	        <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent"
+	            android:orientation="horizontal" >
+
+	            <LinearLayout
+	                android:layout_width="5dp"
+	                android:layout_height="match_parent" >
+	            </LinearLayout>
+
+	            <TextView
+	                android:id="@+id/TextView07"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:layout_gravity="center"
+	                android:text="Twitter Friends"
+	                android:textColor="@color/NameColorGrey" />
+
+	            <LinearLayout
+	                android:layout_width="wrap_content"
+	                android:layout_height="match_parent"
+	                android:layout_weight="1" >
+	            </LinearLayout>
+
+	            <ImageView
+	                android:id="@+id/ImageView12"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:layout_gravity="center"
+	                android:src="@drawable/image_arrow_right" />
+
+	            <LinearLayout
+	                android:layout_width="5dp"
+	                android:layout_height="match_parent" >
+	            </LinearLayout>
+	        </LinearLayout>
+	    </LinearLayout>
+
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="50dp"
+	        android:background="#ffffff"
+	        android:orientation="vertical" android:id="@+id/profileFindFriendsFromSearch">
+
+	        <ImageView
+	            android:id="@+id/ImageView11"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:src="@drawable/image_line" />
+
+	        <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent"
+	            android:orientation="horizontal" >
+
+	            <LinearLayout
+	                android:layout_width="5dp"
+	                android:layout_height="match_parent" >
+	            </LinearLayout>
+
+	            <TextView
+	                android:id="@+id/TextView06"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:layout_gravity="center"
+	                android:text="Search names and usernames"
+	                android:textColor="@color/NameColorGrey" />
+
+	            <LinearLayout
+	                android:layout_width="wrap_content"
+	                android:layout_height="match_parent"
+	                android:layout_weight="1" >
+	            </LinearLayout>
+
+	            <ImageView
+	                android:id="@+id/ImageView10"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:layout_gravity="center"
+	                android:src="@drawable/image_arrow_right" />
+
+	            <LinearLayout
+	                android:layout_width="5dp"
+	                android:layout_height="match_parent" >
+	            </LinearLayout>
+	        </LinearLayout>
+	    </LinearLayout>
+
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="50dp"
+	        android:background="#ffffff"
+	        android:orientation="vertical" android:id="@+id/profileFindFriendsFromSuggest">
+
+	        <ImageView
+	            android:id="@+id/ImageView09"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:src="@drawable/image_line" />
+
+	        <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="match_parent"
+	            android:orientation="horizontal" >
+
+	            <LinearLayout
+	                android:layout_width="5dp"
+	                android:layout_height="match_parent" >
+	            </LinearLayout>
+
+	            <TextView
+	                android:id="@+id/TextView05"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:layout_gravity="center"
+	                android:text="Suggested users"
+	                android:textColor="@color/NameColorGrey" />
+
+	            <LinearLayout
+	                android:layout_width="wrap_content"
+	                android:layout_height="match_parent"
+	                android:layout_weight="1" >
+	            </LinearLayout>
+
+	            <ImageView
+	                android:id="@+id/ImageView08"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:layout_gravity="center"
+	                android:src="@drawable/image_arrow_right" />
+
+	            <LinearLayout
+	                android:layout_width="5dp"
+	                android:layout_height="match_parent" >
+	            </LinearLayout>
+	        </LinearLayout>
+	    </LinearLayout>
+
+	    <LinearLayout
+	        android:layout_width="match_parent"
+	        android:layout_height="50dp"
+	        android:background="#ffffff"
+	        android:orientation="vertical" >
+
+	        <ImageView
+	            android:id="@+id/ImageView07"
+	            android:layout_width="wrap_content"
+	            android:layout_height="wrap_content"
+	            android:src="@drawable/image_line" />
+	    </LinearLayout>
+	</LinearLayout>
+    
+</LinearLayout>

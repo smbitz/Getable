@@ -13,6 +13,7 @@ import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -33,16 +34,18 @@ import com.codegears.getable.ui.ProductCommentItemLayout;
 import com.codegears.getable.ui.UserFollowItemLayout;
 import com.codegears.getable.util.Config;
 import com.codegears.getable.util.ImageLoader;
-import com.codegears.getable.util.NetworkThreadUtil;
-import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
-import com.codegears.getable.util.NetworkUtil;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 import android.view.View.OnClickListener;
+import android.view.View.OnKeyListener;
 
-public class ProductCommentLayout extends AbstractViewLayout implements NetworkThreadListener, OnClickListener {
+public class ProductCommentLayout extends AbstractViewLayout implements OnClickListener {
 	
-	public static final String SHARE_PREF_VALUE_PRODUCT_ID = "SHARE_PREF_VALUE_PRODUCT_ID";
-	public static final String SHARE_PREF_KEY_PRODUCT_ID = "SHARE_PREF_KEY_PRODUCT_ID";
+	public static final String SHARE_PREF_VALUE_PRODUCT_COMMENT_ACT_ID = "SHARE_PREF_VALUE_PRODUCT_COMMENT_ACT_ID";
+	public static final String SHARE_PREF_KEY_ACT_ID = "SHARE_PREF_KEY_ACT_ID";
 	public static final String SHARE_PREF_KEY_USER_ID = "SHARE_PREF_KEY_USER_ID";
 	private static final int DELETE_BUTTON_STATUS_HIDE = 0;
 	private static final int DELETE_BUTTON_STATUS_SHOW = 1;
@@ -61,19 +64,21 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 	private MyApp app;
 	private Button editButton;
 	private int deleteButtonStatus;
-	private List<String> appCookie;
+	//private List<String> appCookie;
 	private String activityUserId;
+	private AsyncHttpClient asyncHttpClient;
 	
 	public ProductCommentLayout(Activity activity) {
 		super(activity);
 		View.inflate(this.getContext(), R.layout.productcommentlayout, this);
 		
-		SharedPreferences myPreferences = this.getActivity().getSharedPreferences( SHARE_PREF_VALUE_PRODUCT_ID, this.getActivity().MODE_PRIVATE );
-		productId = myPreferences.getString( SHARE_PREF_KEY_PRODUCT_ID, null );
+		SharedPreferences myPreferences = this.getActivity().getSharedPreferences( SHARE_PREF_VALUE_PRODUCT_COMMENT_ACT_ID, this.getActivity().MODE_PRIVATE );
+		productId = myPreferences.getString( SHARE_PREF_KEY_ACT_ID, null );
 		activityUserId = myPreferences.getString( SHARE_PREF_KEY_USER_ID, null );
 		
 		app = (MyApp) this.getActivity().getApplication();
-		appCookie = app.getAppCookie();
+		//appCookie = app.getAppCookie();
+		asyncHttpClient = app.getAsyncHttpClient();
 		commentListView = (ListView) findViewById( R.id.productCommentLayoutListView );
 		commentText = (EditText) findViewById( R.id.productCommentLayoutText );
 		submitButton = (Button) findViewById( R.id.productCommentLayoutSubmitButton );
@@ -86,6 +91,20 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 		submitButton.setOnClickListener( this );
 		editButton.setOnClickListener( this );
 		
+		commentText.setOnKeyListener(new OnKeyListener() {
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				// If the event is a key-down event on the "enter" button
+		        if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+		            (keyCode == KeyEvent.KEYCODE_ENTER)) {
+		          // Perform action on key press
+		          submitCommentText();
+		          return true;
+		        }
+		        return false;
+			}
+		});
+		
 		if( app.getUserId().equals( activityUserId ) ){
 			editButton.setVisibility( View.VISIBLE );
 		}
@@ -96,7 +115,14 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 		
 		getCommentDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+productId+"/comments.json"+urlVar1;
 		
-		NetworkThreadUtil.getRawData(getCommentDataURL, null, this);
+		//NetworkThreadUtil.getRawData(getCommentDataURL, null, this);
+		asyncHttpClient.get( getCommentDataURL, new JsonHttpResponseHandler(){
+			@Override
+			public void onSuccess(JSONObject jsonObject) {
+				super.onSuccess(jsonObject);
+				onGetCommentURLSuccess( jsonObject );
+			}
+		});
 	}
 
 	@Override
@@ -114,8 +140,33 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener){
 		this.listener = listener;
 	}
-
-	@Override
+	
+	private void onGetCommentURLSuccess(JSONObject jsonObject){
+		JSONArray newArray = null;
+		try {
+			newArray = jsonObject.optJSONArray("entities");
+			
+			ProductActivityCommentsData newData;
+			if( newArray == null ){
+				newData = new ProductActivityCommentsData( jsonObject );
+				activityCommentsData.add( newData );
+			}else{
+				for(int i = 0; i<newArray.length(); i++){
+					//Load Product Data
+					newData = new ProductActivityCommentsData( (JSONObject) newArray.get(i) );
+					activityCommentsData.add( newData );
+				}
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+		commentAdapter.setData( activityCommentsData );
+		commentText.setText("");
+		commentListView.setAdapter( commentAdapter );
+	}
+	
+	/*@Override
 	public void onNetworkDocSuccess(String urlString, Document document) {
 		// TODO Auto-generated method stub
 		
@@ -186,14 +237,14 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 		
 	}
 	
-	private void recycleResource() {
-		activityCommentsData.clear();
-	}
-	
 	@Override
 	public void onNetworkFail(String urlString) {
 		// TODO Auto-generated method stub
 		
+	}*/
+	
+	private void recycleResource() {
+		activityCommentsData.clear();
 	}
 	
 	private class CommentAdapter extends BaseAdapter {
@@ -233,7 +284,7 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 			String setUserName = data.get( position ).getActor().getName();
 			String setCommentText = data.get( position ).getComment().getCommentText();
 			
-			imageLoader.DisplayImage(getUserImageURL, ProductCommentLayout.this.getActivity(), returnView.getUserImageView(), true);
+			imageLoader.DisplayImage(getUserImageURL, ProductCommentLayout.this.getActivity(), returnView.getUserImageView(), true, asyncHttpClient);
 			returnView.setUserName( setUserName );
 			returnView.setCommentText( setCommentText );
 			returnView.setOnClickListener( ProductCommentLayout.this );
@@ -256,14 +307,7 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 	@Override
 	public void onClick(View v) {
 		if( v.equals( submitButton ) ){
-			String text = commentText.getText().toString();
-			if( !(text.equals("")) && !(text.equals(null)) ){
-				HashMap< String, String > dataMap = new HashMap<String, String>();
-				dataMap.put( "text", text );
-				String postData = NetworkUtil.createPostData( dataMap );
-				
-				NetworkThreadUtil.getRawDataWithCookie(getCommentDataURL, postData, appCookie, this);
-			}
+			submitCommentText();
 		}else if( v.equals( editButton ) ){
 			if( deleteButtonStatus == DELETE_BUTTON_STATUS_HIDE ){
 				deleteButtonStatus = DELETE_BUTTON_STATUS_SHOW;
@@ -277,11 +321,40 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 			String commentActivityId = commentDeleteButton.getActivityCommentsData().getId();
 			deleteCommentUrl = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+commentActivityId+".json";
 			
-			HashMap< String, String > dataMap = new HashMap<String, String>();
+			/*HashMap< String, String > dataMap = new HashMap<String, String>();
 			dataMap.put( "_a", "delete" );
 			String postData = NetworkUtil.createPostData( dataMap );
 			
-			NetworkThreadUtil.getRawDataWithCookie( deleteCommentUrl, postData, appCookie, this );
+			NetworkThreadUtil.getRawDataWithCookie( deleteCommentUrl, postData, appCookie, this );*/
+			
+			HashMap<String, String> paramMap = new HashMap<String, String>();
+			paramMap.put( "_a", "delete" );
+			RequestParams params = new RequestParams(paramMap);
+			asyncHttpClient.post( deleteCommentUrl, params, new JsonHttpResponseHandler(){
+				@Override
+				public void onSuccess(JSONObject getJsonObject) {
+					super.onSuccess(getJsonObject);
+					JSONObject jsonObject = null;
+					jsonObject = getJsonObject.optJSONObject( "status" );
+					
+					if( jsonObject != null ){
+						String deleteCommentId = jsonObject.optString( "id" );
+						ArrayList<ProductActivityCommentsData> newActivityCommentsData = new ArrayList<ProductActivityCommentsData>();
+						for( ProductActivityCommentsData fetchData:activityCommentsData ){
+							String currentCommentId = fetchData.getId();
+							if( !(deleteCommentId.equals( currentCommentId )) ){
+								newActivityCommentsData.add( fetchData );
+							}
+						}
+						activityCommentsData = newActivityCommentsData;
+					}
+					
+					commentAdapter.setData( activityCommentsData );
+					commentText.setText("");
+					commentListView.setAdapter( commentAdapter );
+					commentListView.invalidateViews();
+				}
+			});
 		}else if(listener != null){
 			if( v instanceof ProductCommentItemLayout ){
 				ProductCommentItemLayout productCommentItemLayout = (ProductCommentItemLayout) v;
@@ -291,6 +364,28 @@ public class ProductCommentLayout extends AbstractViewLayout implements NetworkT
 		        prefsEditor.commit();
 		        listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_USERPROFILE );
 			}
+		}
+	}
+
+	private void submitCommentText() {
+		String text = commentText.getText().toString();
+		if( !(text.equals("")) && !(text.equals(null)) ){
+			/*HashMap< String, String > dataMap = new HashMap<String, String>();
+			dataMap.put( "text", text );
+			String postData = NetworkUtil.createPostData( dataMap );
+			
+			NetworkThreadUtil.getRawDataWithCookie(getCommentDataURL, postData, appCookie, this);*/
+			
+			HashMap<String, String> paramMap = new HashMap<String, String>();
+			paramMap.put( "text", text );
+			RequestParams params = new RequestParams(paramMap);
+			asyncHttpClient.get( getCommentDataURL, params, new JsonHttpResponseHandler(){
+				@Override
+				public void onSuccess(JSONObject jsonObject) {
+					super.onSuccess(jsonObject);
+					onGetCommentURLSuccess( jsonObject );
+				}
+			});
 		}
 	}
 	

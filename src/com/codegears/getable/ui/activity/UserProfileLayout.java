@@ -21,11 +21,14 @@ import com.codegears.getable.ui.AbstractViewLayout;
 import com.codegears.getable.ui.FollowButton;
 import com.codegears.getable.ui.UserProfileHeader;
 import com.codegears.getable.ui.UserProfileImageLayout;
+import com.codegears.getable.ui.UserToggleButton;
 import com.codegears.getable.ui.tabbar.TabBar;
+import com.codegears.getable.ui.tabbar.TabBarListener;
 import com.codegears.getable.util.Config;
-import com.codegears.getable.util.NetworkThreadUtil;
-import com.codegears.getable.util.NetworkUtil;
-import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -34,15 +37,17 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup.LayoutParams;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.LinearLayout;
 import android.widget.ToggleButton;
 
-public class UserProfileLayout extends AbstractViewLayout implements OnClickListener, BodyLayoutStackListener, NetworkThreadListener {
+public class UserProfileLayout extends AbstractViewLayout implements OnClickListener, BodyLayoutStackListener, TabBarListener {
 
 	public static final String GET_NUMBER_OF_PRODUCT = "numberOfProducts";
 	public static final String SHARE_PREF_VALUE_USER_ID = "SHARE_PREF_PRODUCT_USER_ID";
@@ -62,11 +67,11 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 	private String getUserDataURL;
 	private Config config;
 	private UserProfileImageLayout userProfileImageLayout;
-	private ToggleButton photoColumnButton;
-	private ToggleButton likesColumnButton;
-	private ToggleButton wishlistsColumnButton;
-	private ToggleButton followersColumnButton;
-	private ToggleButton followingsColumnButton;
+	private UserToggleButton photoColumnButton;
+	private UserToggleButton likesColumnButton;
+	private UserToggleButton wishlistsColumnButton;
+	private UserToggleButton followersColumnButton;
+	private UserToggleButton followingsColumnButton;
 	private String photoTextButton;
 	private String likesTextButton;
 	private String wishlistsTextButton;
@@ -76,8 +81,9 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 	private FollowButton userHeaderFollowButton;
 	private String followUserURL;
 	private String unFollowUserURL;
-	private List<String> appCookie;
+	//private List<String> appCookie;
 	private MyApp app;
+	private AsyncHttpClient asyncHttpClient;
 	
 	public UserProfileLayout( Activity activity ) {
 		super( activity );
@@ -86,14 +92,19 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 		SharedPreferences myPreferences = this.getActivity().getSharedPreferences( SHARE_PREF_VALUE_USER_ID, this.getActivity().MODE_PRIVATE );
 		userId = myPreferences.getString( SHARE_PREF_KEY_USER_ID, null );
 		
-		loadingDialog = ProgressDialog.show(this.getActivity(), "", 
-	               "Loading. Please wait...", true, true);
+		loadingDialog = new ProgressDialog( this.getContext() );
+		loadingDialog.setTitle("");
+		loadingDialog.setMessage("Loading. Please wait...");
+		loadingDialog.setIndeterminate( true );
+		loadingDialog.setCancelable( true );
+		loadingDialog.show();
 		
 		userHeader = new UserProfileHeader( this.getContext() );
 		config = new Config( this.getActivity() );
 		
 		app = (MyApp) this.getActivity().getApplication();
-		appCookie = app.getAppCookie();
+		//appCookie = app.getAppCookie();
+		asyncHttpClient = app.getAsyncHttpClient();
 		tabBar = (TabBar) findViewById( R.id.userProfileTabBar );
 		bodyLayout = (ViewGroup) findViewById( R.id.userProfileBodyLayout );
 		userProfileImageLayout = (UserProfileImageLayout) userHeader.getUserProfileImageLayout();
@@ -114,12 +125,11 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 		String getFollowingsDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+userId+"/followings.json?page.number=1&page.size=32";
 		
 		//---- First Layout ----//
-		photoColumnButton = new ToggleButton( this.getContext() );
-		photoColumnButton.setText( "PHOTOS" );
-		photoColumnButton.setTextSize(9);
+		photoColumnButton = new UserToggleButton( this.getContext() );
+		photoColumnButton.setText("");
 		photoColumnButton.setTextOn( photoTextButton );
 		photoColumnButton.setTextOff( photoTextButton );
-		photoColumnButton.setBackgroundResource( R.drawable.user_layout_button );
+		photoColumnButton.setBackgroundResource( R.drawable.user_layout_button_1 );
 		photoColumnButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
 		userGalleryLayoutPhotos = new UserGalleryLayout( this.getActivity(), getPhotosDataURL, UserGalleryLayout.USER_GALLERY_VIEW_TYPE_PHOTOS );
 		userGalleryLayoutPhotos.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -127,12 +137,11 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
         tabBar.addTab( photoColumnButton, userGalleryLayoutPhotos );
         
         //---- Second Layout ----//
-        likesColumnButton = new ToggleButton( this.getContext() );
-        likesColumnButton.setText( "LIKES" );
-        likesColumnButton.setTextSize(9);
+        likesColumnButton = new UserToggleButton( this.getContext() );
+        likesColumnButton.setText("");
         likesColumnButton.setTextOn( likesTextButton );
         likesColumnButton.setTextOff( likesTextButton );
-        likesColumnButton.setBackgroundResource( R.drawable.user_layout_button );
+        likesColumnButton.setBackgroundResource( R.drawable.user_layout_button_2 );
         likesColumnButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
         userGalleryLayoutLikes = new UserGalleryLayout( this.getActivity(), getLikesDataURL, UserGalleryLayout.USER_GALLERY_VIEW_TYPE_LIKES );
         userGalleryLayoutLikes.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -140,12 +149,11 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
         tabBar.addTab( likesColumnButton, userGalleryLayoutLikes );
         
         //---- Third Layout ----//
-        wishlistsColumnButton = new ToggleButton( this.getContext() );
-        wishlistsColumnButton.setText( "WISHLISTS" );
-        wishlistsColumnButton.setTextSize(9);
+        wishlistsColumnButton = new UserToggleButton( this.getContext() );
+        wishlistsColumnButton.setText("");
         wishlistsColumnButton.setTextOn( wishlistsTextButton );
         wishlistsColumnButton.setTextOff( wishlistsTextButton );
-        wishlistsColumnButton.setBackgroundResource( R.drawable.user_layout_button );
+        wishlistsColumnButton.setBackgroundResource( R.drawable.user_layout_button_3 );
         wishlistsColumnButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
         userWishlistsLayout = new UserWishlistsLayout( this.getActivity(), getWishlistsDataURL );
         userWishlistsLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -153,12 +161,11 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
         tabBar.addTab( wishlistsColumnButton, userWishlistsLayout );
         
         //---- Fourth Layout ----//
-        followersColumnButton = new ToggleButton( this.getContext() );
-        followersColumnButton.setText( "FOLLOWERS" );
-        followersColumnButton.setTextSize(9);
+        followersColumnButton = new UserToggleButton( this.getContext() );
+        followersColumnButton.setText("");
         followersColumnButton.setTextOn( followersTextButton );
         followersColumnButton.setTextOff( followersTextButton );
-        followersColumnButton.setBackgroundResource( R.drawable.user_layout_button );
+        followersColumnButton.setBackgroundResource( R.drawable.user_layout_button_4 );
         followersColumnButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
         userFollowersLayout = new UserFollowLayout( this.getActivity(), getFollowersDataURL, UserFollowLayout.GET_FOLLOWERS );
         userFollowersLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
@@ -166,21 +173,119 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
         tabBar.addTab( followersColumnButton, userFollowersLayout );
         
         //---- Fifth Layout ----//
-        followingsColumnButton = new ToggleButton( this.getContext() );
-        followingsColumnButton.setText( "FOLLOWING" );
-        followingsColumnButton.setTextSize(8);
+        followingsColumnButton = new UserToggleButton( this.getContext() );
+        followingsColumnButton.setText("");
         followingsColumnButton.setTextOn( followingsTextButton );
         followingsColumnButton.setTextOff( followingsTextButton );
-        followingsColumnButton.setBackgroundResource( R.drawable.user_layout_button );
+        followingsColumnButton.setBackgroundResource( R.drawable.user_layout_button_5 );
         followingsColumnButton.setLayoutParams(new LinearLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT, 1.0f));
         userFollowingsLayout = new UserFollowLayout( this.getActivity(), getFollowingsDataURL, UserFollowLayout.GET_FOLLOWINGS );
         userFollowingsLayout.setLayoutParams(new LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT));
         userFollowingsLayout.setBackgroundColor( 0xFFFFFFFF );
         tabBar.addTab( followingsColumnButton, userFollowingsLayout );
         
+        photoColumnButton.setSelectedText();
+        likesColumnButton.setNormalText();
+        wishlistsColumnButton.setNormalText();
+        followersColumnButton.setNormalText();
+        followingsColumnButton.setNormalText();
+        
+        tabBar.setTabBarListener( this );
+        
         getUserDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+userId+".json";
         
-        NetworkThreadUtil.getRawDataWithCookie(getUserDataURL, null, appCookie, this);
+        //NetworkThreadUtil.getRawDataWithCookie(getUserDataURL, null, appCookie, this);
+        asyncHttpClient.get( getUserDataURL, new JsonHttpResponseHandler(){
+        	@Override
+        	public void onSuccess(JSONObject getJsonObject) {
+        		super.onSuccess(getJsonObject);
+        		onGetUserDataURL(getJsonObject);
+        	}
+        });
+	}
+	
+	private void onGetUserDataURL(JSONObject jsonObject){
+		ActorData newData = null;
+		//Load Product Data
+		newData = new ActorData( jsonObject );
+		
+		//Load Product Image
+		URL userPictureURL = null;
+		Bitmap userImageBitmap = null;
+		try {
+			userPictureURL = new URL( newData.getPicture().getImageUrls().getImageURLT() );
+		} catch (MalformedURLException e) {
+			e.printStackTrace();
+		}
+		
+		try {
+			userImageBitmap = BitmapFactory.decodeStream( userPictureURL.openConnection().getInputStream() );
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		//Set User Header
+		final String setUserName = newData.getName();
+		final Bitmap setUserImage = userImageBitmap;
+		final ActorData setActorData = newData;
+		
+		//Set number button
+		JSONObject statisticJson = null;
+		try {
+			statisticJson = jsonObject.getJSONObject("statistic");
+		} catch (JSONException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		photoTextButton = statisticJson.optString("numberOfProducts");
+		likesTextButton = statisticJson.optString("numberOfLikes");
+		wishlistsTextButton = statisticJson.optString("numberOfWishlists");
+		followersTextButton = statisticJson.optString("numberOfFollowers");
+		followingsTextButton = statisticJson.optString("numberOfFollowings");
+		
+		final String setNumberPhotos = photoTextButton;
+		final String setNumberLikes = likesTextButton;
+		final String setNumberWishlists = wishlistsTextButton;
+		this.getActivity().runOnUiThread( new Runnable() {
+			@Override
+			public void run() {
+				//Set User Header
+				userHeader.setName( setUserName );
+				userHeader.setData( setActorData );
+				if( setUserImage != null ){
+					userProfileImageLayout.setUserImage( setUserImage );
+				}
+				
+				if( app.getUserId().equals( setActorData.getId() ) ){
+					userHeaderFollowButton.setVisibility( View.INVISIBLE );
+				}else{
+					userHeaderFollowButton.setActorData( setActorData );
+					
+					//Set text/image follow/following
+					if( setActorData.getMyRelation().getFollowActivity() != null ){
+						//userHeaderFollowButton.setText( "Following" );
+						userHeaderFollowButton.setBackgroundResource( R.drawable.button_following );
+						userHeaderFollowButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
+					}else{
+						//userHeaderFollowButton.setText( "Follow" );
+						userHeaderFollowButton.setBackgroundResource( R.drawable.button_follow );
+						userHeaderFollowButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
+					}
+				}
+				
+				//Set number of likes.
+				photoColumnButton.setText( setNumberPhotos );
+				likesColumnButton.setText( setNumberLikes );
+				wishlistsColumnButton.setText( setNumberWishlists );
+				followersColumnButton.setText( followersTextButton );
+				followingsColumnButton.setText( followingsTextButton );
+			}
+		});
+		
+		if( loadingDialog.isShowing() ){
+			loadingDialog.dismiss();
+		}
 	}
 	
 	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener){
@@ -201,7 +306,7 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 				String followUserId = followButton.getActorData().getId();
 				
 				followUserURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+followUserId+"/followers.json";
-				Map< String, String > newMapData = new HashMap<String, String>();
+				/*Map< String, String > newMapData = new HashMap<String, String>();
 				newMapData.put( "_a", "follow" );
 				String postData = NetworkUtil.createPostData( newMapData );
 				
@@ -240,6 +345,23 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 						// TODO Auto-generated method stub
 						
 					}
+				});*/
+				
+				HashMap<String, String> paramMap = new HashMap<String, String>();
+				paramMap.put( "_a", "follow" );
+				RequestParams params = new RequestParams(paramMap);
+				asyncHttpClient.post( followUserURL, params, new JsonHttpResponseHandler(){
+					@Override
+					public void onSuccess(JSONObject jsonObject) {
+						super.onSuccess(jsonObject);
+						ActorData actorData = null;
+						if( jsonObject.optJSONObject("followedUser") != null ){
+							actorData = new ActorData( jsonObject.optJSONObject("followedUser") );
+						}
+						followButton.setActorData( actorData );
+						
+						followButton.setEnabled( true );
+					}
 				});
 				
 				//Set text/image follow/following
@@ -250,7 +372,7 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 				String followActivityId = followButton.getActorData().getMyRelation().getFollowActivity().getId();
 				
 				unFollowUserURL = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+followActivityId+".json";
-				Map< String, String > newMapData = new HashMap<String, String>();
+				/*Map< String, String > newMapData = new HashMap<String, String>();
 				newMapData.put( "_a", "delete" );
 				String postData = NetworkUtil.createPostData( newMapData );
 				
@@ -276,6 +398,17 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 					public void onNetworkDocSuccess(String urlString, Document document) {
 						// TODO Auto-generated method stub
 						
+					}
+				});*/
+				
+				HashMap<String, String> paramMap = new HashMap<String, String>();
+				paramMap.put( "_a", "delete" );
+				RequestParams params = new RequestParams(paramMap);
+				asyncHttpClient.post( unFollowUserURL, params, new AsyncHttpResponseHandler(){
+					@Override
+					public void onSuccess(String arg0) {
+						super.onSuccess(arg0);
+						followButton.setEnabled( true );
 					}
 				});
 				
@@ -305,7 +438,7 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 		
 	}
 
-	@Override
+	/*@Override
 	public void onNetworkDocSuccess(String urlString, Document document) {
 		// TODO Auto-generated method stub
 		
@@ -369,7 +502,9 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 					//Set User Header
 					userHeader.setName( setUserName );
 					userHeader.setData( setActorData );
-					userProfileImageLayout.setUserImage( setUserImage );
+					if( setUserImage != null ){
+						userProfileImageLayout.setUserImage( setUserImage );
+					}
 					
 					if( app.getUserId().equals( setActorData.getId() ) ){
 						userHeaderFollowButton.setVisibility( View.INVISIBLE );
@@ -389,15 +524,17 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 					}
 					
 					//Set number of likes.
-					photoColumnButton.setText( setNumberPhotos+"\nPHOTOS" );
-					likesColumnButton.setText( setNumberLikes+"\nLIKES" );
-					wishlistsColumnButton.setText( setNumberWishlists+"\nWISHLISTS" );
-					followersColumnButton.setText( followersTextButton+"\nFOLLOWERS" );
-					followingsColumnButton.setText( followingsTextButton+"\nFOLLOWINGS" );
+					photoColumnButton.setText( setNumberPhotos );
+					likesColumnButton.setText( setNumberLikes );
+					wishlistsColumnButton.setText( setNumberWishlists );
+					followersColumnButton.setText( followersTextButton );
+					followingsColumnButton.setText( followingsTextButton );
 				}
 			});
 			
-			loadingDialog.dismiss();
+			if( loadingDialog.isShowing() ){
+				loadingDialog.dismiss();
+			}
 		}else if( urlString.equals( followUserURL ) ){
 			//On click follow result.
 		}
@@ -407,6 +544,41 @@ public class UserProfileLayout extends AbstractViewLayout implements OnClickList
 	public void onNetworkFail(String urlString) {
 		// TODO Auto-generated method stub
 		
+	}*/
+
+	@Override
+	public void onTabBarPerform(CompoundButton button) {
+		if( button.equals( photoColumnButton ) ){
+			photoColumnButton.setSelectedText();
+	        likesColumnButton.setNormalText();
+	        wishlistsColumnButton.setNormalText();
+	        followersColumnButton.setNormalText();
+	        followingsColumnButton.setNormalText();
+		}else if( button.equals( likesColumnButton ) ){
+			photoColumnButton.setNormalText();
+	        likesColumnButton.setSelectedText();
+	        wishlistsColumnButton.setNormalText();
+	        followersColumnButton.setNormalText();
+	        followingsColumnButton.setNormalText();
+		}else if( button.equals( wishlistsColumnButton ) ){
+			photoColumnButton.setNormalText();
+	        likesColumnButton.setNormalText();
+	        wishlistsColumnButton.setSelectedText();
+	        followersColumnButton.setNormalText();
+	        followingsColumnButton.setNormalText();
+		}else if( button.equals( followersColumnButton ) ){
+			photoColumnButton.setNormalText();
+	        likesColumnButton.setNormalText();
+	        wishlistsColumnButton.setNormalText();
+	        followersColumnButton.setSelectedText();
+	        followingsColumnButton.setNormalText();
+		}else if( button.equals( followingsColumnButton ) ){
+			photoColumnButton.setNormalText();
+	        likesColumnButton.setNormalText();
+	        wishlistsColumnButton.setNormalText();
+	        followersColumnButton.setNormalText();
+	        followingsColumnButton.setSelectedText();
+		}
 	}
 
 }

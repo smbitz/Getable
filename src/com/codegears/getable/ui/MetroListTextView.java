@@ -4,6 +4,7 @@ import com.codegears.getable.R;
 import com.codegears.getable.data.MetroData;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -12,14 +13,27 @@ public class MetroListTextView extends LinearLayout {
 	
 	private TextView metroText;
 	private MetroData metroData;
+	private LinearLayout viewLayout;
 	
 	public MetroListTextView(Context context) {
 		super(context);
 		View.inflate(context, R.layout.metrolisttextview, this);
+
+		viewLayout = (LinearLayout) findViewById( R.id.metroListLayout );
 		
 		metroText = (TextView) findViewById( R.id.metroListViewText );
 	}
-
+	
+	public void setItemNormal(){
+		viewLayout.setBackgroundColor( this.getResources().getColor( R.color.BGColorGrey ) );
+		metroText.setTextColor( R.color.NameColorGrey );
+	}
+	
+	public void setItemSelected(){
+		viewLayout.setBackgroundColor( this.getResources().getColor( R.color.NameColorPink ) );
+		metroText.setTextColor( Color.WHITE );
+	}
+	
 	public void setText(String name) {
 		// TODO Auto-generated method stub
 		metroText.setText( name );

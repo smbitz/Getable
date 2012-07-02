@@ -13,9 +13,10 @@ import com.codegears.getable.data.ProductActivityCommentsData;
 import com.codegears.getable.data.ProductActivityData;
 import com.codegears.getable.ui.CommentRowLayout;
 import com.codegears.getable.util.Config;
-import com.codegears.getable.util.NetworkThreadUtil;
-import com.codegears.getable.util.NetworkUtil;
-import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -29,7 +30,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.Toast;
 
-public class ProductPhotoOptions extends Activity implements OnClickListener, NetworkThreadListener {
+public class ProductPhotoOptions extends Activity implements OnClickListener {
 	
 	public static final String PUT_EXTRA_ACTIVITY_ID = "PUT_EXTRA_ACTIVITY_ID"; 
 	private static final String URL_GET_PRODUCT_ACTIVITIES_BY_ID = "URL_GET_PRODUCT_ACTIVITIES_BY_ID";
@@ -55,6 +56,8 @@ public class ProductPhotoOptions extends Activity implements OnClickListener, Ne
 	private String deleteActURL;
 	private String currentUserId;
 	private Button flagButton;
+	private Button shareButton;
+	private AsyncHttpClient asyncHttpClient;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -66,6 +69,7 @@ public class ProductPhotoOptions extends Activity implements OnClickListener, Ne
 		config = new Config( this );
 		app = (MyApp) this.getApplication();
 		appCookie = app.getAppCookie();
+		asyncHttpClient = app.getAsyncHttpClient();
 		closeButton = (Button) findViewById( R.id.productDetailPhotoOptionsCloseButton );
 		closeButtonOwn = (Button) findViewById( R.id.productDetailPhotoOptionsOwnCloseButton );
 		photoOptionsOtherLayout = (LinearLayout) findViewById( R.id.productDetailPhotoOptionsOtherLayout );
@@ -76,6 +80,7 @@ public class ProductPhotoOptions extends Activity implements OnClickListener, Ne
 		deleteActButton = (Button) findViewById( R.id.productDetailPhotoOptionsDeleteActButton );
 		manageCommentButton = (Button) findViewById( R.id.productDetailPhotoOptionsManageCommentButton );
 		flagButton = (Button) findViewById( R.id.productDetailPhotoOptionsFlagReviewButton );
+		shareButton = (Button) findViewById( R.id.productDetailPhotoOptionsShareButton );
 		
 		closeButton.setOnClickListener( this );
 		closeButtonOwn.setOnClickListener( this );
@@ -85,12 +90,30 @@ public class ProductPhotoOptions extends Activity implements OnClickListener, Ne
 		deleteActButton.setOnClickListener( this );
 		manageCommentButton.setOnClickListener( this );
 		flagButton.setOnClickListener( this );
+		shareButton.setOnClickListener( this );
 		
 		String urlVar1 = MyApp.DEFAULT_URL_VAR_1;
 		
 		getProductDataURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+activityId+".json"+urlVar1;
 		
-		NetworkThreadUtil.getRawDataWithCookie(getProductDataURL, null, appCookie, this);
+		asyncHttpClient.get( 
+			getProductDataURL,
+			new JsonHttpResponseHandler(){
+				@Override
+				public void onSuccess(JSONObject jsonObject) {
+					super.onSuccess(jsonObject);
+					//Load Product Data
+					currentData = new ProductActivityData( jsonObject );
+					
+					currentUserId = currentData.getActor().getId();
+					
+					if( app.getUserId().equals( currentUserId ) ){
+						photoOptionsOwnLayout.setVisibility( View.VISIBLE );
+					}else{
+						photoOptionsOtherLayout.setVisibility( View.VISIBLE );
+					}
+				}
+			});
 	}
 
 	@Override
@@ -119,11 +142,18 @@ public class ProductPhotoOptions extends Activity implements OnClickListener, Ne
 			startActivity(intent);
 		}else if( v.equals( deleteActButton ) ){
 			deleteActURL = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+activityId+".json";
-			Map< String, String > newMapData = new HashMap<String, String>();
-			newMapData.put( "_a", "delete" );
-			String postData = NetworkUtil.createPostData( newMapData );
-			
-			NetworkThreadUtil.getRawDataWithCookie(deleteActURL, postData, appCookie, this);
+
+			HashMap<String, String> paramMap = new HashMap<String, String>();
+			paramMap.put( "_a", "delete" );
+			RequestParams params = new RequestParams(paramMap);
+			asyncHttpClient.post( deleteActURL, params, new AsyncHttpResponseHandler(){
+				@Override
+				public void onSuccess(String arg0) {
+					super.onSuccess(arg0);
+					Intent intent = new Intent( ProductPhotoOptions.this, MainActivity.class );
+					ProductPhotoOptions.this.startActivity( intent );
+				}
+			});
 		}else if( v.equals( manageCommentButton ) ){
 			String extra[] = { activityId, currentUserId };
 			
@@ -134,74 +164,20 @@ public class ProductPhotoOptions extends Activity implements OnClickListener, Ne
 		}else if( v.equals( flagButton ) ){
 			flagReviewURL = config.get( URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+activityId+"/flags.json";
 			
-			Map< String, String > newMapData = new HashMap<String, String>();
-			newMapData.put( "emptly", "emptly" );
-			String postData = NetworkUtil.createPostData( newMapData );
-			
-			NetworkThreadUtil.getRawDataWithCookie( flagReviewURL, postData, appCookie, this );
-			this.finish();
-		}
-	}
-
-	@Override
-	public void onNetworkDocSuccess(String urlString, Document document) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onNetworkRawSuccess(String urlString, String result) {
-		if( urlString.equals( getProductDataURL ) ){
-			try {
-				//Load Product Data
-				JSONObject jsonObject = new JSONObject(result);
-				currentData = new ProductActivityData( jsonObject );
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			currentUserId = currentData.getActor().getId();
-			
-			if( app.getUserId().equals( currentUserId ) ){
-				this.runOnUiThread( new Runnable() {
-					@Override
-					public void run() {
-						photoOptionsOwnLayout.setVisibility( View.VISIBLE );
-					}
-				});
-			}else{
-				this.runOnUiThread( new Runnable() {
-					@Override
-					public void run() {
-						photoOptionsOtherLayout.setVisibility( View.VISIBLE );
-					}
-				});
-			}
-		}else if( urlString.equals( deleteActURL ) ){
-			Intent intent = new Intent( this, MainActivity.class );
-			this.startActivity( intent );
-		}else if( urlString.equals( flagReviewURL ) ){
-			this.runOnUiThread( new Runnable() {
+			asyncHttpClient.post( flagReviewURL, new AsyncHttpResponseHandler(){
 				@Override
-				public void run() {
+				public void onSuccess(String arg0) {
+					super.onSuccess(arg0);
 					Toast toast = Toast.makeText( ProductPhotoOptions.this, "Flag Review.", Toast.LENGTH_LONG );
 					toast.show();
 				}
 			});
-		}
-		
-	}
-
-	@Override
-	public void onNetworkFail(String urlString) {
-		// TODO Auto-generated method stub
-		if( urlString.equals( flagReviewURL ) ){
-			System.out.println("Fail URL : "+urlString);
-			//System.out.println("Result : "+result);
-			
-			/*Toast toast = Toast.makeText(this, "Flag Review.", Toast.LENGTH_LONG);
-			toast.show();*/
+			this.finish();
+		}else if( v.equals( shareButton ) ){
+			Intent intent = new Intent();
+			intent.putExtra( PUT_EXTRA_ACTIVITY_ID, activityId );
+			this.setResult( MainActivity.RESULT_PHOTO_OPTION_TO_SHARE_LIST_PRODUCT_LAYOUT, intent );
+			this.finish();
 		}
 	}
 	

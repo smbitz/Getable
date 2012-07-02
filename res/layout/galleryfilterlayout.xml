@@ -5,7 +5,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="85dp"
+        android:layout_height="80dp"
         android:orientation="vertical">
     </LinearLayout>
 
@@ -29,7 +29,7 @@
 
 	            <LinearLayout
 	                android:layout_width="match_parent"
-	                android:layout_height="5dp"
+	                android:layout_height="10dp"
 	                android:orientation="vertical" >
 	            </LinearLayout>
 
@@ -46,8 +46,8 @@
 	                android:id="@+id/textView1"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
-	                android:text="Location"
-	                android:textAppearance="?android:attr/textAppearanceMedium" />
+	                android:text="LOCATION"
+	                android:textAppearance="?android:attr/textAppearanceMedium" android:textSize="14dp" android:layout_gravity="center"/>
 
 	        </LinearLayout>
 
@@ -72,19 +72,19 @@
 	                <ToggleButton
 	                    android:id="@+id/galleryFilterLocalButton"
 	                    android:layout_width="match_parent"
-	                    android:layout_height="35dp"
+	                    android:layout_height="30dp"
 	                    android:checked="true" android:text="" android:textOn="" android:textOff="" android:layout_weight="1"/>
 
 	                <ToggleButton
 	                    android:id="@+id/galleryFilterAllButton"
 	                    android:layout_width="match_parent"
-	                    android:layout_height="35dp"
+	                    android:layout_height="30dp"
 	                    android:text="" android:textOn="" android:textOff="" android:layout_weight="1"/>
 
 	                <ToggleButton
 	                    android:id="@+id/galleryFilterCityButton"
 	                    android:layout_width="match_parent"
-	                    android:layout_height="35dp"
+	                    android:layout_height="30dp"
 	                    android:text="" android:textOn="" android:textOff="" android:layout_weight="1"/>
 	            </LinearLayout>
 
@@ -103,8 +103,7 @@
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
 	        android:layout_weight="1"
-	        android:orientation="vertical"
-	        android:visibility="gone" >
+	        android:orientation="vertical" android:visibility="gone">
 
 	        <ListView
 	            android:id="@+id/galleryFilterMetrosList"
@@ -127,7 +126,7 @@
 
 	        <LinearLayout
 	            android:layout_width="match_parent"
-	            android:layout_height="match_parent" android:layout_weight="2.8">
+	            android:layout_height="match_parent" android:layout_weight="2.95">
 
 	            <LinearLayout
 	                android:layout_width="wrap_content"
@@ -138,8 +137,8 @@
 	                android:id="@+id/textView2"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
-	                android:text="Sort"
-	                android:textAppearance="?android:attr/textAppearanceMedium"/>
+	                android:text="SORT"
+	                android:textAppearance="?android:attr/textAppearanceMedium" android:textSize="14dp"/>
 
 	            <LinearLayout
 	                android:layout_width="wrap_content"
@@ -163,13 +162,13 @@
 	                <ToggleButton
 	                    android:id="@+id/galleryFilterPopularButton"
 	                    android:layout_width="match_parent"
-	                    android:layout_height="35dp"
+	                    android:layout_height="30dp"
 	                    android:checked="true" android:text="" android:textOn="" android:textOff="" android:layout_weight="1"/>
 
 	                <ToggleButton
 	                    android:id="@+id/galleryFilterRecentButton"
 	                    android:layout_width="match_parent"
-	                    android:layout_height="35dp"
+	                    android:layout_height="30dp"
 	                    android:text="" android:textOn="" android:textOff="" android:layout_weight="1"/>
 	            </LinearLayout>
 

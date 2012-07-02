@@ -1,6 +1,7 @@
 package com.codegears.getable.ui;
 
 import com.codegears.getable.R;
+import com.codegears.getable.data.ActorData;
 import com.codegears.getable.data.ProductActorFollowData;
 import com.codegears.getable.data.ProductActorLikeData;
 
@@ -22,6 +23,7 @@ public class UserFollowItemLayout extends LinearLayout {
 	private ProductActorLikeData likeUserData;
 	private LinearLayout followButtonLayout;
 	private FollowButton followButton;
+	private ActorData actorData;
 
 	public UserFollowItemLayout(Context context) {
 		super(context);
@@ -54,6 +56,10 @@ public class UserFollowItemLayout extends LinearLayout {
 		followUserData = productActorFollowersData;
 	}
 	
+	public void setActorData(ActorData setActorData) {
+		actorData = setActorData;
+	}
+	
 	public ProductActorFollowData getFollowUserData(){
 		return followUserData;
 	}
@@ -72,6 +78,10 @@ public class UserFollowItemLayout extends LinearLayout {
 	
 	public FollowButton getFollowButton(){
 		return followButton;
+	}
+	
+	public ActorData getActorData(){
+		return actorData;
 	}
 
 }

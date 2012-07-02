@@ -18,6 +18,7 @@ public class ActorData {
 	private ActorPicture picture;
 	private Boolean firstLogin;
 	private MyRelationData myRelation;
+	private ActorGender gender;
 	
 	public ActorData(JSONObject jsonObject) {
 		try {
@@ -36,6 +37,10 @@ public class ActorData {
 			
 			if( jsonObject.optJSONObject("myRelation") != null ){
 				myRelation = new MyRelationData( jsonObject.optJSONObject("myRelation") );
+			}
+			
+			if( jsonObject.optJSONObject("gender") != null ){
+				gender = new ActorGender( jsonObject.optJSONObject("gender") );
 			}
 			
 		} catch (JSONException e) {
@@ -65,7 +70,27 @@ public class ActorData {
 	}
 	
 	public MyRelationData getMyRelation(){
-		return this.myRelation;
+		return myRelation;
+	}
+	
+	public String getFirstName(){
+		return firstName;
+	}
+	
+	public String getLastName(){
+		return lastName;
+	}
+	
+	public ActorGender getGender(){
+		return gender;
+	}
+	
+	public ActorNotificationSettings getNotificationSettings(){
+		return notificationSettings;
+	}
+	
+	public ActorSocialConnections getSocialConnections(){
+		return socialConnections;
 	}
 	
 }

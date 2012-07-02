@@ -7,6 +7,7 @@ import com.codegears.getable.data.StoreData;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -17,12 +18,14 @@ public class ShareProductSearchItem extends LinearLayout {
 	private BrandData brandData;
 	private StoreData storeData;
 	private String genderId;
+	private ImageView arrowRight;
 	
 	public ShareProductSearchItem(Context context) {
 		super(context);
 		View.inflate(context, R.layout.shareproductsearchitem, this);
 		
 		name = (TextView) findViewById( R.id.shareProductSearchItemName );
+		arrowRight = (ImageView) findViewById( R.id.shareProductSearchItemArrowRightImage );
 	}
 	
 	public void setName( String setValue ){
@@ -43,6 +46,10 @@ public class ShareProductSearchItem extends LinearLayout {
 	
 	public void setGenderId(String setValue) {
 		genderId = setValue;
+	}
+	
+	public void setArrowVisibility(int visibility){
+		arrowRight.setVisibility(visibility);
 	}
 	
 	public CategoryData getCategoryData() {

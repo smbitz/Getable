@@ -18,4 +18,13 @@ public class ActorSocialConnections {
 			e.printStackTrace();
 		}
 	}
+	
+	public ActorSocialFacebook getFacebook(){
+		return facebook;
+	}
+	
+	public ActorSocialTwitter getTwitter(){
+		return twitter;
+	}
+	
 }

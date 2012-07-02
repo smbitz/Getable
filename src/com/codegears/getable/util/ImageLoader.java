@@ -1,12 +1,24 @@
 package com.codegears.getable.util;
 
+import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Stack;
 import java.util.WeakHashMap;
+
+import org.apache.http.HttpResponse;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.BinaryHttpResponseHandler;
 
 import android.app.Activity;
 import android.content.Context;
@@ -21,12 +33,29 @@ public class ImageLoader {
 	private PhotosQueue photosQueue = new PhotosQueue();
 	private Activity activity;
 	private PhotosLoader photoLoaderThread = new PhotosLoader();
+	private AsyncHttpClient asyncHttpClient;
 	
 	public ImageLoader(Context context){
 		//Make the background thead low priority. This way it will not affect the UI performance
         photoLoaderThread.setPriority(Thread.NORM_PRIORITY-1);
 	}
 	
+	public Bitmap DisplayImage( String imageURL, Activity currentAct , ImageView imageView, Boolean isUseCache, AsyncHttpClient getAsyncHttpClient ){
+		asyncHttpClient = getAsyncHttpClient;
+		imageViews.put( imageView, imageURL );
+		Bitmap bitmap = null;
+		if( isUseCache ){
+			bitmap = memoryCache.get( imageURL );
+			if( bitmap != null ){
+				imageView.setImageBitmap( bitmap );
+				return bitmap;
+			}
+		}
+		
+		queuePhoto( imageURL, currentAct, imageView);
+		return bitmap;
+	}
+
 	public Bitmap DisplayImage( String imageURL, Activity currentAct , ImageView imageView, Boolean isUseCache ){
 		imageViews.put( imageView, imageURL );
 		Bitmap bitmap = null;
@@ -60,7 +89,7 @@ public class ImageLoader {
 	private Bitmap getBitmap(String url) 
     {   
         //from web
-        try {
+        /*try {
             Bitmap bitmap=null;
             URL imageUrl = new URL( url );
             HttpURLConnection conn = (HttpURLConnection)imageUrl.openConnection();
@@ -72,7 +101,27 @@ public class ImageLoader {
         } catch (Exception ex){
            ex.printStackTrace();
            return null;
-        }
+        }*/
+		Bitmap bitmap = null;
+		HttpClient client = asyncHttpClient.getHttpClient();
+		HttpGet httpGet = new HttpGet( url );
+		
+		HttpResponse res;
+		InputStream is;
+		try {
+			res = client.execute( httpGet, asyncHttpClient.getHttpContext() );
+			is = res.getEntity().getContent();
+			bitmap = BitmapFactory.decodeStream( is );
+            return bitmap;
+		} catch (ClientProtocolException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+			return null;
+		}
     }
 	
 	public void clearCache() {

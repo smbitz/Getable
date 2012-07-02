@@ -18,12 +18,12 @@ import com.codegears.getable.R;
 import com.codegears.getable.data.ProductActivityData;
 import com.codegears.getable.ui.AbstractViewLayout;
 import com.codegears.getable.ui.ProductImageThumbnail;
+import com.codegears.getable.ui.ProductImageThumbnailDetail;
 import com.codegears.getable.util.Config;
 import com.codegears.getable.util.GetCurrentLocation;
 import com.codegears.getable.util.ImageLoader;
-import com.codegears.getable.util.NetworkThreadUtil;
-import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
-import com.codegears.getable.util.NetworkUtil;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -43,12 +43,17 @@ import android.widget.AdapterView.OnItemClickListener;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.GridView;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 
-public class GalleryLayout extends AbstractViewLayout implements OnClickListener, OnItemClickListener, NetworkThreadListener {
+public class GalleryLayout extends AbstractViewLayout implements OnClickListener, OnItemClickListener {
 
 	private static final String URL_GET_PRODUCT_ACTIVITIES = "URL_GET_PRODUCT_ACTIVITIES";
+	
+	private static final int GALLERY_THREE_ITEM_VIEW = 0;
+	private static final int GALLERY_TWO_ITEM_VIEW = 1;
 	
 	private Button filterButton;
 	private GridView galleryGrid;
@@ -64,11 +69,18 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 	private String currentLng;
 	private GetCurrentLocation getCurrentLocation;
 	private ImageLoader imageLoader;
+	private TextView textViewFilter1;
+	private TextView textViewFilter2;
+	private ImageButton threeItemViewButton;
+	private ImageButton twoItemViewButton;
+	private int galleryViewItemStatus;
+	private AsyncHttpClient asyncHttpClient;
+	private MyApp app;
 	
 	public GalleryLayout( Activity activity ) {
 		super( activity );
-		
 		View.inflate( activity, R.layout.gallerylayout, this );
+		
 		filterButton = (Button)this.findViewById( R.id.FilterButton );
 		galleryGrid = (GridView)this.findViewById( R.id.GalleryGrid );
 		galleryAdapter = new GalleryAdapter();
@@ -76,9 +88,19 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 		config = new Config( this.getContext() );
 		getCurrentLocation = new GetCurrentLocation( this.getContext() );
 		imageLoader = new ImageLoader( this.getContext() );
+		textViewFilter1 = (TextView) findViewById( R.id.galleryLayoutFilterText1 );
+		textViewFilter2 = (TextView) findViewById( R.id.galleryLayoutFilterText2 );
+		threeItemViewButton = (ImageButton) findViewById( R.id.galleryLayoutThreeItemViewButton );
+		twoItemViewButton = (ImageButton) findViewById( R.id.galleryLayoutTwoItemViewButton );
+		app = (MyApp) this.getActivity().getApplication();
+		asyncHttpClient = app.getAsyncHttpClient();
+		
+		galleryViewItemStatus = GALLERY_THREE_ITEM_VIEW;
 		
 		filterButton.setOnClickListener( this );
 		galleryGrid.setOnItemClickListener( this );
+		threeItemViewButton.setOnClickListener( this );
+		twoItemViewButton.setOnClickListener( this );
 		
 		currentLat = getCurrentLocation.getCurrentLat();
 		currentLng = getCurrentLocation.getCurrentLng();
@@ -86,24 +108,35 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 		urlVar2 = "&sort.properties[0].name=statistic.score.active&sort.properties[0].reverse=true&sort.properties[1].name=statistic.score.allTime&sort.properties[1].reverse=true";
 		urlVar3 = "&currentCoordinate.latitude="+currentLat+"&currentCoordinate.longitude="+currentLng;
 		
-		//galleryGrid.setOnItemClickListener( this );
-		//SharedPreference.get(image.id);	// image which clicked at GalleryLayout, so use id as ....
 		loadData();
 	}
 	
 	public void loadData(){
-		//NetworkThread.load();
-		//public void onReceipt(){
-			//Array<Image> image = data get;
-			//click image
-			//image.storeAsClickedImageAtGalleryLayout();
-			//SharedPreference.put(key, image.id);
-			//which image clicked??
-		//}
 		recycleResource();
-		NetworkThreadUtil.getRawData(
+		/*NetworkThreadUtil.getRawData(
 				config.get( URL_GET_PRODUCT_ACTIVITIES ).toString()+urlVar1+urlVar2+urlVar3,
-        		null, this);
+        		null, this);*/
+		asyncHttpClient.post( 
+			config.get( URL_GET_PRODUCT_ACTIVITIES ).toString()+urlVar1+urlVar2+urlVar3,
+			new JsonHttpResponseHandler(){
+				@Override
+				public void onSuccess(JSONObject jsonObject) {
+					super.onSuccess(jsonObject);
+					try {
+						JSONArray newArray = jsonObject.getJSONArray("entities");
+						for(int i = 0; i<newArray.length(); i++){
+							//Load Product Data
+							ProductActivityData newData = new ProductActivityData( newArray.getJSONObject(i) );
+							arrayProductData.add(newData);
+						}
+					} catch (JSONException e) {
+						e.printStackTrace();
+					}
+					
+					galleryAdapter.setData( arrayProductData );
+					galleryGrid.setAdapter( galleryAdapter );
+				}
+		});
 	}
 	
 	private void recycleResource() {
@@ -115,10 +148,26 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 	}
 	
 	@Override
-	public void onClick( View view ) {
-		if(filterButton.equals( view )){
+	public void onClick( View v ) {
+		if( v.equals( filterButton )){
 			Intent intent = new Intent(this.getContext(), GalleryFilterActivity.class);
 			this.getActivity().startActivityForResult( intent, MainActivity.REQUEST_GALLERY_FILTER );
+		}else if( v.equals( threeItemViewButton ) ){
+			if( galleryViewItemStatus == GALLERY_TWO_ITEM_VIEW ){
+				galleryGrid.setNumColumns( 3 );
+				galleryViewItemStatus = GALLERY_THREE_ITEM_VIEW;
+				threeItemViewButton.setImageResource( R.drawable.gallery_3_item_view_selected );
+				twoItemViewButton.setImageResource( R.drawable.gallery_2_item_view );
+				refreshView();
+			}
+		}else if( v.equals( twoItemViewButton ) ){
+			if( galleryViewItemStatus == GALLERY_THREE_ITEM_VIEW ){
+				galleryGrid.setNumColumns( 2 );
+				galleryViewItemStatus = GALLERY_TWO_ITEM_VIEW;
+				twoItemViewButton.setImageResource( R.drawable.gallery_2_item_view_selected );
+				threeItemViewButton.setImageResource( R.drawable.gallery_3_item_view );
+				refreshView();
+			}
 		}
 	}
 	
@@ -161,26 +210,52 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 
 		@Override
 		public View getView( int position, View convertView, ViewGroup arg2 ) {
-			ProductImageThumbnail returnView;
 			
-			if (convertView == null) {
-				ProductImageThumbnail newImageThumbnail = new ProductImageThumbnail(GalleryLayout.this.getContext());
+			View returnView = null;
+			
+			if( galleryViewItemStatus == GALLERY_THREE_ITEM_VIEW ){
+				ProductImageThumbnail newImageThumbnail;
+				
+				if (convertView == null) {
+					ProductImageThumbnail newImageThumbnailTemp = new ProductImageThumbnail(GalleryLayout.this.getContext());
+					newImageThumbnail = newImageThumbnailTemp;
+				}else{
+					newImageThumbnail = (ProductImageThumbnail) convertView;
+					newImageThumbnail.setProductImageDefault();
+				}
+				
+				String productImageURL = arrayProductData.get( position ).getProduct().getProductPicture().getImageUrls().getImageURLT();
+				
+				newImageThumbnail.setProductData( arrayProductData.get( position ) );
+				imageLoader.DisplayImage( productImageURL, GalleryLayout.this.getActivity(), newImageThumbnail.getProductImageView(), true, asyncHttpClient );
+				
 				returnView = newImageThumbnail;
-			}else{
-				returnView = (ProductImageThumbnail) convertView;
-				returnView.setProductImageDefault();
+			}else if( galleryViewItemStatus == GALLERY_TWO_ITEM_VIEW ){
+				ProductImageThumbnailDetail newImageThumbnailDetail;
+				
+				if (convertView == null) {
+					ProductImageThumbnailDetail newImageThumbnailDetailTemp = new ProductImageThumbnailDetail(GalleryLayout.this.getContext());
+					newImageThumbnailDetail = newImageThumbnailDetailTemp;
+				}else{
+					newImageThumbnailDetail = (ProductImageThumbnailDetail) convertView;
+					newImageThumbnailDetail.setProductImageDefault();
+				}
+				
+				String productImageURL = arrayProductData.get( position ).getProduct().getProductPicture().getImageUrls().getImageURLT();
+				
+				newImageThumbnailDetail.setProductData( arrayProductData.get( position ) );
+				newImageThumbnailDetail.setProductName( arrayProductData.get( position ).getProduct().getBrand().getName() );
+				newImageThumbnailDetail.setUserName( arrayProductData.get( position ).getActor().getName() );
+				imageLoader.DisplayImage( productImageURL, GalleryLayout.this.getActivity(), newImageThumbnailDetail.getProductImageView(), true, asyncHttpClient );
+				
+				returnView = newImageThumbnailDetail;
 			}
-			
-			String productImageURL = arrayProductData.get( position ).getProduct().getProductPicture().getImageUrls().getImageURLT();
-			
-			returnView.setProductData( arrayProductData.get( position ) );
-			imageLoader.DisplayImage( productImageURL, GalleryLayout.this.getActivity(), returnView.getProductImageView(), true );
 			
 			return returnView;
 		}
 	}
 
-	@Override
+	/*@Override
 	public void onNetworkDocSuccess(String urlString, Document document) {
 		// TODO Auto-generated method stub
 		
@@ -193,7 +268,7 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 			JSONArray newArray = jsonObject.getJSONArray("entities");
 			for(int i = 0; i<newArray.length(); i++){
 				//Load Product Data
-				ProductActivityData newData = new ProductActivityData( (JSONObject) newArray.get(i) );
+				ProductActivityData newData = new ProductActivityData( newArray.getJSONObject(i) );
 				arrayProductData.add(newData);
 			}
 		} catch (JSONException e) {
@@ -213,19 +288,31 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 	public void onNetworkFail(String urlString) {
 		// TODO Auto-generated method stub
 		
-	}
+	}*/
 
 	@Override
 	public void refreshView( Intent getData ) {
 		urlVar2 = getData.getExtras().getString( GalleryFilterActivity.PUT_EXTRA_URL_VAR_1 );
 		urlVar3 = getData.getExtras().getString( GalleryFilterActivity.PUT_EXTRA_URL_VAR_2 );
+		
+		final String showTextFilter1 = getData.getExtras().getString( GalleryFilterActivity.PUT_EXTRA_FILTER_1 );
+		final String showTextFilter2 = getData.getExtras().getString( GalleryFilterActivity.PUT_EXTRA_FILTER_2 );
+		
+		this.getActivity().runOnUiThread( new Runnable() {
+			@Override
+			public void run() {
+				textViewFilter1.setText( showTextFilter1 );
+				textViewFilter2.setText( showTextFilter2 );
+			}
+		});
+		
 		loadData();
 	}
 
 	@Override
 	public void refreshView() {
-		// TODO Auto-generated method stub
-		
+		recycleResource();
+		loadData();
 	}
 	
 }

@@ -4,5 +4,8 @@
     <string name="hello">Hello World, MainActivity!</string>
     <string name="app_name">Getable</string>
     <color name="NameColorBlue">#63bfec</color>
+    <color name="NameColorGrey">#887f79</color>
+    <color name="NameColorPink">#ec4ab9</color>
+    <color name="BGColorGrey">#ded9d6</color>
 
 </resources>

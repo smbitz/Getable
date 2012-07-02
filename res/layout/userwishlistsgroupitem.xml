@@ -6,15 +6,31 @@
   android:layout_height="match_parent">
 
     <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="5dp"
+        android:orientation="vertical" >
+    </LinearLayout>
+
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal" >
 
+        <LinearLayout
+            android:layout_width="5dp"
+            android:layout_height="match_parent" >
+        </LinearLayout>
+
         <ImageView
             android:id="@+id/userWishlistsImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
+            android:layout_width="60dp"
+            android:layout_height="60dp"
             android:src="@drawable/image_wishlist_default" />
+
+        <LinearLayout
+            android:layout_width="5dp"
+            android:layout_height="match_parent" >
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -38,7 +54,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" android:layout_weight="4">
+            android:layout_height="match_parent" android:layout_weight="3">
 
             <ImageView
                 android:id="@+id/imageView2"
@@ -48,12 +64,17 @@
 
         </LinearLayout>
 
+        <LinearLayout
+            android:layout_width="5dp"
+            android:layout_height="match_parent" >
+        </LinearLayout>
+
     </LinearLayout>
 
-    <ImageView
-        android:id="@+id/imageView1"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:src="@drawable/image_line" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:orientation="vertical" >
+    </LinearLayout>
 
 </LinearLayout>

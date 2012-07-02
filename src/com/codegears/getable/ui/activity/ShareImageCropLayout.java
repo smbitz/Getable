@@ -13,6 +13,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Environment;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 
@@ -33,14 +34,16 @@ public class ShareImageCropLayout extends AbstractViewLayout implements OnClickL
 	private ImageView cropImage;
 	private BodyLayoutStackListener listener;
 	private String extStorageDirectory;
+	private Activity activity;
 	
 	public ShareImageCropLayout(Activity activity) {
 		super(activity);
+		this.activity = activity;
 		View.inflate( this.getContext(), R.layout.shareimagecroplayout,  this );
 		
 		cropImageView = (CropView) findViewById( R.id.shareImageCropImageView );
 		doneButton = (Button) findViewById( R.id.shareImageCropDoneButton );
-		Bitmap arrow = BitmapFactory.decodeResource( this.getResources(), R.drawable.ic_launcher );
+		Bitmap arrow = BitmapFactory.decodeResource( this.getResources(), R.drawable.crop_image_button );
 		cropImageView.setButton( arrow, arrow, arrow, arrow );
 		
 		extStorageDirectory = Environment.getExternalStorageDirectory().toString()+TEMP_IMAGE_DIRECTORY_NAME;
@@ -53,10 +56,10 @@ public class ShareImageCropLayout extends AbstractViewLayout implements OnClickL
 		doneButton.setOnClickListener( this );
 	}
 	
-	public void setImage( Bitmap bitmap ){
-		//cropImageView.setCropRatio( 1 );
-		cropImageView.setImageBitmap( bitmap );
-		cropImageView.setBitmap(bitmap);
+	public void setImage(final Bitmap bitmap ){
+				cropImageView.setCropRatio( 1 );
+				cropImageView.setImageBitmap( bitmap );
+				cropImageView.setBitmap(bitmap);			
 	}
 
 	@Override
@@ -82,11 +85,12 @@ public class ShareImageCropLayout extends AbstractViewLayout implements OnClickL
 				//Delete old value.
 				SharedPreferences myPref = this.getActivity().getSharedPreferences( ShareImageDetailLayout.SHARE_PREF_DETAIL_VALUE, this.getActivity().MODE_PRIVATE );
 				SharedPreferences.Editor prefsEditor = myPref.edit();
-				prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_PRODUCT_NAME, null );
+				prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_CATEGORY_NAME, null );
+				prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_CATEGORY_ID, null );
 				prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_BRAND_NAME, null );
 				prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_STORES_NAME, null );
+				prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_STORES_ID, null );
 				prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_GENDER_ID, null );
-				prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_BRAND_ID, null );
 				prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_STORES_EXTERNAL_ID, null );
 				prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_STORES_EXTERNAL_TYPE_ID, null );
 		        prefsEditor.commit();

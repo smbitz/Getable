@@ -6,5 +6,11 @@
 	<classpathentry kind="con" path="com.android.ide.eclipse.adt.LIBRARIES"/>
 	<classpathentry exported="true" kind="lib" path="C:/Users/BeNzz/Desktop/SourceCode/ExtJar/httpclient-4.2.jar"/>
 	<classpathentry exported="true" kind="lib" path="C:/Users/BeNzz/Desktop/SourceCode/ExtJar/httpmime-4.2.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/BeNzz/Desktop/SourceCode/ExtJar/commons-io-2.3.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/BeNzz/Desktop/SourceCode/ExtJar/android-async-http-1.4.0.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/BeNzz/Desktop/SourceCode/AndroidTwitter/ExtJars/Jars/signpost-commonshttp4-1.2.1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/BeNzz/Desktop/SourceCode/AndroidTwitter/ExtJars/Jars/signpost-core-1.2.1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/BeNzz/Desktop/SourceCode/AndroidTwitter/ExtJars/Jars/signpost-jetty6-1.2.1.1.jar"/>
+	<classpathentry exported="true" kind="lib" path="C:/Users/BeNzz/Desktop/SourceCode/AndroidTwitter/ExtJars/Jars/twitter4j-core-2.1.6.jar"/>
 	<classpathentry kind="output" path="bin/classes"/>
 </classpath>

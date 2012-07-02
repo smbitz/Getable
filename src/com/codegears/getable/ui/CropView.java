@@ -50,6 +50,13 @@ public class CropView extends ImageView {
 		cropArea.right = 0.3f * xyRatio / xyRatioView;
 		cropArea.bottom = 0.3f;
 	}
+	
+	@Override
+	public void onWindowFocusChanged(boolean hasWindowFocus){
+		super.onWindowFocusChanged(hasWindowFocus);
+		this.setCropRatio(cropRatio);	//reset CropRatio due to the problem of view measure
+		adjustCropArea();				//readjust CropArea due to the problem of view measure
+	}
 
 	/*
 	 * set directional button image
@@ -107,7 +114,7 @@ public class CropView extends ImageView {
 				cropArea.top -= cropArea.bottom - 1;
 				cropArea.bottom = 1;
 			}
-		} else if ( xyRatioView < xyRatioImage ) {
+		} else if ( xyRatioView < xyRatioImage ) {		
 			float adjustedImageHeight = this.getWidth() / xyRatioImage;
 			float space = (this.getHeight() - adjustedImageHeight) / 2;
 			float spaceRatio = space / this.getHeight();
@@ -184,7 +191,7 @@ public class CropView extends ImageView {
 	public void onDraw( Canvas canvas ) {
 		super.onDraw( canvas );
 		Paint borderPaint = new Paint();
-		borderPaint.setColor( 0xFFFF0000 );
+		borderPaint.setColor( 0xff0000ff );
 		Paint outterAreaPaint = new Paint();
 		outterAreaPaint.setColor( 0x7F000000 );
 		float cropTop = cropArea.top * this.getHeight();

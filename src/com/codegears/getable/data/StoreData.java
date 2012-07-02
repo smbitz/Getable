@@ -11,30 +11,24 @@ public class StoreData {
 	private String city;
 	private String state;
 	private String postalCode;
-	private StoreCoondinate coondinate;
+	private StoreCoordinate coordinate;
 	private ExternalStoresReferenceData externalReference;
 	
 	public StoreData(JSONObject jsonObject) {
-		try {
-			name = jsonObject.optString("name");
-			id = jsonObject.optString("id");
-			url = jsonObject.optString("url");
-			streetAddress = jsonObject.optString("streetAddress");
-			city = jsonObject.optString("city");
-			state = jsonObject.optString("state");
-			postalCode = jsonObject.optString("postalCode");
-			
-			if( jsonObject.getJSONObject("coondinate") != null ){
-				coondinate = new StoreCoondinate( jsonObject.getJSONObject("coondinate") );
-			}
-			
-			if( jsonObject.getJSONObject("externalReference") != null ){
-				externalReference = new ExternalStoresReferenceData( jsonObject.getJSONObject("externalReference") );
-			}
-			
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		name = jsonObject.optString("name");
+		id = jsonObject.optString("id");
+		url = jsonObject.optString("url");
+		streetAddress = jsonObject.optString("streetAddress");
+		city = jsonObject.optString("city");
+		state = jsonObject.optString("state");
+		postalCode = jsonObject.optString("postalCode");
+		
+		if( jsonObject.optJSONObject("coordinate") != null ){
+			coordinate = new StoreCoordinate( jsonObject.optJSONObject("coordinate") );
+		}
+		
+		if( jsonObject.optJSONObject("externalReference") != null ){
+			externalReference = new ExternalStoresReferenceData( jsonObject.optJSONObject("externalReference") );
 		}
 	}
 	
@@ -56,6 +50,10 @@ public class StoreData {
 	
 	public ExternalStoresReferenceData getExternalReference(){
 		return externalReference;
+	}
+	
+	public StoreCoordinate getCoondinate(){
+		return coordinate;
 	}
 	
 }

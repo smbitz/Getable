@@ -26,7 +26,7 @@ public class NearbyItem extends LinearLayout {
 		userName = (TextView) findViewById( R.id.nearByItemUserName );
 		productName = (TextView) findViewById( R.id.nearByItemProductName );
 		productAddress = (TextView) findViewById( R.id.nearByItemProductAddress );
-		distanceValue = (TextView) findViewById( R.id.nearByItemMiDistance );
+		distanceValue = (TextView) findViewById( R.id.nearByItemMiDistanceText );
 	}
 	
 	public ImageView getProductImageView(){
@@ -55,6 +55,10 @@ public class NearbyItem extends LinearLayout {
 	
 	public void setProductActivityData( ProductActivityData setData ){
 		activityData = setData;
+	}
+	
+	public void setMiText( String setTextMi ){
+		distanceValue.setText( setTextMi );
 	}
 	
 }

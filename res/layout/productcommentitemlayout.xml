@@ -8,16 +8,45 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
-        <ImageView
-            android:id="@+id/productCommentItemUserImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_launcher" />
+        <LinearLayout
+            android:layout_width="5dp"
+            android:layout_height="match_parent" >
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:orientation="vertical" >
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/productCommentItemUserImage"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:src="@drawable/user_image_default" />
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="5dp"
+            android:layout_height="match_parent" >
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="5dp"
+                android:orientation="vertical" >
+            </LinearLayout>
 
             <TextView
                 android:id="@+id/productCommentItemUserName"
@@ -36,7 +65,7 @@
                 android:id="@+id/productCommentItemCommentTime"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="TextView" />
+                android:text="" />
 
         </LinearLayout>
 
@@ -52,4 +81,10 @@
 
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:orientation="vertical" >
+    </LinearLayout>
+    
 </LinearLayout>

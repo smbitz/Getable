@@ -12,6 +12,7 @@ import org.w3c.dom.Document;
 
 import com.codegears.getable.BodyLayoutStackListener;
 import com.codegears.getable.MainActivity;
+import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
 import com.codegears.getable.data.ProductActivityData;
 import com.codegears.getable.data.ProductActorLikeData;
@@ -19,8 +20,8 @@ import com.codegears.getable.ui.AbstractViewLayout;
 import com.codegears.getable.ui.ProductImageThumbnail;
 import com.codegears.getable.util.Config;
 import com.codegears.getable.util.ImageLoader;
-import com.codegears.getable.util.NetworkThreadUtil;
-import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.JsonHttpResponseHandler;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
@@ -36,7 +37,7 @@ import android.widget.BaseAdapter;
 import android.widget.Gallery;
 import android.widget.GridView;
 
-public class UserGalleryLayout extends AbstractViewLayout implements OnItemClickListener, NetworkThreadListener {
+public class UserGalleryLayout extends AbstractViewLayout implements OnItemClickListener {
 
 	public static final String URL_DEFAULT = "URL_DEFAULT";
 	public static final String USER_GALLERY_VIEW_TYPE_PHOTOS = "USER_GALLERY_VIEW_TYPE_PHOTOS";
@@ -49,12 +50,17 @@ public class UserGalleryLayout extends AbstractViewLayout implements OnItemClick
 	private ArrayList<ProductActivityData> arrayProductData;
 	private String viewDataType;
 	private ImageLoader imageLoader;
+	private MyApp app;
+	private AsyncHttpClient asyncHttpClient;
 	
 	public UserGalleryLayout(Activity activity, String setDataURL, String setViewDataType) {
 		super(activity);
 		View.inflate( this.getContext(), R.layout.usergallerylayout, this);
 		
 		viewDataType = setViewDataType;
+		
+		app = (MyApp) this.getActivity().getApplication();
+		asyncHttpClient = app.getAsyncHttpClient();
 		
 		userGalleryGrid = (GridView) findViewById( R.id.userGalleryGridView );
 		userGalleryAdapter = new UserGalleryAdapter();
@@ -69,7 +75,43 @@ public class UserGalleryLayout extends AbstractViewLayout implements OnItemClick
 
 	private void loadData() {
 		recycleResource();
-		NetworkThreadUtil.getRawData( userDataURL, null, this);
+		//NetworkThreadUtil.getRawData( userDataURL, null, this);
+		asyncHttpClient.get( userDataURL, new JsonHttpResponseHandler(){
+			@Override
+			public void onSuccess(JSONObject getJsonObject) {
+				super.onSuccess(getJsonObject);
+				onUserDataURLSuccess(getJsonObject);
+			}
+		});
+	}
+	
+	private void onUserDataURLSuccess(JSONObject jsonObject){
+		try {
+			JSONArray newArray = jsonObject.getJSONArray("entities");
+			for(int i = 0; i<newArray.length(); i++){
+				//Load Product Data
+				ProductActivityData newData = null;
+				
+				if( viewDataType.equals( USER_GALLERY_VIEW_TYPE_PHOTOS ) ){
+					newData = new ProductActivityData( (JSONObject) newArray.get(i) );
+				}else if( viewDataType.equals( USER_GALLERY_VIEW_TYPE_LIKES ) ){
+					ProductActorLikeData productActorLikeActivity = new ProductActorLikeData( (JSONObject) newArray.get(i) );
+					newData = productActorLikeActivity.getLike().getActivityData();
+				}
+				
+				arrayProductData.add(newData);
+			}
+		} catch (JSONException e) {
+			e.printStackTrace();
+		}
+		
+		userGalleryAdapter.setData( arrayProductData );
+		this.getActivity().runOnUiThread( new Runnable() {
+			@Override
+			public void run() {
+				userGalleryGrid.setAdapter( userGalleryAdapter );
+			}
+		});
 	}
 
 	private void recycleResource() {
@@ -142,7 +184,7 @@ public class UserGalleryLayout extends AbstractViewLayout implements OnItemClick
 			String productImageURL = arrayProductData.get( position ).getProduct().getProductPicture().getImageUrls().getImageURLT();
 			
 			returnView.setProductData( arrayProductData.get( position ) );
-			imageLoader.DisplayImage(productImageURL, UserGalleryLayout.this.getActivity(), returnView.getProductImageView(), true);
+			imageLoader.DisplayImage(productImageURL, UserGalleryLayout.this.getActivity(), returnView.getProductImageView(), true, asyncHttpClient );
 			
 			return returnView;
 		}
@@ -163,7 +205,7 @@ public class UserGalleryLayout extends AbstractViewLayout implements OnItemClick
 		}
 	}
 
-	@Override
+	/*@Override
 	public void onNetworkDocSuccess(String urlString, Document document) {
 		// TODO Auto-generated method stub
 		
@@ -204,5 +246,5 @@ public class UserGalleryLayout extends AbstractViewLayout implements OnItemClick
 	public void onNetworkFail(String urlString) {
 		// TODO Auto-generated method stub
 		
-	}
+	}*/
 }

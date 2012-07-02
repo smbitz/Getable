@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="wrap_content"
+	android:layout_height="155dp" android:background="@drawable/photo_option_bg" android:layout_gravity="center">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <Button
+            android:id="@+id/customDialogGenderMaleButton"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Male" android:background="@null" android:textColor="#ffffff"/>
+
+        <ImageView
+            android:id="@+id/imageView1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/photo_option_line" android:layout_gravity="center"/>
+
+        <Button
+            android:id="@+id/customDialogGenderFemaleButton"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Female" android:background="@null" android:textColor="#ffffff"/>
+
+        <ImageView
+            android:id="@+id/ImageView01"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/photo_option_line" android:layout_gravity="center"/>
+
+        <Button
+            android:id="@+id/customDialogGenderNotSayButton"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="I'd rather not say" android:background="@null" android:textColor="#ffffff"/>
+
+    </LinearLayout>
+
+</LinearLayout>

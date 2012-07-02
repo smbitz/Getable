@@ -3,6 +3,7 @@ package com.codegears.getable.util;
 import java.util.List;
 
 import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.protocol.BasicHttpContext;
 import org.w3c.dom.Document;
 
 public class NetworkThreadUtil {
@@ -51,20 +52,6 @@ public class NetworkThreadUtil {
 		}.start();
 	}
 	
-	public static void getRawDataMultiPartWithCookie(final String urlString, final String postData,final List<String> cookie, final NetworkThreadListener listener, final MultipartEntity entity ){
-		new Thread() {
-			@Override
-			public void run() {
-				String raw = NetworkUtil.getRawData(urlString, postData, cookie, entity);
-				if (!raw.equals("")) {
-					listener.onNetworkRawSuccess(urlString, raw);
-				} else {
-					listener.onNetworkFail(urlString);
-				}
-			}
-		}.start();
-	}
-	
 	public static void getRawData(final String urlString,
 			final String postData, final NetworkThreadListener listener) {
 		new Thread() {
@@ -86,6 +73,23 @@ public class NetworkThreadUtil {
 		public void onNetworkRawSuccess(String urlString, String result);
 
 		public void onNetworkFail(String urlString);
+	}
+
+	public static void getRawDataMultiPartWithCookie(final String urlString,
+			final MultipartEntity reqEntity,
+			final BasicHttpContext appBasicHttpContext,
+			final NetworkThreadListener listener) {
+		new Thread() {
+			@Override
+			public void run() {
+				String raw = NetworkUtil.getRawData(urlString, reqEntity, appBasicHttpContext);
+				if (!raw.equals("")) {
+					listener.onNetworkRawSuccess(urlString, raw);
+				} else {
+					listener.onNetworkFail(urlString);
+				}
+			}
+		}.start();
 	}
 
 }

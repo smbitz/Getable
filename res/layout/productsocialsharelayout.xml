@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:orientation="vertical" >
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <com.codegears.getable.ui.AppHeader
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+        </com.codegears.getable.ui.AppHeader>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" android:layout_gravity="center">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" android:layout_weight="5">
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/productSocialShareLayoutShareButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Share" android:layout_gravity="center" android:background="@null" android:textColor="#ffffff" android:layout_weight="1" android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+        </LinearLayout>
+
+    </FrameLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" android:layout_marginLeft="5dp" android:layout_marginRight="5dp" android:layout_marginTop="5dp" android:layout_marginBottom="5dp">
+
+        <EditText
+            android:id="@+id/productSocialShareLayoutShareText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:ems="10" >
+            <requestFocus />
+        </EditText>
+
+    </LinearLayout>
+
+</LinearLayout>

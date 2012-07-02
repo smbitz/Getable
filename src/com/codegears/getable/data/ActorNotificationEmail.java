@@ -13,4 +13,17 @@ public class ActorNotificationEmail {
 		commented = jsonObject.optBoolean("commented");
 		liked = jsonObject.optBoolean("liked");
 	}
+	
+	public boolean getFollowSetting(){
+		return followed;
+	}
+	
+	public boolean getCommentSetting(){
+		return commented;
+	}
+	
+	public boolean getLikeSetting(){
+		return liked;
+	}
+	
 }

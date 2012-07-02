@@ -3,6 +3,7 @@ package com.codegears.getable.ui.activity;
 import com.codegears.getable.BodyLayoutStackListener;
 import com.codegears.getable.R;
 import com.codegears.getable.ui.AbstractViewLayout;
+import com.google.android.maps.MapController;
 import com.google.android.maps.MapView;
 
 import android.app.Activity;
@@ -16,13 +17,14 @@ public class StoreMainLayout extends AbstractViewLayout {
 	public static final String SHARE_PREF_KEY_STORE_ID = "SHARE_PREF_KEY_STORE_ID";
 	
 	private BodyLayoutStackListener listener;
-	private LinearLayout mapViewLayout;
+	private MapView mapView;
+	private MapController mapController;
 
 	public StoreMainLayout(Activity activity) {
 		super(activity);
 		View.inflate(this.getContext(), R.layout.storemainlayout, this);
 		
-		mapViewLayout = (LinearLayout) findViewById( R.id.storeMainLayoutMapView );
+		mapView = (MapView) findViewById( R.id.storeMainLayoutMapView );
 	}
 
 	@Override

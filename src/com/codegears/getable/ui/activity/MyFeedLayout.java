@@ -15,6 +15,7 @@ import android.content.SharedPreferences;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
@@ -37,12 +38,14 @@ import com.codegears.getable.ui.ProductImageThumbnail;
 import com.codegears.getable.ui.ProductNumComment;
 import com.codegears.getable.util.Config;
 import com.codegears.getable.util.ImageLoader;
-import com.codegears.getable.util.NetworkThreadUtil;
-import com.codegears.getable.util.NetworkUtil;
-import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
 import android.view.View.OnClickListener;
 
-public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadListener, OnClickListener {
+public class MyFeedLayout extends AbstractViewLayout implements OnClickListener {
 	
 	private static final String FEED_TYPE_ADD_PRODUCT = "1";
 	private static final String FEED_TYPE_COMMENT = "2";
@@ -60,6 +63,9 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 	private String getProductLikeURL;
 	private String getProductUnLikeURL;
 	private String getFeedURL;
+	private AsyncHttpClient asyncHttpClient;
+	private LinearLayout findFriendLayout;
+	private Button findFriendButton;
 	
 	public MyFeedLayout(Activity activity) {
 		super(activity);
@@ -67,15 +73,51 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 		
 		config = new Config( this.getContext() );
 		app = (MyApp) this.getActivity().getApplication();
+		asyncHttpClient = app.getAsyncHttpClient();
 		arrayFeedData = new ArrayList<ProductActivityData>();
 		feedListView = (ListView) findViewById( R.id.myFeedLayoutListView );
 		feedAdapter = new FeedAdapter();
 		imageLoader = new ImageLoader( this.getContext() );
+		findFriendLayout = (LinearLayout) findViewById( R.id.myFeedLayoutFindFriendLayout );
+		findFriendButton = (Button) findViewById( R.id.myFeedLayoutFindFriendButton );
+		
+		findFriendButton.setOnClickListener( this );
 		
 		getFeedURL = config.get( MyApp.URL_DEFAULT ).toString()+"me/feed.json"+MyApp.DEFAULT_URL_VAR_1;
 		appCookie = app.getAppCookie();
 		
-		NetworkThreadUtil.getRawDataWithCookie(getFeedURL, null, appCookie, this);
+		//NetworkThreadUtil.getRawDataWithCookie(getFeedURL, null, appCookie, this);
+		asyncHttpClient.get( getFeedURL, new JsonHttpResponseHandler(){
+			@Override
+			public void onSuccess(JSONObject resultObject) {
+				super.onSuccess(resultObject);
+				try {
+					//Check type of feed.
+					if( resultObject.optJSONArray( "entities" ) != null ){
+						JSONArray newArray = resultObject.optJSONArray( "entities" );
+						
+						for(int i = 0; i<newArray.length(); i++){
+							JSONObject entitiesObject = (JSONObject) newArray.get(i);
+							
+							ProductActivityData activityData = new ProductActivityData( entitiesObject );
+							arrayFeedData.add( activityData );
+						}
+					}
+					
+					if( arrayFeedData.size() > 0 ){
+						feedAdapter.setData( arrayFeedData );
+						feedListView.setAdapter( feedAdapter );
+					}else{
+						feedListView.setVisibility( View.GONE );
+						findFriendLayout.setVisibility( View.VISIBLE );
+					}
+					
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}
+		});
 	}
 
 	@Override
@@ -94,7 +136,7 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 		this.listener = listener;
 	}
 
-	@Override
+	/*@Override
 	public void onNetworkDocSuccess(String urlString, Document document) {
 		// TODO Auto-generated method stub
 		
@@ -135,7 +177,7 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 	public void onNetworkFail(String urlString) {
 		// TODO Auto-generated method stub
 		
-	}
+	}*/
 	
 	private class FeedAdapter extends BaseAdapter {
 		
@@ -222,8 +264,8 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 				ImageView userImageView = newProductRow.getUserImageView();
 				ImageView productImageView = newProductRow.getProducImageView();
 				
-				imageLoader.DisplayImage(userImageURL, MyFeedLayout.this.getActivity(), userImageView, true);
-				imageLoader.DisplayImage(productImageURL, MyFeedLayout.this.getActivity(), productImageView, true);
+				imageLoader.DisplayImage(userImageURL, MyFeedLayout.this.getActivity(), userImageView, true, asyncHttpClient);
+				imageLoader.DisplayImage(productImageURL, MyFeedLayout.this.getActivity(), productImageView, true, asyncHttpClient);
 				
 				newProductRow.setOnClickListener( MyFeedLayout.this );
 				
@@ -249,8 +291,8 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 				ImageView userImageView = commentRow.getUserImageView();
 				ImageView productImageView = commentRow.getProducImageView();
 				
-				imageLoader.DisplayImage(userImageURL, MyFeedLayout.this.getActivity(), userImageView, true);
-				imageLoader.DisplayImage(productImageURL, MyFeedLayout.this.getActivity(), productImageView, true);
+				imageLoader.DisplayImage(userImageURL, MyFeedLayout.this.getActivity(), userImageView, true, asyncHttpClient);
+				imageLoader.DisplayImage(productImageURL, MyFeedLayout.this.getActivity(), productImageView, true, asyncHttpClient);
 				
 				commentRow.setOnClickListener( MyFeedLayout.this );
 				
@@ -274,8 +316,8 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 				ImageView userImageView = likeRow.getUserImageView();
 				ImageView productImageView = likeRow.getProducImageView();
 				
-				imageLoader.DisplayImage(userImageURL, MyFeedLayout.this.getActivity(), userImageView, true);
-				imageLoader.DisplayImage(productImageURL, MyFeedLayout.this.getActivity(), productImageView, true);
+				imageLoader.DisplayImage(userImageURL, MyFeedLayout.this.getActivity(), userImageView, true, asyncHttpClient);
+				imageLoader.DisplayImage(productImageURL, MyFeedLayout.this.getActivity(), productImageView, true, asyncHttpClient);
 				
 				likeRow.setOnClickListener( MyFeedLayout.this );
 				
@@ -297,7 +339,7 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 				//Set image
 				ImageView userImageView = followingRow.getUserImageView();
 				
-				imageLoader.DisplayImage(userImageURL, MyFeedLayout.this.getActivity(), userImageView, true);
+				imageLoader.DisplayImage(userImageURL, MyFeedLayout.this.getActivity(), userImageView, true, asyncHttpClient);
 				
 				followingRow.setOnClickListener( MyFeedLayout.this );
 				
@@ -317,7 +359,7 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 			getProductLikeURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/likes.json";
 			
 			if( feedLikeButton.getButtonStatus() == LikeButton.BUTTON_STATUS_LIKE ){
-				HashMap< String, String > likeDataMap = new HashMap<String, String>();
+				/*HashMap< String, String > likeDataMap = new HashMap<String, String>();
 				likeDataMap.put( "emtpy", "emtpy" );
 				String likePostData = NetworkUtil.createPostData( likeDataMap );
 				
@@ -357,12 +399,27 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 						// TODO Auto-generated method stub
 						
 					}
+				});*/
+				
+				asyncHttpClient.post( getProductLikeURL, new JsonHttpResponseHandler(){
+					@Override
+					public void onSuccess(JSONObject jsonObject) {
+						super.onSuccess(jsonObject);
+						ProductActivityData newData = new ProductActivityData( jsonObject );
+						String likeId = newData.getLike().getActivityData().getId();
+						feedLikeButton.setLikeId( likeId );
+						
+						//On click like result.
+						//Set image liked
+						feedLikeButton.setBackgroundResource( R.drawable.myfeed_liked_icon );
+						feedLikeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKED );
+					}
 				});
 			}else if( feedLikeButton.getButtonStatus() == LikeButton.BUTTON_STATUS_LIKED ){
 				String likeActivityId = feedLikeButton.getLikeId();
 				getProductUnLikeURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+"/"+likeActivityId+".json";
 				
-				HashMap< String, String > likeDataMap = new HashMap<String, String>();
+				/*HashMap< String, String > likeDataMap = new HashMap<String, String>();
 				likeDataMap.put( "_a", "delete" );
 				String likePostData = NetworkUtil.createPostData( likeDataMap );
 				
@@ -392,14 +449,28 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 						// TODO Auto-generated method stub
 						
 					}
+				});*/
+				
+				HashMap<String, String> paramMap = new HashMap<String, String>();
+				paramMap.put( "_a", "delete" );
+				RequestParams params = new RequestParams(paramMap);
+				asyncHttpClient.post( getProductUnLikeURL, params, new AsyncHttpResponseHandler(){
+					@Override
+					public void onSuccess(String arg0) {
+						super.onSuccess(arg0);
+						//On click like result.
+						//Set image liked
+						feedLikeButton.setBackgroundResource( R.drawable.myfeed_like_icon );
+						feedLikeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKE );
+					}
 				});
 			}
 		}else if( v instanceof MyFeedCommentButton ){
 			if(listener != null){
 				MyFeedCommentButton feedCommentButton = (MyFeedCommentButton) v;
-				SharedPreferences myPreferences = this.getActivity().getSharedPreferences( ProductCommentLayout.SHARE_PREF_VALUE_PRODUCT_ID, this.getActivity().MODE_PRIVATE );
+				SharedPreferences myPreferences = this.getActivity().getSharedPreferences( ProductCommentLayout.SHARE_PREF_VALUE_PRODUCT_COMMENT_ACT_ID, this.getActivity().MODE_PRIVATE );
 				SharedPreferences.Editor prefsEditor = myPreferences.edit();
-				prefsEditor.putString( ProductCommentLayout.SHARE_PREF_KEY_PRODUCT_ID, feedCommentButton.getProductData().getId() );
+				prefsEditor.putString( ProductCommentLayout.SHARE_PREF_KEY_ACT_ID, feedCommentButton.getProductData().getId() );
 				prefsEditor.putString( ProductCommentLayout.SHARE_PREF_KEY_USER_ID, feedCommentButton.getProductData().getActor().getId() );
 				prefsEditor.commit();
 				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PRODUCT_COMMENT_USER_LIST );
@@ -419,6 +490,10 @@ public class MyFeedLayout extends AbstractViewLayout implements NetworkThreadLis
 				prefsEditor.putString( ProductWishlistLayout.SHARE_PREF_KEY_WISHLIST_ID, wishlistId );
 				prefsEditor.commit();
 				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PRODUCT_WISHLIST );
+			}
+		}else if( v.equals( findFriendButton ) ){
+			if(listener != null){
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_FIND_FRIENDS );
 			}
 		}else if(listener != null){
 			if( v instanceof  MyFeedAddNewProductRow ){

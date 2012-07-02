@@ -2,19 +2,31 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical" >
+    android:orientation="vertical" android:background="#ffffff">
+	
+    <com.codegears.getable.ui.AppHeader
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent">
+    </com.codegears.getable.ui.AppHeader>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" android:layout_weight="1" android:id="@+id/storeMainLayoutMapView">
-        
+        android:layout_height="wrap_content" android:layout_weight="2">
+
+        <com.google.android.maps.MapView
+            android:id="@+id/storeMainLayoutMapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:apiKey="0SEWpIeH6ISLbi1uyG9btYIuPKYrhqMyGRax3zA"
+            android:clickable="true" >
+        </com.google.android.maps.MapView>
+
     </LinearLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" android:layout_weight="1">
+        android:orientation="vertical">
 
         <LinearLayout
             android:layout_width="match_parent"

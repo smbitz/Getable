@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="wrap_content"
+	android:layout_height="152dp" android:layout_gravity="center">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" android:background="@drawable/photo_option_bg">
+
+        <Button
+            android:id="@+id/customDialogSelectImageFromCameraButton"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Take Photo" android:background="@null" android:textColor="#ffffff"/>
+
+        <ImageView
+            android:id="@+id/ImageView01"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/photo_option_line" android:layout_gravity="center"/>
+
+        <Button
+            android:id="@+id/customDialogSelectImageFromGalleryButton"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:text="Choose Existing" android:background="@null" android:textColor="#ffffff"/>
+
+        <ImageView
+            android:id="@+id/ImageView02"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:src="@drawable/photo_option_line" />
+
+        <Button
+            android:id="@+id/customDialogSelectImageCancelButton"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:background="@null"
+            android:text="Cancel"
+            android:textColor="#ffffff" />
+
+    </LinearLayout>
+
+</LinearLayout>

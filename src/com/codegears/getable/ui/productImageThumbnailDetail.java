@@ -42,6 +42,10 @@ public class ProductImageThumbnailDetail extends LinearLayout {
 		userName.setText( setUserName );
 	}
 	
+	public void setProductImageDefault(){
+		productImage.setImageResource( R.drawable.empty_image );
+	}
+	
 	public ProductActivityData getProductData(){
 		return productActivityData;
 	}

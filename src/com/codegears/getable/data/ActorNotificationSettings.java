@@ -16,4 +16,13 @@ public class ActorNotificationSettings {
 			e.printStackTrace();
 		}
 	}
+	
+	public ActorNotificationEmail getEmailNotificationSetting(){
+		return email;
+	}
+	
+	public ActorNotificationPush getPushNotificationSetting(){
+		return push;
+	}
+	
 }

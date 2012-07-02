@@ -29,12 +29,14 @@ import com.codegears.getable.ui.AbstractViewLayout;
 import com.codegears.getable.ui.ProductWishlistItem;
 import com.codegears.getable.ui.WishlistAddRemoveButton;
 import com.codegears.getable.util.Config;
-import com.codegears.getable.util.NetworkThreadUtil;
-import com.codegears.getable.util.NetworkUtil;
-import com.codegears.getable.util.NetworkThreadUtil.NetworkThreadListener;
+import com.loopj.android.http.AsyncHttpClient;
+import com.loopj.android.http.AsyncHttpResponseHandler;
+import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
+
 import android.view.View.OnClickListener;
 
-public class ProductWishlistLayout extends AbstractViewLayout implements NetworkThreadListener, OnClickListener {
+public class ProductWishlistLayout extends AbstractViewLayout implements OnClickListener {
 	
 	public static final String SHARE_PREF_WISHLLIST_VALUE = "SHARE_PREF_WISHLLIST_VALUE";
 	public static final String SHARE_PREF_KEY_PRODUCT_ID = "SHARE_PREF_KEY_PRODUCT_ID";
@@ -43,7 +45,8 @@ public class ProductWishlistLayout extends AbstractViewLayout implements Network
 	private String productActivityId;
 	private Config config;
 	private MyApp app;
-	private List<String> appCookie;
+	private AsyncHttpClient asyncHttpClient;
+	//private List<String> appCookie;
 	private JSONArray arrayWishlistId;
 	private ArrayList<WishlistData> arrayWishlistData;
 	private ListView wishlistList;
@@ -73,7 +76,8 @@ public class ProductWishlistLayout extends AbstractViewLayout implements Network
 		
 		config = new Config( this.getContext() );
 		app = (MyApp) this.getActivity().getApplication();
-		appCookie = app.getAppCookie();
+		//appCookie = app.getAppCookie();
+		asyncHttpClient = app.getAsyncHttpClient();
 		arrayWishlistData = new ArrayList<WishlistData>();
 		wishlistList = (ListView) findViewById( R.id.productWishlistListView );
 		wishlistAdapter = new WishlistAdapter();
@@ -89,7 +93,92 @@ public class ProductWishlistLayout extends AbstractViewLayout implements Network
 		
 		wishlistURL = config.get( MyApp.URL_DEFAULT )+"me/wishlists.json";
 		
-		NetworkThreadUtil.getRawDataWithCookie( wishlistURL, null, appCookie, this );
+		//NetworkThreadUtil.getRawDataWithCookie( wishlistURL, null, appCookie, this );
+		asyncHttpClient.get( wishlistURL, new JsonHttpResponseHandler(){
+			@Override
+			public void onSuccess(JSONObject getJsonObject) {
+				super.onSuccess(getJsonObject);
+				onWishlistURLSuccess(getJsonObject);
+			}
+		});
+	}
+	
+	private void onWishlistURLSuccess(JSONObject jsonObject){
+		//Load Product Data
+		if( jsonObject.optJSONArray( "entities" ) != null ){
+			JSONArray newArray = jsonObject.optJSONArray( "entities" );
+			for(int i = 0; i<newArray.length(); i++){
+				
+				//Load Product Data
+				WishlistData newData = null;
+				if( newArray.optJSONObject(i) != null ){
+					newData = new WishlistData( newArray.optJSONObject(i) );
+				}
+				
+				arrayWishlistData.add( newData );
+			}
+			
+			wishlistAdapter.setData( arrayWishlistData );
+			wishlistList.setAdapter( wishlistAdapter );
+		}else{
+			//Create new wishlist data.
+			//Load Product Data
+			final WishlistData newData = new WishlistData( jsonObject );
+			String currentWishlistId = newData.getId();
+			
+			String addRemoveWishlistURL = config.get( MyApp.URL_DEFAULT ).toString()+"me/wishlists/"+currentWishlistId+"/activities/"+productActivityId+".json";
+			
+			/*HashMap< String, String > addDataMap = new HashMap<String, String>();
+			addDataMap.put( "emtpy", "emtpy" );
+			String addPostData = NetworkUtil.createPostData( addDataMap );
+			
+			NetworkThreadUtil.getRawDataWithCookie(addRemoveWishlistURL, addPostData, appCookie, new NetworkThreadListener() {
+				
+				@Override
+				public void onNetworkRawSuccess(String urlString, String result) {
+					//Add new id to array
+					arrayWishlistId.put( newData.getId() );
+					
+					//Refresh adapter
+					arrayWishlistData.add( newData );
+					
+					wishlistAdapter.setData( arrayWishlistData );
+					ProductWishlistLayout.this.getActivity().runOnUiThread( new Runnable() {
+						@Override
+						public void run() {
+							wishlistList.setAdapter( wishlistAdapter );
+						}
+					});
+				}
+				
+				@Override
+				public void onNetworkFail(String urlString) {
+					// TODO Auto-generated method stub
+					
+				}
+				
+				@Override
+				public void onNetworkDocSuccess(String urlString, Document document) {
+					// TODO Auto-generated method stub
+					
+				}
+			});*/
+			
+			asyncHttpClient.post( addRemoveWishlistURL, new AsyncHttpResponseHandler(){
+				@Override
+				public void onSuccess(String arg0) {
+					super.onSuccess(arg0);
+					//Add new id to array
+					arrayWishlistId.put( newData.getId() );
+					
+					//Refresh adapter
+					arrayWishlistData.add( newData );
+					
+					wishlistAdapter.setData( arrayWishlistData );
+					wishlistList.setAdapter( wishlistAdapter );
+				}
+			});
+		}
 	}
 
 	@Override
@@ -104,7 +193,7 @@ public class ProductWishlistLayout extends AbstractViewLayout implements Network
 		
 	}
 
-	@Override
+	/*@Override
 	public void onNetworkDocSuccess(String urlString, Document document) {
 		// TODO Auto-generated method stub
 		
@@ -189,7 +278,7 @@ public class ProductWishlistLayout extends AbstractViewLayout implements Network
 	public void onNetworkFail(String urlString) {
 		// TODO Auto-generated method stub
 		
-	}
+	}*/
 	
 	private class WishlistAdapter extends BaseAdapter {
 		
@@ -272,16 +361,19 @@ public class ProductWishlistLayout extends AbstractViewLayout implements Network
 			String addRemoveWishlistURL = config.get( MyApp.URL_DEFAULT ).toString()+"me/wishlists/"+currentWishlistId+"/activities/"+productActivityId+".json";
 			
 			//Post delete data
-			HashMap< String, String > removeDataMap = new HashMap<String, String>();
+			HashMap<String, String> paramMap = new HashMap<String, String>();
+			paramMap.put( "_a", "delete" );
+			RequestParams deletePostData = new RequestParams(paramMap);
+			/*HashMap< String, String > removeDataMap = new HashMap<String, String>();
 			removeDataMap.put( "_a", "delete" );
 			String deletePostData = NetworkUtil.createPostData( removeDataMap );
 			
 			HashMap< String, String > addDataMap = new HashMap<String, String>();
 			addDataMap.put( "emtpy", "emtpy" );
-			String addPostData = NetworkUtil.createPostData( addDataMap );
+			String addPostData = NetworkUtil.createPostData( addDataMap );*/
 			
 			if( buttonState == WishlistAddRemoveButton.BUTTON_STATE_ADD ){
-				NetworkThreadUtil.getRawDataWithCookie( addRemoveWishlistURL, addPostData, appCookie, new NetworkThreadListener() {
+				/*NetworkThreadUtil.getRawDataWithCookie( addRemoveWishlistURL, addPostData, appCookie, new NetworkThreadListener() {
 					
 					@Override
 					public void onNetworkRawSuccess(String urlString, String result) {
@@ -306,9 +398,19 @@ public class ProductWishlistLayout extends AbstractViewLayout implements Network
 						// TODO Auto-generated method stub
 						
 					}
+				});*/
+				
+				asyncHttpClient.post( addRemoveWishlistURL, new AsyncHttpResponseHandler(){
+					@Override
+					public void onSuccess(String arg0) {
+						super.onSuccess(arg0);
+						//Set button image and status.
+						addRemoveButton.setText( "Remove" );
+						addRemoveButton.setButtonState( WishlistAddRemoveButton.BUTTON_STATE_REMOVE );
+					}
 				});
 			}else if( buttonState == WishlistAddRemoveButton.BUTTON_STATE_REMOVE ){
-				NetworkThreadUtil.getRawDataWithCookie( addRemoveWishlistURL, deletePostData, appCookie, new NetworkThreadListener() {
+				/*NetworkThreadUtil.getRawDataWithCookie( addRemoveWishlistURL, deletePostData, appCookie, new NetworkThreadListener() {
 					
 					@Override
 					public void onNetworkRawSuccess(String urlString, String result) {
@@ -333,6 +435,16 @@ public class ProductWishlistLayout extends AbstractViewLayout implements Network
 						// TODO Auto-generated method stub
 						
 					}
+				});*/
+				
+				asyncHttpClient.post( addRemoveWishlistURL, deletePostData, new AsyncHttpResponseHandler(){
+					@Override
+					public void onSuccess(String arg0) {
+						super.onSuccess(arg0);
+						//Set button image and status.
+						addRemoveButton.setText( "Add" );
+						addRemoveButton.setButtonState( WishlistAddRemoveButton.BUTTON_STATE_ADD );
+					}
 				});
 			}
 		}else if( v.equals( createButton ) ){
@@ -343,11 +455,22 @@ public class ProductWishlistLayout extends AbstractViewLayout implements Network
 			createWishlistLayout.setVisibility( View.GONE );
 			String text = wishlistNameEditText.getText().toString();
 			if( !(text.equals("")) && !(text.equals(null)) ){
-				HashMap< String, String > dataMap = new HashMap<String, String>();
+				/*HashMap< String, String > dataMap = new HashMap<String, String>();
 				dataMap.put( "name", text );
 				String postData = NetworkUtil.createPostData( dataMap );
 				
-				NetworkThreadUtil.getRawDataWithCookie( wishlistURL, postData, appCookie, this );
+				NetworkThreadUtil.getRawDataWithCookie( wishlistURL, postData, appCookie, this );*/
+				
+				HashMap<String, String> paramMap = new HashMap<String, String>();
+				paramMap.put( "name", text );
+				RequestParams params = new RequestParams(paramMap);
+				asyncHttpClient.post( wishlistURL, params, new JsonHttpResponseHandler(){
+					@Override
+					public void onSuccess(JSONObject getJsonObject) {
+						super.onSuccess(getJsonObject);
+						onWishlistURLSuccess(getJsonObject);
+					}
+				});
 			}
 		}
 	}

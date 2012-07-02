@@ -12,4 +12,7 @@
     <string 
         name="URL_DEFAULT" 
         value="http://wongnaimedia.dyndns.org/getable/" />
+    <string 
+        name="URL_GET_CURRENT_USER_DATA" 
+        value="http://wongnaimedia.dyndns.org/getable/me.json" />
 </resources>

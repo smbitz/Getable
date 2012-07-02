@@ -1,0 +1,484 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+	android:orientation="vertical" android:layout_width="match_parent"
+	android:layout_height="match_parent">
+	
+    <com.codegears.getable.ui.AppHeader
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent">
+    </com.codegears.getable.ui.AppHeader>
+
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:background="#ffffff">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="#887f79" >
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/textView1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Account"
+                    android:textColor="#ffffff" />
+            </LinearLayout>
+			
+            <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="50dp"
+	            android:background="#ffffff"
+	            android:orientation="vertical" android:id="@+id/profileChangeSettingChangePasswordButton">
+
+	            <LinearLayout
+	                android:layout_width="match_parent"
+	                android:layout_height="match_parent"
+	                android:orientation="horizontal" >
+
+	                <LinearLayout
+	                    android:layout_width="5dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+
+	                <TextView
+	                    android:id="@+id/textView2"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:layout_gravity="center"
+	                    android:text="Change Password"
+	                    android:textColor="@color/NameColorGrey" />
+
+	                <LinearLayout
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="match_parent"
+	                    android:layout_weight="1" >
+	                </LinearLayout>
+
+	                <ImageView
+	                    android:id="@+id/imageView2"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:layout_gravity="center"
+	                    android:src="@drawable/image_arrow_right" />
+
+	                <LinearLayout
+	                    android:layout_width="5dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+
+	            </LinearLayout>
+	        </LinearLayout>
+	        
+            <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="50dp"
+	            android:background="#ffffff"
+	            android:orientation="vertical" android:id="@+id/profileChangeSettingBlockUserButton" android:visibility="gone">
+
+	            <ImageView
+	                android:id="@+id/ImageView02"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:src="@drawable/image_line" />
+
+	            <LinearLayout
+	                android:layout_width="match_parent"
+	                android:layout_height="match_parent"
+	                android:orientation="horizontal" >
+
+	                <LinearLayout
+	                    android:layout_width="5dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+
+	                <TextView
+	                    android:id="@+id/TextView01"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:layout_gravity="center"
+	                    android:text="Blocked Users"
+	                    android:textColor="@color/NameColorGrey" />
+
+	                <LinearLayout
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="match_parent"
+	                    android:layout_weight="1" >
+	                </LinearLayout>
+
+	                <ImageView
+	                    android:id="@+id/ImageView01"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:layout_gravity="center"
+	                    android:src="@drawable/image_arrow_right" />
+
+	                <LinearLayout
+	                    android:layout_width="5dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+
+	            </LinearLayout>
+	        </LinearLayout>
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="#887f79">
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/textView1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Sharing"
+                    android:textColor="#ffffff" />
+            </LinearLayout>
+	
+            <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="50dp"
+	            android:background="#ffffff"
+	            android:orientation="vertical">
+
+	            <LinearLayout
+	                android:layout_width="match_parent"
+	                android:layout_height="match_parent"
+	                android:orientation="horizontal" >
+
+	                <LinearLayout
+	                    android:layout_width="5dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+
+	                <TextView
+	                    android:id="@+id/textView2"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:layout_gravity="center"
+	                    android:text="Facebook"
+	                    android:textColor="@color/NameColorGrey" />
+
+	                <LinearLayout
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="match_parent"
+	                    android:layout_weight="1" >
+	                </LinearLayout>
+
+	                <ToggleButton
+	                    android:id="@+id/profileChangeSettingFacebookConfigButton"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:text="ToggleButton" android:layout_gravity="center" android:visibility="gone"/>
+
+	                <TextView
+	                    android:id="@+id/profileChangeSettingFacebookConfigText"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:text="configure"
+	                    android:textColor="@color/NameColorGrey" android:layout_gravity="center" android:visibility="gone"/>
+
+	                <LinearLayout
+	                    android:layout_width="5dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+
+	                <ImageView
+	                    android:id="@+id/imageView2"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:layout_gravity="center"
+	                    android:src="@drawable/image_arrow_right" />
+
+	                <LinearLayout
+	                    android:layout_width="5dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+
+	            </LinearLayout>
+	        </LinearLayout>
+	        
+            <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="50dp"
+	            android:background="#ffffff"
+	            android:orientation="vertical">
+
+	            <ImageView
+	                android:id="@+id/ImageView02"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:src="@drawable/image_line" />
+
+	            <LinearLayout
+	                android:layout_width="match_parent"
+	                android:layout_height="match_parent"
+	                android:orientation="horizontal" >
+
+	                <LinearLayout
+	                    android:layout_width="5dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+
+	                <TextView
+	                    android:id="@+id/TextView01"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:layout_gravity="center"
+	                    android:text="Twitter"
+	                    android:textColor="@color/NameColorGrey" />
+
+	                <LinearLayout
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="match_parent"
+	                    android:layout_weight="1" >
+	                </LinearLayout>
+
+	                <ToggleButton
+	                    android:id="@+id/profileChangeSettingTwitterConfigButton"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:text="ToggleButton" android:layout_gravity="center" android:visibility="gone"/>
+
+	                <TextView
+	                    android:id="@+id/profileChangeSettingTwitterConfigText"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:text="configure"
+	                    android:textColor="@color/NameColorGrey" android:layout_gravity="center" android:visibility="gone"/>
+
+	                <LinearLayout
+	                    android:layout_width="5dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+
+	                <ImageView
+	                    android:id="@+id/ImageView01"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:layout_gravity="center"
+	                    android:src="@drawable/image_arrow_right" />
+
+	                <LinearLayout
+	                    android:layout_width="5dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+	            </LinearLayout>
+
+	        </LinearLayout>
+            
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="#887f79" >
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/textView1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Notifications"
+                    android:textColor="#ffffff" />
+            </LinearLayout>
+            
+            <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="50dp"
+	            android:background="#ffffff"
+	            android:orientation="vertical">
+
+	            <LinearLayout
+	                android:layout_width="match_parent"
+	                android:layout_height="match_parent"
+	                android:orientation="horizontal" >
+
+	                <LinearLayout
+	                    android:layout_width="5dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+
+	                <TextView
+	                    android:id="@+id/textView2"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:layout_gravity="center"
+	                    android:text="Following Activity"
+	                    android:textColor="@color/NameColorGrey" />
+
+	                <LinearLayout
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="match_parent"
+	                    android:layout_weight="1" >
+	                </LinearLayout>
+					
+	                <com.codegears.getable.ui.ProfileSettingNotificationButton
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content" android:layout_gravity="center" android:src="@drawable/notification_icon_push_1" android:background="@null" android:id="@+id/profileChangeSettingsFollowPushButton">
+	                </com.codegears.getable.ui.ProfileSettingNotificationButton>
+
+	                <LinearLayout
+	                    android:layout_width="15dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+
+	                <com.codegears.getable.ui.ProfileSettingNotificationButton
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content" android:background="@null" android:src="@drawable/notification_icon_email_1" android:layout_gravity="center" android:id="@+id/profileChangeSettingsFollowEmailButton"/>
+
+	                <LinearLayout
+	                    android:layout_width="5dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+
+	            </LinearLayout>
+	        </LinearLayout>
+	        
+            <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="50dp"
+	            android:background="#ffffff"
+	            android:orientation="vertical">
+
+	            <ImageView
+	                android:id="@+id/ImageView02"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:src="@drawable/image_line" />
+
+	            <LinearLayout
+	                android:layout_width="match_parent"
+	                android:layout_height="match_parent"
+	                android:orientation="horizontal" >
+
+	                <LinearLayout
+	                    android:layout_width="5dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+
+	                <TextView
+	                    android:id="@+id/TextView01"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:layout_gravity="center"
+	                    android:text="Comments"
+	                    android:textColor="@color/NameColorGrey" />
+
+	                <LinearLayout
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="match_parent"
+	                    android:layout_weight="1" >
+	                </LinearLayout>
+
+	                <com.codegears.getable.ui.ProfileSettingNotificationButton
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:background="@null"
+	                    android:src="@drawable/notification_icon_push_1" android:layout_gravity="center" android:id="@+id/profileChangeSettingsCommentPushButton"/>
+
+	                <LinearLayout
+	                    android:layout_width="15dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+
+	                <com.codegears.getable.ui.ProfileSettingNotificationButton
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:background="@null"
+	                    android:src="@drawable/notification_icon_email_1" android:layout_gravity="center" android:id="@+id/profileChangeSettingsCommentEmailButton"/>
+
+	                <LinearLayout
+	                    android:layout_width="5dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+	            </LinearLayout>
+
+	        </LinearLayout>
+            
+            <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="50dp"
+	            android:background="#ffffff"
+	            android:orientation="vertical">
+
+	            <ImageView
+	                android:id="@+id/ImageView02"
+	                android:layout_width="wrap_content"
+	                android:layout_height="wrap_content"
+	                android:src="@drawable/image_line" />
+
+	            <LinearLayout
+	                android:layout_width="match_parent"
+	                android:layout_height="match_parent"
+	                android:orientation="horizontal" >
+
+	                <LinearLayout
+	                    android:layout_width="5dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+
+	                <TextView
+	                    android:id="@+id/TextView01"
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:layout_gravity="center"
+	                    android:text="Likes"
+	                    android:textColor="@color/NameColorGrey" />
+
+	                <LinearLayout
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="match_parent"
+	                    android:layout_weight="1" >
+	                </LinearLayout>
+
+	                <com.codegears.getable.ui.ProfileSettingNotificationButton
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:background="@null"
+	                    android:src="@drawable/notification_icon_push_1" android:layout_gravity="center" android:id="@+id/profileChangeSettingsLikePushButton"/>
+
+	                <LinearLayout
+	                    android:layout_width="15dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+
+	                <com.codegears.getable.ui.ProfileSettingNotificationButton
+	                    android:layout_width="wrap_content"
+	                    android:layout_height="wrap_content"
+	                    android:background="@null"
+	                    android:src="@drawable/notification_icon_email_1" android:layout_gravity="center" android:id="@+id/profileChangeSettingsLikeEmailButton"/>
+
+	                <LinearLayout
+	                    android:layout_width="5dp"
+	                    android:layout_height="match_parent" >
+	                </LinearLayout>
+	            </LinearLayout>
+
+	        </LinearLayout>
+            
+        </LinearLayout>
+
+    </ScrollView>
+
+</LinearLayout>
