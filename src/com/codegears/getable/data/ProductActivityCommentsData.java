@@ -47,4 +47,8 @@ public class ProductActivityCommentsData {
 	public ActorData getActor(){
 		return actor;
 	}
+	
+	public String getActivityTime(){
+		return activityTime;
+	}
 }

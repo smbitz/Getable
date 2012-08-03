@@ -10,14 +10,16 @@ public class ProductActivityStat {
 	private ProductActivityStatScore score;
 	
 	public ProductActivityStat(JSONObject jsonObject) {
-		try {
-			numberOfComments = jsonObject.optInt("numberOfComments");
-			numberOfLikes = jsonObject.optInt("numberOfLikes");
-			score = new ProductActivityStatScore( jsonObject.getJSONObject("score") );
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		numberOfComments = jsonObject.optInt("numberOfComments");
+		numberOfLikes = jsonObject.optInt("numberOfLikes");
+		
+		if( jsonObject.optJSONObject("score") != null ){
+			score = new ProductActivityStatScore( jsonObject.optJSONObject("score") );
 		}
+	}
+	
+	public void setNumberOfLikes( int setValue ){
+		numberOfLikes = setValue;
 	}
 	
 	public int getNumberOfComments(){

@@ -22,6 +22,7 @@ import com.codegears.getable.data.ProductActorFollowData;
 import com.codegears.getable.data.WishlistData;
 import com.codegears.getable.ui.AbstractViewLayout;
 import com.codegears.getable.ui.FollowButton;
+import com.codegears.getable.ui.FooterListView;
 import com.codegears.getable.ui.UserFollowItemLayout;
 import com.codegears.getable.ui.UserWishlistsGrouptItem;
 import com.codegears.getable.util.Config;
@@ -32,6 +33,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -61,6 +63,7 @@ public class UserFollowLayout extends AbstractViewLayout implements OnClickListe
 	private int requestPageType;
 	private ImageLoader imageLoader;
 	private AsyncHttpClient asyncHttpClient;
+	private ProgressDialog loadingDialog;
 	
 	public UserFollowLayout(Activity activity, String getDataFollowTypeURL, int getRequestPageType) {
 		super(activity);
@@ -76,9 +79,28 @@ public class UserFollowLayout extends AbstractViewLayout implements OnClickListe
 		requestPageType = getRequestPageType;
 		imageLoader = new ImageLoader( this.getContext() );
 		
+		loadingDialog = new ProgressDialog( this.getContext() );
+		loadingDialog.setTitle("");
+		loadingDialog.setMessage("Loading. Please wait...");
+		loadingDialog.setIndeterminate( true );
+		loadingDialog.setCancelable( true );
+		
 		defaultGetDataURL = getDataFollowTypeURL;
 		
+		//Set line at footer
+		followListView.addFooterView( new FooterListView( this.getContext() ) );
+		
 		//NetworkThreadUtil.getRawDataWithCookie(defaultGetDataURL, null, appCookie, this);
+		loadData();
+	}
+	
+	private void recycleResource() {
+		arrayFollowData.clear();
+	}
+	
+	public void loadData(){
+		loadingDialog.show();
+		
 		asyncHttpClient.get( defaultGetDataURL, new JsonHttpResponseHandler(){
 			@Override
 			public void onSuccess(JSONObject getJsonObject) {
@@ -103,6 +125,10 @@ public class UserFollowLayout extends AbstractViewLayout implements OnClickListe
 		
 		followAdapter.setData( arrayFollowData );
 		followListView.setAdapter( followAdapter );
+		
+		if( loadingDialog.isShowing() ){
+			loadingDialog.dismiss();
+		}
 	}
 
 	@Override
@@ -113,8 +139,8 @@ public class UserFollowLayout extends AbstractViewLayout implements OnClickListe
 	
 	@Override
 	public void refreshView() {
-		// TODO Auto-generated method stub
-		
+		recycleResource();
+		loadData();
 	}
 	
 	private class FollowAdapter extends BaseAdapter{
@@ -149,11 +175,33 @@ public class UserFollowLayout extends AbstractViewLayout implements OnClickListe
 			}else{
 				userFollowItemLayout = (UserFollowItemLayout) convertView;
 				userFollowItemLayout.getFollowButton().setVisibility( View.VISIBLE );
+				userFollowItemLayout.setUserImageDefault();
 			}
 			
 			FollowButton userFollowButton = userFollowItemLayout.getFollowButton();
 			
-			String imageURL = data.get( position ).getActor().getPicture().getImageUrls().getImageURLT();
+			String imageURL = "";
+			if( requestPageType == GET_FOLLOWERS ){
+				System.out.println("CheckValueNull1 : "+data.get( position ).getActor());
+				imageURL = data.get( position ).getActor().getPicture().getImageUrls().getImageURLT();
+				
+				//Check current user to hide follow button
+				String dataGetUserId = data.get( position ).getActor().getId();
+				String currentUserId = app.getCurrentProfileData().getId();
+				if( dataGetUserId.equals( currentUserId ) ){
+					userFollowButton.setVisibility( View.INVISIBLE );
+				}
+			}else if( requestPageType == GET_FOLLOWINGS ){
+				System.out.println("CheckValueNull2 : "+data.get( position ).getFollowedUser());
+				imageURL = data.get( position ).getFollowedUser().getPicture().getImageUrls().getImageURLT();
+				
+				//Check current user to hide follow button
+				String dataGetUserId = data.get( position ).getFollowedUser().getId();
+				String currentUserId = app.getCurrentProfileData().getId();
+				if( dataGetUserId.equals( currentUserId ) ){
+					userFollowButton.setVisibility( View.INVISIBLE );
+				}
+			}
 			
 			imageLoader.DisplayImage( imageURL, UserFollowLayout.this.getActivity(), userFollowItemLayout.getUserImageView(), true, asyncHttpClient );
 			userFollowItemLayout.setFollowUserData( data.get( position ) );
@@ -166,11 +214,11 @@ public class UserFollowLayout extends AbstractViewLayout implements OnClickListe
 				//Set text/image follow/following
 				if( data.get( position ).getActor().getMyRelation().getFollowActivity() != null ){
 					//userFollowButton.setText( "Following" );
-					userFollowButton.setBackgroundResource( R.drawable.button_following );
+					userFollowButton.setImageResource( R.drawable.button_following );
 					userFollowButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
 				}else{
 					//userFollowButton.setText( "Follow" );
-					userFollowButton.setBackgroundResource( R.drawable.button_follow );
+					userFollowButton.setImageResource( R.drawable.button_follow );
 					userFollowButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
 				}
 			}else if( requestPageType == GET_FOLLOWINGS ){
@@ -181,66 +229,23 @@ public class UserFollowLayout extends AbstractViewLayout implements OnClickListe
 				//Set text/image follow/following
 				if( data.get( position ).getFollowedUser().getMyRelation().getFollowActivity() != null ){
 					//userFollowButton.setText( "Following" );
-					userFollowButton.setBackgroundResource( R.drawable.button_following );
+					userFollowButton.setImageResource( R.drawable.button_following );
 					userFollowButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
 				}else{
 					//userFollowButton.setText( "Follow" );
-					userFollowButton.setBackgroundResource( R.drawable.button_follow );
+					userFollowButton.setImageResource( R.drawable.button_follow );
 					userFollowButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
 				}
 			}
 			
-			/*if( app.getUserId().equals( data.get( position ).getActor().getId() ) ){
-				userFollowButton.setVisibility( View.INVISIBLE );
-			}*/
-			
 			userFollowItemLayout.setOnClickListener( UserFollowLayout.this );
 			userFollowButton.setOnClickListener( UserFollowLayout.this );
+			userFollowButton.setTag(data.get( position ));
 			
 			return userFollowItemLayout;
 		}
 
 	}
-
-	/*@Override
-	public void onNetworkDocSuccess(String urlString, Document document) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onNetworkRawSuccess(String urlString, String result) {
-		if( urlString.equals( defaultGetDataURL ) ){
-			try {
-				JSONObject jsonObject = new JSONObject(result);
-				JSONArray newArray = jsonObject.getJSONArray("entities");
-				for(int i = 0; i<newArray.length(); i++){
-					//Load Follow Data
-					ProductActorFollowData newData = new ProductActorFollowData( (JSONObject) newArray.get(i) );
-					JSONObject object = (JSONObject) newArray.get(i);
-					arrayFollowData.add(newData);
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			
-			followAdapter.setData( arrayFollowData );
-			this.getActivity().runOnUiThread( new Runnable() {
-				@Override
-				public void run() {
-					followListView.setAdapter( followAdapter );
-				}
-			});
-		}else if( urlString.equals( followUserURL ) ){
-			//On click follow result.
-		}
-	}
-
-	@Override
-	public void onNetworkFail(String urlString) {
-		// TODO Auto-generated method stub
-		
-	}*/
 	
 	public void setBodyLayoutStackListener(BodyLayoutStackListener listener) {
 		this.listener = listener;
@@ -249,122 +254,69 @@ public class UserFollowLayout extends AbstractViewLayout implements OnClickListe
 	@Override
 	public void onClick(View v) {
 		if( v instanceof FollowButton ){
+			final ProductActorFollowData currentActorFollowData = (ProductActorFollowData) v.getTag();
 			final FollowButton followButton = (FollowButton) v;
 			followButton.setEnabled( false );
 			if( followButton.getFollowButtonStatus() == FollowButton.BUTTON_STATUS_UNFOLLOW ){
 				String followUserId = followButton.getActorData().getId();
 				
 				followUserURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+followUserId+"/followers.json";
-				/*Map< String, String > newMapData = new HashMap<String, String>();
-				newMapData.put( "_a", "follow" );
-				String postData = NetworkUtil.createPostData( newMapData );
 				
-				NetworkThreadUtil.getRawDataWithCookie(followUserURL, postData, appCookie, new NetworkThreadListener() {
-					
-					@Override
-					public void onNetworkRawSuccess(String urlString, String result) {
-						try {
-							JSONObject jsonObject = new JSONObject(result);
-							ActorData actorData = null;
-							if( jsonObject.optJSONObject("followedUser") != null ){
-								actorData = new ActorData( jsonObject.optJSONObject("followedUser") );
-							}
-							followButton.setActorData( actorData );
-						} catch (JSONException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-						UserFollowLayout.this.getActivity().runOnUiThread( new Runnable() {
-							@Override
-							public void run() {
-								followButton.setEnabled( true );
-							}
-						});
-					}
-					
-					@Override
-					public void onNetworkFail(String urlString) {
-						// TODO Auto-generated method stub
-						
-					}
-					
-					@Override
-					public void onNetworkDocSuccess(String urlString, Document document) {
-						// TODO Auto-generated method stub
-						
-					}
-				});*/
+				followButton.setImageResource( R.drawable.button_following );
+				followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
 				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "_a", "follow" );
 				RequestParams params = new RequestParams(paramMap);
-				asyncHttpClient.get( followUserURL, params, new JsonHttpResponseHandler(){
+				asyncHttpClient.post( followUserURL, params, new JsonHttpResponseHandler(){
 					@Override
 					public void onSuccess(JSONObject jsonObject) {
 						super.onSuccess(jsonObject);
+						System.out.println("CheckFollowerResult : "+jsonObject);
 						ActorData actorData = null;
 						if( jsonObject.optJSONObject("followedUser") != null ){
 							actorData = new ActorData( jsonObject.optJSONObject("followedUser") );
+							followButton.setActorData( actorData );
+							if( requestPageType == GET_FOLLOWERS ){
+								System.out.println("CheckFollower : "+actorData);
+								currentActorFollowData.setActorData( actorData );
+							}else if( requestPageType == GET_FOLLOWINGS ){
+								System.out.println("CheckFollowing : "+actorData);
+								currentActorFollowData.setFollowedUser( actorData );
+							}
 						}
-						followButton.setActorData( actorData );
 						
+						//Set text/image follow/following
+						//followButton.setText( "Following" );
 						followButton.setEnabled( true );
 					}
 				});
-				
-				//Set text/image follow/following
-				//followButton.setText( "Following" );
-				followButton.setBackgroundResource( R.drawable.button_following );
-				followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
 			}else if( followButton.getFollowButtonStatus() == FollowButton.BUTTON_STATUS_FOLLOWING ){
 				String followActivityId = followButton.getActorData().getMyRelation().getFollowActivity().getId();
 				
 				unFollowUserURL = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+followActivityId+".json";
-				/*Map< String, String > newMapData = new HashMap<String, String>();
-				newMapData.put( "_a", "delete" );
-				String postData = NetworkUtil.createPostData( newMapData );
 				
-				NetworkThreadUtil.getRawDataWithCookie(unFollowUserURL, postData, appCookie, new NetworkThreadListener() {
-					
-					@Override
-					public void onNetworkRawSuccess(String urlString, String result) {
-						UserFollowLayout.this.getActivity().runOnUiThread( new Runnable() {
-							@Override
-							public void run() {
-								followButton.setEnabled( true );
-							}
-						});
-					}
-					
-					@Override
-					public void onNetworkFail(String urlString) {
-						// TODO Auto-generated method stub
-						
-					}
-					
-					@Override
-					public void onNetworkDocSuccess(String urlString, Document document) {
-						// TODO Auto-generated method stub
-						
-					}
-				});*/
+				followButton.setImageResource( R.drawable.button_follow );
+				followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
 				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "_a", "delete" );
 				RequestParams params = new RequestParams(paramMap);
-				asyncHttpClient.get( unFollowUserURL, params, new AsyncHttpResponseHandler(){
+				asyncHttpClient.post( unFollowUserURL, params, new AsyncHttpResponseHandler(){
 					@Override
 					public void onSuccess(String arg0) {
 						super.onSuccess(arg0);
+						
+						//Set text/image follow/following
+						//followButton.setText( "Follow" );
 						followButton.setEnabled( true );
+						if( requestPageType == GET_FOLLOWERS ){
+							currentActorFollowData.getActor().getMyRelation().setFollowActivity( null );
+						}else if( requestPageType == GET_FOLLOWINGS ){
+							currentActorFollowData.getFollowedUser().getMyRelation().setFollowActivity( null );
+						}
 					}
 				});
-				
-				//Set text/image follow/following
-				//followButton.setText( "Follow" );
-				followButton.setBackgroundResource( R.drawable.button_follow );
-				followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
 			}
 		}else if(listener != null){
 			if( v instanceof UserFollowItemLayout ){

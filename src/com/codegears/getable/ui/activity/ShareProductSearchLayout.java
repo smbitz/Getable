@@ -1,6 +1,7 @@
 package com.codegears.getable.ui.activity;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -10,15 +11,23 @@ import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -34,6 +43,7 @@ import com.codegears.getable.data.GenderData;
 import com.codegears.getable.data.ProductActivityData;
 import com.codegears.getable.data.StoreData;
 import com.codegears.getable.ui.AbstractViewLayout;
+import com.codegears.getable.ui.FooterListView;
 import com.codegears.getable.ui.ShareProductSearchItem;
 import com.codegears.getable.util.Config;
 import com.codegears.getable.util.ConvertURL;
@@ -41,8 +51,10 @@ import com.codegears.getable.util.GetCurrentLocation;
 import com.codegears.getable.util.GetGender;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.RequestParams;
 
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 
 public class ShareProductSearchLayout extends AbstractViewLayout implements OnClickListener, TextWatcher {
 
@@ -54,21 +66,22 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements OnCl
 	public static final String SHARE_PREF_KEY_SEARCH_STORE = "SHARE_PREF_KEY_SEARCH_STORE";
 	public static final String SHARE_PREF_KEY_SEARCH_GENDER = "SHARE_PREF_KEY_SEARCH_GENDER";
 	
-	private static final String SHARE_PREF_DETAIL_SUB_CATEGORY = "SHARE_PREF_DETAIL_SUB_CATEGORY";
-	private static final String SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_ID = "SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_ID";
-	private static final String SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_NAME = "SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_NAME";
+	public static final String SHARE_PREF_DETAIL_SUB_CATEGORY = "SHARE_PREF_DETAIL_SUB_CATEGORY";
+	public static final String SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_ID = "SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_ID";
+	public static final String SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_NAME = "SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_NAME";
 	
 	private BodyLayoutStackListener listener;
 	private String searchType;
 	private String getSubCategoryId;
 	private String getSubCategoryName;
 	private MyApp app;
-	//private List<String> appCookie;
 	private Config config;
 	private ArrayList<CategoryData> arrayCategoryData;
 	private ArrayList<BrandData> arrayBrandData;
 	private ArrayList<StoreData> arrayStoreData;
 	private ArrayList<GenderData> arrayGendetData;
+	private ArrayList<CategoryData> appArrayCategoryData;
+	private ArrayList<CategoryData> tempArrayCategoryData;
 	private ListView nameItemListView;
 	private ProductNameItemAdapter productNameItemAdapter;
 	private BrandNameItemAdapter brandNameItemAdapter;
@@ -80,6 +93,16 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements OnCl
 	private String getDataURL;
 	private AsyncHttpClient asyncHttpClient;
 	private ProgressDialog loadingDialog;
+	private ImageButton backButton;
+	private LinearLayout searchEditTextLayout;
+	private LinearLayout addNewItemLayout;
+	private TextView addNewItemName;
+	private TextView addNewItemText1;
+	private TextView addNewItemText2;
+	private TextView addNewItemText3;
+	private String brandURL;
+	private String storeURL;
+	private AlertDialog alertDialog;
 	
 	public ShareProductSearchLayout(Activity activity) {
 		super(activity);
@@ -99,6 +122,7 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements OnCl
 		asyncHttpClient = app.getAsyncHttpClient();
 		config = new Config( this.getContext() );
 		arrayCategoryData = new ArrayList<CategoryData>();
+		tempArrayCategoryData = new ArrayList<CategoryData>();
 		arrayBrandData = new ArrayList<BrandData>();
 		arrayStoreData = new ArrayList<StoreData>();
 		arrayGendetData = new ArrayList<GenderData>();
@@ -110,8 +134,42 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements OnCl
 		searchEditText = (EditText) findViewById( R.id.shareProductSearchLayoutEditText );
 		currentLocation = new GetCurrentLocation( this.getContext() );
 		getGender = new GetGender( this.getContext() );
+		backButton = (ImageButton) findViewById( R.id.shareProductSearchLayoutBackButton );
+		appArrayCategoryData = app.getAppArrayProductCategoryData();
+		searchEditTextLayout = (LinearLayout) findViewById( R.id.shareProductSearchLayoutEditTextLayout );
+		addNewItemLayout = (LinearLayout) findViewById( R.id.shareProductSearchLayoutItemAddLayout );
+		addNewItemName = (TextView) findViewById( R.id.shareProductSearchLayoutItemAddTextName );
+		addNewItemText1 = (TextView) findViewById( R.id.shareProductSearchLayoutItemAddText1 );
+		addNewItemText2 = (TextView) findViewById( R.id.shareProductSearchLayoutItemAddText2 );
+		addNewItemText3 = (TextView) findViewById( R.id.shareProductSearchLayoutItemAddText3 );
+		alertDialog = new AlertDialog.Builder( this.getContext() ).create();
 		
-		//searchEditText.addTextChangedListener( this );
+		//Set font
+		searchEditText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		addNewItemName.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		addNewItemText1.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		addNewItemText2.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		addNewItemText3.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		
+		//Set line at footer
+		nameItemListView.addFooterView( new FooterListView( this.getContext() ) );
+		
+		searchEditText.addTextChangedListener( this );
+		searchEditText.setOnKeyListener( new OnKeyListener() {
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				// If the event is a key-down event on the "enter" button
+		        if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+		            (keyCode == KeyEvent.KEYCODE_ENTER)) {
+			        // Perform action on key press
+			        return true;
+		        }
+				return false;
+			}
+		});
+		
+		backButton.setOnClickListener( this );
+		addNewItemLayout.setOnClickListener( this );
 		
 		loadingDialog = new ProgressDialog( this.getContext() );
 		loadingDialog.setTitle("");
@@ -121,14 +179,56 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements OnCl
 		
 		String currentLat = currentLocation.getCurrentLat();
 		String currentLng = currentLocation.getCurrentLng();
+		brandURL = config.get( MyApp.URL_DEFAULT ).toString()+"brands.json";
 		
 		if( searchType.equals( SHARE_PREF_KEY_SEARCH_PRODUCT ) ){
-			getDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"categories.json?";
+			if( (getSubCategoryId != null) &&
+				(getSubCategoryName != null)){
+				for(int i = 0; i<appArrayCategoryData.size(); i++){
+					//Load Category & SubCategory Data
+					if( appArrayCategoryData.get( i ) != null ){
+						CategoryData categoryData = appArrayCategoryData.get( i );
+						if( getSubCategoryId.equals( categoryData.getId() ) &&
+							getSubCategoryName.equals( categoryData.getName() )){
+							JSONArray jsonArray = categoryData.getSubCategories();
+							for(int j = 0; j<jsonArray.length(); j++){
+								if( jsonArray.optJSONObject( j ) != null ){
+									CategoryData newCategoryData = new CategoryData( jsonArray.optJSONObject( j ) );
+									arrayCategoryData.add( newCategoryData );
+									tempArrayCategoryData.add( newCategoryData );
+								}
+							}
+						}
+					}
+				}
+			}else{
+				for(int i = 0; i<appArrayCategoryData.size(); i++){
+					//Load Category Data
+					if( appArrayCategoryData.get( i ) != null ){
+						CategoryData categoryData = appArrayCategoryData.get( i );
+						arrayCategoryData.add( categoryData );
+						tempArrayCategoryData.add( categoryData );
+					}
+				}
+			}
+			
+			productNameItemAdapter.setData( arrayCategoryData );
+			this.getActivity().runOnUiThread( new Runnable() {
+				@Override
+				public void run() {
+					nameItemListView.setAdapter( productNameItemAdapter );
+				}
+			});
+			//getDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"categories.json?";
 		}else if( searchType.equals( SHARE_PREF_KEY_SEARCH_BRAND ) ){
+			//Add new brand
 			getDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"brands.json?";
 		}else if( searchType.equals( SHARE_PREF_KEY_SEARCH_STORE ) ){
+			//Add new store
 			getDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"stores.json?currentCoordinate.latitude="+currentLat+"&currentCoordinate.longitude="+currentLng+"&";
 		}else if( searchType.equals( SHARE_PREF_KEY_SEARCH_GENDER ) ){
+			searchEditTextLayout.setVisibility( View.GONE );
+			
 			Map<String, Object> map = getGender.getGenderData();
 			for( int i = 1; i<(map.size()+1); i++ ){
 				String genderName = (map.get( String.valueOf( i )).toString() );
@@ -159,53 +259,9 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements OnCl
 	}
 	
 	private void onGetDataURLSuccess(JSONObject jsonObject){
-		if( loadingDialog.isShowing() ){
-			loadingDialog.dismiss();
-		}
-		
-		if( searchType.equals( SHARE_PREF_KEY_SEARCH_PRODUCT ) ){
-			try {
-				JSONArray newArray = jsonObject.getJSONArray( "entities" );
-				if( (getSubCategoryId != null) &&
-					(getSubCategoryName != null)){
-					for(int i = 0; i<newArray.length(); i++){
-						//Load Category & SubCategory Data
-						if( newArray.optJSONObject( i ) != null ){
-							CategoryData categoryData = new CategoryData( newArray.optJSONObject( i ) );
-							if( getSubCategoryId.equals( categoryData.getId() ) &&
-								getSubCategoryName.equals( categoryData.getName() )){
-								JSONArray jsonArray = categoryData.getSubCategories();
-								for(int j = 0; j<jsonArray.length(); j++){
-									if( jsonArray.optJSONObject( j ) != null ){
-										CategoryData newCategoryData = new CategoryData( jsonArray.optJSONObject( j ) );
-										arrayCategoryData.add( newCategoryData );
-									}
-								}
-							}
-						}
-					}
-				}else{
-					for(int i = 0; i<newArray.length(); i++){
-						//Load Category Data
-						if( newArray.optJSONObject( i ) != null ){
-							CategoryData categoryData = new CategoryData( newArray.optJSONObject( i ) );
-							arrayCategoryData.add( categoryData );
-						}
-					}
-				}
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+		if( searchType.equals( SHARE_PREF_KEY_SEARCH_BRAND ) ){
+			arrayBrandData.clear();
 			
-			productNameItemAdapter.setData( arrayCategoryData );
-			this.getActivity().runOnUiThread( new Runnable() {
-				@Override
-				public void run() {
-					nameItemListView.setAdapter( productNameItemAdapter );
-				}
-			});
-		}else if( searchType.equals( SHARE_PREF_KEY_SEARCH_BRAND ) ){
 			try {
 				JSONArray newArray = jsonObject.getJSONArray( "entities" );
 				for(int i = 0; i<newArray.length(); i++){
@@ -227,29 +283,45 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements OnCl
 					nameItemListView.setAdapter( brandNameItemAdapter );
 				}
 			});
+			
+			//if no result
+			if( arrayBrandData.size() == 0 ){
+				addNewItemLayout.setVisibility( VISIBLE );
+				addNewItemName.setText( searchEditText.getText() );
+			}else{
+				addNewItemLayout.setVisibility( GONE );
+			}
 		}else if( searchType.equals( SHARE_PREF_KEY_SEARCH_STORE ) ){
+			arrayStoreData.clear();
+			
 			try {
-				jsonObject = jsonObject.optJSONObject( "stores" );
-				JSONArray newArrayStoreData = jsonObject.getJSONArray( "entities" );
-				for(int i = 0; i<newArrayStoreData.length(); i++){
-					//Load Store Data
-					if( newArrayStoreData.optJSONObject( i ) != null ){
-						StoreData newStoreData = new StoreData( newArrayStoreData.optJSONObject( i ) );
-						arrayStoreData.add( newStoreData );
+				//Fetch store
+				if( jsonObject.optJSONObject( "stores" ) != null ){
+					JSONObject storeJsonObject = jsonObject.optJSONObject( "stores" );
+					JSONArray newArrayStoreData = storeJsonObject.getJSONArray( "entities" );
+					for(int i = 0; i<newArrayStoreData.length(); i++){
+						//Load Store Data
+						if( newArrayStoreData.optJSONObject( i ) != null ){
+							StoreData newStoreData = new StoreData( newArrayStoreData.optJSONObject( i ) );
+							arrayStoreData.add( newStoreData );
+						}
 					}
 				}
 				
-				JSONArray newArrayExternalStoreData = jsonObject.getJSONArray( "externalStores" );
-				for(int i = 0; i<newArrayExternalStoreData.length(); i++){
-					//Load External Store Data
-					if( newArrayExternalStoreData.optJSONObject( i ) != null ){
-						ExternalStoresData externalStoresData = new ExternalStoresData( newArrayExternalStoreData.optJSONObject( i ) );
-						JSONArray newArrayExternalStoreDataFetch = externalStoresData.getStores();
-						for(int j = 0; j<newArrayExternalStoreDataFetch.length(); j++){
-							//Load Store Data
-							if( newArrayExternalStoreDataFetch.optJSONObject( j ) != null ){
-								StoreData newStoreData = new StoreData( newArrayExternalStoreDataFetch.optJSONObject( j ) );
-								arrayStoreData.add( newStoreData );
+				//Fetch ExStore
+				if( jsonObject.optJSONArray( "externalStores" ) != null ){
+					JSONArray newArrayExternalStoreData = jsonObject.optJSONArray( "externalStores" );
+					for(int i = 0; i<newArrayExternalStoreData.length(); i++){
+						//Load External Store Data
+						if( newArrayExternalStoreData.optJSONObject( i ) != null ){
+							ExternalStoresData externalStoresData = new ExternalStoresData( newArrayExternalStoreData.optJSONObject( i ) );
+							JSONArray newArrayExternalStoreDataFetch = externalStoresData.getStores();
+							for(int j = 0; j<newArrayExternalStoreDataFetch.length(); j++){
+								//Load Store Data
+								if( newArrayExternalStoreDataFetch.optJSONObject( j ) != null ){
+									StoreData newStoreData = new StoreData( newArrayExternalStoreDataFetch.optJSONObject( j ) );
+									arrayStoreData.add( newStoreData );
+								}
 							}
 						}
 					}
@@ -266,6 +338,18 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements OnCl
 					nameItemListView.setAdapter( storeNameItemAdapter );
 				}
 			});
+			
+			//if no result
+			if( arrayStoreData.size() == 0 ){
+				addNewItemLayout.setVisibility( VISIBLE );
+				addNewItemName.setText( searchEditText.getText() );
+			}else{
+				addNewItemLayout.setVisibility( GONE );
+			}
+		}
+		
+		if( loadingDialog.isShowing() ){
+			loadingDialog.dismiss();
 		}
 	}
 
@@ -468,6 +552,10 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements OnCl
 	public void onClick(View v) {
 		if( listener != null ){
 			if( v instanceof ShareProductSearchItem ){
+				InputMethodManager imm = (InputMethodManager) this.getActivity().getSystemService(
+					      Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow( searchEditText.getWindowToken(), 0 );
+				
 				ShareProductSearchItem productSearchItem = (ShareProductSearchItem) v;
 				if( searchType.equals( SHARE_PREF_KEY_SEARCH_PRODUCT ) ){
 					JSONArray jsonItemArray = productSearchItem.getCategoryData().getSubCategories();
@@ -475,8 +563,8 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements OnCl
 						(jsonItemArray.length() > 0) ){
 						SharedPreferences myPref = this.getActivity().getSharedPreferences( ShareProductSearchLayout.SHARE_PREF_DETAIL_SUB_CATEGORY, this.getActivity().MODE_PRIVATE );
 						SharedPreferences.Editor prefsEditor = myPref.edit();
-						prefsEditor.putString( ShareProductSearchLayout.SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_ID, productSearchItem.getCategoryData().getId() );
-						prefsEditor.putString( ShareProductSearchLayout.SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_NAME, productSearchItem.getCategoryData().getName() );
+						prefsEditor.putString( SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_ID, productSearchItem.getCategoryData().getId() );
+						prefsEditor.putString( SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_NAME, productSearchItem.getCategoryData().getName() );
 				        prefsEditor.commit();
 						listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_SHARE_IMAGE_DETAIL_SEARCH_VALUE );
 					}else{
@@ -489,8 +577,8 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements OnCl
 				        //Delete subCategory pref.
 				        SharedPreferences myPrefSubCategory = this.getActivity().getSharedPreferences( ShareProductSearchLayout.SHARE_PREF_DETAIL_SUB_CATEGORY, this.getActivity().MODE_PRIVATE );
 						SharedPreferences.Editor prefsEditorSubCategory = myPrefSubCategory.edit();
-						prefsEditorSubCategory.putString( ShareProductSearchLayout.SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_ID, null );
-						prefsEditorSubCategory.putString( ShareProductSearchLayout.SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_NAME, null );
+						prefsEditorSubCategory.putString( SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_ID, null );
+						prefsEditorSubCategory.putString( SHARE_PREF_DETAIL_SUB_CATEGORY_PRODUCT_NAME, null );
 						prefsEditorSubCategory.commit();
 				        
 						listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_SHARE_IMAGE_DETAIL_WITH_RESULT );
@@ -523,6 +611,96 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements OnCl
 			        
 			        listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_SHARE_IMAGE_DETAIL_WITH_RESULT );
 				}
+			}else if( v.equals( backButton ) ){
+				InputMethodManager imm = (InputMethodManager) this.getActivity().getSystemService(
+					      Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow( searchEditText.getWindowToken(), 0 );
+				
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_BACK_BUTTON );
+			}else if( v.equals( addNewItemLayout ) ){
+				loadingDialog.show();
+				if( searchType.equals( SHARE_PREF_KEY_SEARCH_BRAND ) ){
+					final String nameAddBrand = searchEditText.getText().toString();
+					
+					HashMap<String, String> paramMap = new HashMap<String, String>();
+					paramMap.put( "_a", "add" );
+					paramMap.put( "name", nameAddBrand );
+					RequestParams params = new RequestParams(paramMap);
+					
+					asyncHttpClient.post( brandURL, params, new JsonHttpResponseHandler(){
+						@Override
+						public void onSuccess(JSONObject jsonObject) {
+							// TODO Auto-generated method stub
+							super.onSuccess(jsonObject);
+							
+							SharedPreferences myPref = ShareProductSearchLayout.this.getActivity().getSharedPreferences( ShareImageDetailLayout.SHARE_PREF_DETAIL_VALUE, ShareProductSearchLayout.this.getActivity().MODE_PRIVATE );
+							SharedPreferences.Editor prefsEditor = myPref.edit();
+							prefsEditor.putString( ShareImageDetailLayout.SHARE_PREF_KEY_BRAND_NAME, nameAddBrand );
+					        prefsEditor.commit();
+					        
+					        listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_SHARE_IMAGE_DETAIL_WITH_RESULT );
+					        
+					        if( loadingDialog.isShowing() ){
+					        	loadingDialog.dismiss();
+					        }
+						}
+						
+						@Override
+						public void onFailure(Throwable arg0, JSONObject arg1) {
+							// TODO Auto-generated method stub
+							super.onFailure(arg0, arg1);
+							if( loadingDialog.isShowing() ){
+					        	loadingDialog.dismiss();
+					        }
+							
+							alertDialog.setTitle( "Error" );
+							alertDialog.setMessage( "Add new brand error !" );
+							alertDialog.setButton( "Done", new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									// TODO Auto-generated method stub
+									alertDialog.dismiss();
+								}
+							});
+							alertDialog.show();
+						}
+						
+						@Override
+						public void onFailure(Throwable arg0, String arg1) {
+							// TODO Auto-generated method stub
+							super.onFailure(arg0, arg1);
+							if( loadingDialog.isShowing() ){
+					        	loadingDialog.dismiss();
+					        }
+							
+							alertDialog.setTitle( "Error" );
+							alertDialog.setMessage( "Add new brand error !" );
+							alertDialog.setButton( "Done", new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									// TODO Auto-generated method stub
+									alertDialog.dismiss();
+								}
+							});
+							alertDialog.show();
+						}
+					});
+				}else if( searchType.equals( SHARE_PREF_KEY_SEARCH_STORE ) ){
+					InputMethodManager imm = (InputMethodManager) this.getActivity().getSystemService(
+						      Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow( searchEditText.getWindowToken(), 0 );
+					
+					SharedPreferences myPref = ShareProductSearchLayout.this.getActivity().getSharedPreferences( ShareProductAddNewStoreLayout.SHARE_PREF_NEW_STORE_NAME, ShareProductSearchLayout.this.getActivity().MODE_PRIVATE );
+					SharedPreferences.Editor prefsEditor = myPref.edit();
+					prefsEditor.putString( ShareProductAddNewStoreLayout.SHARE_PREF_KEY_NEW_STORES_NAME, searchEditText.getText().toString() );
+			        prefsEditor.commit();
+					
+					listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_ADD_NEW_STORE );
+					
+					if( loadingDialog.isShowing() ){
+			        	loadingDialog.dismiss();
+			        }
+				}
 			}
 		}
 	}
@@ -530,15 +708,77 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements OnCl
 	@Override
 	public void afterTextChanged(Editable s) {
 		if( !(s.equals("")) && 
-				s != null  &&
-			    (s.length() > 0) ){
-				String searchByNameURL = getDataURL+"q="+s;
-				searchByNameURL = searchByNameURL.replace( " ", "%20" );
-				
+			s != null  &&
+			(s.length() > 0) ){
+				if( searchType.equals( SHARE_PREF_KEY_SEARCH_PRODUCT ) ){
+					clearArrayData();
+					
+					for( CategoryData fetchData : tempArrayCategoryData ){
+						if( fetchData.getName().toLowerCase().startsWith( s.toString().toLowerCase() ) ){
+							arrayCategoryData.add( fetchData );
+						}
+					}
+					
+					productNameItemAdapter.setData( arrayCategoryData );
+					this.getActivity().runOnUiThread( new Runnable() {
+						@Override
+						public void run() {
+							nameItemListView.setAdapter( productNameItemAdapter );
+						}
+					});
+				}else{
+					String searchByNameURL = getDataURL+"q="+s;
+					searchByNameURL = searchByNameURL.replace( " ", "%20" );
+					
+					asyncHttpClient.get( searchByNameURL, new JsonHttpResponseHandler(){
+						@Override
+						public void onSuccess(JSONObject getJsonObject) {
+							super.onSuccess(getJsonObject);
+							onGetDataURLSuccess(getJsonObject);
+						}
+					});
+				}
+		}else{
+			if( searchType.equals( SHARE_PREF_KEY_SEARCH_PRODUCT ) ){
 				clearArrayData();
 				
-				//NetworkThreadUtil.getRawDataWithCookie( searchByNameURL, null, appCookie, this );
-				asyncHttpClient.get( searchByNameURL, new JsonHttpResponseHandler(){
+				if( (getSubCategoryId != null) &&
+					(getSubCategoryName != null)){
+					for(int i = 0; i<appArrayCategoryData.size(); i++){
+						//Load Category & SubCategory Data
+						if( appArrayCategoryData.get( i ) != null ){
+							CategoryData categoryData = appArrayCategoryData.get( i );
+							if( getSubCategoryId.equals( categoryData.getId() ) &&
+								getSubCategoryName.equals( categoryData.getName() )){
+								JSONArray jsonArray = categoryData.getSubCategories();
+								for(int j = 0; j<jsonArray.length(); j++){
+									if( jsonArray.optJSONObject( j ) != null ){
+										CategoryData newCategoryData = new CategoryData( jsonArray.optJSONObject( j ) );
+										arrayCategoryData.add( newCategoryData );
+									}
+								}
+							}
+						}
+					}
+				}else{
+					for(int i = 0; i<appArrayCategoryData.size(); i++){
+						//Load Category Data
+						if( appArrayCategoryData.get( i ) != null ){
+							CategoryData categoryData = appArrayCategoryData.get( i );
+							arrayCategoryData.add( categoryData );
+						}
+					}
+				}
+				
+				productNameItemAdapter.setData( arrayCategoryData );
+				this.getActivity().runOnUiThread( new Runnable() {
+					@Override
+					public void run() {
+						nameItemListView.setAdapter( productNameItemAdapter );
+					}
+				});
+			}else{
+				asyncHttpClient.get( getDataURL, new JsonHttpResponseHandler(){
 					@Override
 					public void onSuccess(JSONObject getJsonObject) {
 						super.onSuccess(getJsonObject);
@@ -546,6 +786,7 @@ public class ShareProductSearchLayout extends AbstractViewLayout implements OnCl
 					}
 				});
 			}
+		}
 	}
 
 	@Override

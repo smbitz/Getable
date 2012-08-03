@@ -26,6 +26,14 @@ public class MyRelationData {
 		liked = jsonObject.optString( "liked" );
 	}
 	
+	public void setFollowActivity( ProductActivityData setFollowActivity ){
+		followActivity = setFollowActivity;
+	}
+	
+	public void setLike( String setLike ){
+		liked = setLike;
+	}
+	
 	public ProductActivityData getFollowActivity(){
 		return followActivity;
 	}

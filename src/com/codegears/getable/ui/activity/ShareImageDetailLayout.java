@@ -35,20 +35,24 @@ import org.w3c.dom.Document;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.os.Environment;
 import android.preference.PreferenceManager;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -73,8 +77,10 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 import android.view.View.OnClickListener;
+import android.view.View.OnKeyListener;
+import android.view.inputmethod.InputMethodManager;
 
-public class ShareImageDetailLayout extends AbstractViewLayout implements OnClickListener {
+public class ShareImageDetailLayout extends AbstractViewLayout implements OnClickListener, TextWatcher {
 	
 	public static final String SHARE_PREF_DETAIL_VALUE = "SHARE_PREF_DETAIL_VALUE";
 	public static final String SHARE_PREF_KEY_CATEGORY_NAME = "SHARE_PREF_KEY_CATEGORY_NAME";
@@ -131,6 +137,20 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 	private ImageView brandRightArrow;
 	private ImageView locationRightArrow;
 	private ImageView genderRightArrow;
+	private ImageButton backButton;
+	private TextView descriptionText;
+	private TextView productText;
+	private TextView brandText;
+	private TextView locationText;
+	private TextView genderText;
+	private TextView priceText;
+	private TextView captionText;
+	private TextView sharingText;
+	private TextView facebookText;
+	private TextView twitterText;
+	private ImageView facebookArrowImage;
+	private ImageView twitterArrorImage;
+	private AlertDialog alertDialog;
 	
 	public ShareImageDetailLayout(Activity activity) {
 		super(activity);
@@ -141,6 +161,14 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 		twitterButtonStatus = socialPrefs.getInt( MyApp.SHARE_PREF_KEY_TWITTER_BUTTON_STATUS, 0 );
 		
 		myPrefs = this.getActivity().getSharedPreferences( SHARE_PREF_DETAIL_VALUE, this.getActivity().MODE_PRIVATE );
+		
+		app = (MyApp) this.getActivity().getApplication();
+		//appCookie = app.getAppCookie();
+		asyncHttpClient = app.getAsyncHttpClient();
+		config = new Config( this.getContext() );
+		currentActorData = app.getCurrentProfileData();
+		facebook = app.getFacebook();
+		alertDialog = new AlertDialog.Builder( this.getContext() ).create();
 		
 		productButton = (Button) findViewById( R.id.shareImageDetailLayoutProductButton );
 		brandButton = (Button) findViewById( R.id.shareImageDetailLayoutBrandButton );
@@ -162,6 +190,40 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 		brandRightArrow = (ImageView) findViewById( R.id.shareImageDetailLayoutBrandRightArrow );
 		locationRightArrow = (ImageView) findViewById( R.id.shareImageDetailLayoutLocationRightArrow );
 		genderRightArrow = (ImageView) findViewById( R.id.shareImageDetailLayoutGenderRightArrow );
+		backButton = (ImageButton) findViewById( R.id.shareImageDetailLayoutBackButton );
+		descriptionText = (TextView) findViewById( R.id.shareImageDetailDescriptionText );
+		productText = (TextView) findViewById( R.id.shareImageDetailProductText );
+		brandText = (TextView) findViewById( R.id.shareImageDetailBrandText );
+		locationText = (TextView) findViewById( R.id.shareImageDetailLocationText );
+		genderText = (TextView) findViewById( R.id.shareImageDetailGenderText );
+		priceText = (TextView) findViewById( R.id.shareImageDetailPriceText );
+		captionText = (TextView) findViewById( R.id.shareImageDetailCaptionText );
+		sharingText = (TextView) findViewById( R.id.shareImageDetailSharingText );
+		facebookText = (TextView) findViewById( R.id.shareImageDetailFacebookText );
+		twitterText = (TextView) findViewById( R.id.shareImageDetailTwitterText );
+		facebookArrowImage = (ImageView) findViewById( R.id.shareImageDetailFacebookArrowImage );
+		twitterArrorImage = (ImageView) findViewById( R.id.shareImageDetailTwitterArrowImage );
+		
+		//Set font
+		descriptionText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		productText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		brandText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		locationText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		genderText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		priceText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		captionText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		sharingText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		facebookText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		twitterText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		facebookConfigText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		twitterConfigText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		shareButton.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH_2) );
+		productName.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		brandName.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		locationName.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		genderName.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		priceEditText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		captionEditText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
 		
 		productButton.setOnClickListener( this );
 		brandButton.setOnClickListener( this );
@@ -172,8 +234,9 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 		twitterConfigButton.setOnClickListener( this );
 		facebookConfigText.setOnClickListener( this );
 		twitterConfigText.setOnClickListener( this );
+		backButton.setOnClickListener( this );
 		
-		priceEditText.addTextChangedListener( new TextWatcher() {
+		/*priceEditText.addTextChangedListener( new TextWatcher() {
 			
 			@Override
 			public void onTextChanged(CharSequence s, int start, int before, int count) {
@@ -190,7 +253,8 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 			
 			@Override
 			public void afterTextChanged(Editable s) {
-				if( s.length() == 0 ||
+				final String setTextString = s.toString().replace("$", "");
+				if( setTextString.length() == 0 ||
 					productName.getText().length() == 0 ||
 					brandName.getText().length() == 0 ||
 					locationName.getText().length() == 0 ||
@@ -201,22 +265,51 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 					shareButton.setTextColor( Color.WHITE );
 					shareButton.setEnabled( true );
 				}
+				
+				if( setTextString.length() > 0 ){
+					s.clear();
+					//s.append( "$"+setTextString );
+				}
+			}
+		});*/
+		
+		priceEditText.addTextChangedListener( this );
+		
+		priceEditText.setOnKeyListener(new OnKeyListener() {
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				// If the event is a key-down event on the "enter" button
+		        if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+		            (keyCode == KeyEvent.KEYCODE_ENTER)) {
+		          return true;
+		        }
+		        return false;
+			}
+		});
+		
+		captionEditText.setOnKeyListener(new OnKeyListener() {
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				// If the event is a key-down event on the "enter" button
+		        if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+		            (keyCode == KeyEvent.KEYCODE_ENTER)) {
+		          return true;
+		        }
+		        return false;
 			}
 		});
 		
 		shareButton.setTextColor( R.color.NameColorGrey );
 		shareButton.setEnabled( false );
 		
-		app = (MyApp) this.getActivity().getApplication();
-		//appCookie = app.getAppCookie();
-		asyncHttpClient = app.getAsyncHttpClient();
-		config = new Config( this.getContext() );
-		currentActorData = app.getCurrentProfileData();
-		facebook = app.getFacebook();
-		
-		String tempDirectory = ShareImageCropLayout.TEMP_IMAGE_DIRECTORY_NAME;
+		String tempDirectory = MyApp.TEMP_IMAGE_DIRECTORY_NAME;
 		String tempImageName = ShareImageCropLayout.TEMP_IMAGE_FILE_NAME;
 		tempImageLocation = Environment.getExternalStorageDirectory().toString()+tempDirectory+tempImageName;
+		
+		File tempCreateDirectory = new File( tempImageLocation );
+		if( !(tempCreateDirectory.exists()) ){
+			tempCreateDirectory.mkdir();
+		}
 		
 		loadingDialog = new ProgressDialog( this.getActivity() );
 		loadingDialog.setTitle("");
@@ -224,21 +317,35 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 		loadingDialog.setIndeterminate( true );
 		loadingDialog.setCancelable( true );
 		
-		setViewFromData();
-		
 		shareURL = config.get( MyApp.URL_DEFAULT ).toString()+"activities/product.json";
 		getCurrentUserDataURL = config.get( MyApp.URL_GET_CURRENT_USER_DATA ).toString();
 		connectFacebookURL = config.get( MyApp.URL_DEFAULT ).toString()+"me/integrations/facebook.json";
+		
+		if( currentActorData == null ){
+			asyncHttpClient.post( getCurrentUserDataURL, new JsonHttpResponseHandler(){
+				@Override
+				public void onSuccess(JSONObject jsonObject) {
+					super.onSuccess(jsonObject);
+					setViewFromData();
+				}
+			});
+		}else{
+			setViewFromData();
+		}
 	}
 	
 	private void setViewFromData(){
 		//Set facebook and twitter button status default.
 		facebookConfigButton.setVisibility( View.GONE );
 		facebookConfigText.setVisibility( View.GONE );
+		facebookArrowImage.setVisibility( View.GONE );
 		twitterConfigButton.setVisibility( View.GONE );
 		twitterConfigText.setVisibility( View.GONE );
+		twitterArrorImage.setVisibility( View.GONE );
 		
 		//Set Facebook and Twitter config button;
+		System.out.println( "DeBug ShareImage 1 : "+currentActorData );
+		System.out.println( "DeBug ShareImage 2 : "+currentActorData.getName() );
 		if( currentActorData.getSocialConnections().getFacebook().getStatus() ){
 			facebookConfigButton.setVisibility( View.VISIBLE );
 			if( facebookButtonStatus != 0 ){
@@ -252,6 +359,7 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 			}
 		}else{
 			facebookConfigText.setVisibility( View.VISIBLE );
+			facebookArrowImage.setVisibility( View.VISIBLE );
 		}
 		
 		if( currentActorData.getSocialConnections().getTwitter().getStatus() ){
@@ -267,10 +375,11 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 			}
 		}else{
 			twitterConfigText.setVisibility( View.VISIBLE );
+			twitterArrorImage.setVisibility( View.VISIBLE );
 		}
 	}
 	
-	private void refreshViewFromSetupSocial(){
+	public void refreshViewFromSetupSocial(){
 		asyncHttpClient.post( getCurrentUserDataURL, new JsonHttpResponseHandler(){
 			@Override
 			public void onSuccess(JSONObject jsonObject) {
@@ -330,7 +439,7 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 					brandName.getText().length() > 0 &&
 					locationName.getText().length() > 0 &&
 					genderName.getText().length() > 0 &&
-					priceEditText.getText().length() > 0 ){
+					priceEditText.getText().toString().replace("$", "").length() > 0 ){
 					shareButton.setTextColor( Color.WHITE );
 					shareButton.setEnabled( true );
 				}else{
@@ -344,6 +453,8 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 	@Override
 	public void onClick(View v) {
 		if( v.equals( shareButton ) ){
+			loadingDialog.show();
+			
 			//Post image.
 			Bitmap bitmap = BitmapFactory.decodeFile( tempImageLocation );
 			ByteArrayOutputStream bao = new ByteArrayOutputStream();
@@ -357,7 +468,7 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 				reqEntity.addPart("brand", new StringBody(setBrandName));
 				reqEntity.addPart("category", new StringBody(setCategoryId));
 				reqEntity.addPart("gender", new StringBody(setGenderId));
-				reqEntity.addPart("price", new StringBody(priceEditText.getText().toString()));
+				reqEntity.addPart("price", new StringBody(priceEditText.getText().toString().replace("$", "")));
 				reqEntity.addPart("description", new StringBody(captionEditText.getText().toString()));
 				
 				//Set social sharing
@@ -382,6 +493,7 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 				asyncHttpClient.post( this.getContext(), shareURL, reqEntity, null, new JsonHttpResponseHandler(){
 					@Override
 					public void onSuccess(JSONObject getJsonObject) {
+						System.out.println("UploadSuccessResult : "+getJsonObject);
 						super.onSuccess(getJsonObject);
 						//Test Data
 						try {
@@ -389,6 +501,10 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 							onShareURLSuccess(getJsonObject);
 						} catch (JSONException e) {
 							e.printStackTrace();
+							if( loadingDialog.isShowing() ){
+								loadingDialog.dismiss();
+							}
+							
 							final AlertDialog alertDialog = new AlertDialog.Builder( ShareImageDetailLayout.this.getContext() ).create();
 							alertDialog.setTitle( "Error" );
 							alertDialog.setMessage( "Upload fail !!" );
@@ -411,8 +527,10 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 			SharedPreferences myPref = this.getActivity().getSharedPreferences( MyApp.SHARE_PREF_SOCIAL_STATUS_BUTTON, this.getActivity().MODE_PRIVATE );
 			SharedPreferences.Editor prefsEditor = myPref.edit();
 			if( facebookConfigButton.isChecked() ){
+				facebookButtonStatus = MyApp.FACEBOOK_BUTTON_STATUS_ON;
 				prefsEditor.putInt( MyApp.SHARE_PREF_KEY_FACEBOOK_BUTTON_STATUS, MyApp.FACEBOOK_BUTTON_STATUS_ON );
 			}else{
+				facebookButtonStatus = MyApp.FACEBOOK_BUTTON_STATUS_OFF;
 				prefsEditor.putInt( MyApp.SHARE_PREF_KEY_FACEBOOK_BUTTON_STATUS, MyApp.FACEBOOK_BUTTON_STATUS_OFF );
 			}
 			prefsEditor.commit();
@@ -420,15 +538,17 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 			SharedPreferences myPref = this.getActivity().getSharedPreferences( MyApp.SHARE_PREF_SOCIAL_STATUS_BUTTON, this.getActivity().MODE_PRIVATE );
 			SharedPreferences.Editor prefsEditor = myPref.edit();
 			if( twitterConfigButton.isChecked() ){
+				twitterButtonStatus = MyApp.TWITTER_BUTTON_STATUS_ON;
 				prefsEditor.putInt( MyApp.SHARE_PREF_KEY_TWITTER_BUTTON_STATUS, MyApp.TWITTER_BUTTON_STATUS_ON );
 			}else{
+				twitterButtonStatus = MyApp.TWITTER_BUTTON_STATUS_OFF;
 				prefsEditor.putInt( MyApp.SHARE_PREF_KEY_TWITTER_BUTTON_STATUS, MyApp.TWITTER_BUTTON_STATUS_OFF );
 			}
 			prefsEditor.commit();
 		}else if( v.equals( facebookConfigText ) ){
 			loadingDialog.show();
 			
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences( this.getActivity() );
+			/*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences( this.getActivity() );
 			String currentAccessToken = prefs.getString( ConnectFacebook.FACEBOOK_ACCESS_TOKEN, null );
 			long expires = prefs.getLong( ConnectFacebook.FACEBOOK_ACCESS_EXPIRES, 0);
 			if(currentAccessToken != null) {
@@ -438,14 +558,46 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 	            facebook.setAccessExpires(expires);
 	        }
 			
-			if( !facebook.isSessionValid() ){
-				facebook.authorize( this.getActivity(), new DialogListener() {
+			if( !facebook.isSessionValid() ){*/
+				facebook.authorize( this.getActivity(), MyApp.FACEBOOK_PERMISSION, new DialogListener() {
 					
 					@Override
-					public void onFacebookError(FacebookError e) { }
+					public void onFacebookError(FacebookError e) { 
+						System.out.println("ShareImageDetailFacebookError1 : "+e);
+						alertDialog.setTitle( "Error" );
+						alertDialog.setMessage( "Cannot connect facebook." );
+						alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								// TODO Auto-generated method stub
+								alertDialog.dismiss();
+							}
+						});
+						alertDialog.show();
+						
+						if( loadingDialog.isShowing() ){
+							loadingDialog.dismiss();
+						}
+					}
 					
 					@Override
-					public void onError(DialogError e) { }
+					public void onError(DialogError e) {
+						System.out.println("ShareImageDetailFacebookError2 : "+e);
+						alertDialog.setTitle( "Error" );
+						alertDialog.setMessage( "Cannot connect facebook." );
+						alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								// TODO Auto-generated method stub
+								alertDialog.dismiss();
+							}
+						});
+						alertDialog.show();
+						
+						if( loadingDialog.isShowing() ){
+							loadingDialog.dismiss();
+						}
+					}
 					
 					@Override
 					public void onComplete(Bundle values) {
@@ -462,20 +614,105 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 						paramMap.put( "accessToken", facebook.getAccessToken() );
 						paramMap.put( "_a", "connect" );
 						RequestParams params = new RequestParams(paramMap);
-						asyncHttpClient.post( connectFacebookURL, params, new AsyncHttpResponseHandler(){
+						asyncHttpClient.post( connectFacebookURL, params, new JsonHttpResponseHandler(){
 							@Override
-							public void onSuccess(String arg0) {
-								super.onSuccess(arg0);
-								refreshViewFromSetupSocial();
+							public void onSuccess(JSONObject jsonObject) {
+								super.onSuccess(jsonObject);
+								try {
+									String checkValue = jsonObject.getString( "status" );
+									refreshViewFromSetupSocial();
+								} catch (JSONException e) {
+									System.out.println("ShareImageDetailFacebookError3 : "+e);
+									e.printStackTrace();
+									
+									JSONObject errorObject;
+									try {
+										errorObject = jsonObject.getJSONObject( "error" );
+										String message = errorObject.optString( "message" );
+										alertDialog.setTitle( "Error" );
+										alertDialog.setMessage( message );
+										alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+											@Override
+											public void onClick(DialogInterface dialog, int which) {
+												// TODO Auto-generated method stub
+												alertDialog.dismiss();
+											}
+										});
+										alertDialog.show();
+									} catch (JSONException e1) {
+										// TODO Auto-generated catch block
+										System.out.println("ShareImageDetailFacebookError4 : "+e1);
+										e1.printStackTrace();
+										alertDialog.setTitle( "Error" );
+										alertDialog.setMessage( "Cannot connect facebook." );
+										alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+											@Override
+											public void onClick(DialogInterface dialog, int which) {
+												// TODO Auto-generated method stub
+												alertDialog.dismiss();
+											}
+										});
+										alertDialog.show();
+									}
+									
+									if( loadingDialog.isShowing() ){
+										loadingDialog.dismiss();
+									}
+								}
+							}
+							
+							@Override
+							public void onFailure(Throwable arg0,JSONObject arg1) {
+								// TODO Auto-generated method stub
+								super.onFailure(arg0, arg1);
+								System.out.println("ShareImageDetailFacebookError5 : "+arg1);
+								if( loadingDialog.isShowing() ){
+									loadingDialog.dismiss();
+								}
+								
+								alertDialog.setTitle( "Error" );
+								alertDialog.setMessage( "Cannot connect facebook." );
+								alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+									@Override
+									public void onClick(DialogInterface dialog, int which) {
+										// TODO Auto-generated method stub
+										alertDialog.dismiss();
+									}
+								});
+								alertDialog.show();
+							}
+							
+							@Override
+							public void onFailure(Throwable arg0, String arg1) {
+								super.onFailure(arg0, arg1);
+								System.out.println("ShareImageDetailFacebookError6 : "+arg1);
+								if( loadingDialog.isShowing() ){
+									loadingDialog.dismiss();
+								}
+								
+								alertDialog.setTitle( "Error" );
+								alertDialog.setMessage( "Cannot connect facebook." );
+								alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+									@Override
+									public void onClick(DialogInterface dialog, int which) {
+										// TODO Auto-generated method stub
+										alertDialog.dismiss();
+									}
+								});
+								alertDialog.show();
 							}
 						});
 					}
 					
 					@Override
-					public void onCancel() { }
+					public void onCancel() { 
+						if( loadingDialog.isShowing() ){
+							loadingDialog.dismiss();
+						}
+					}
 					
 				});
-			}else{
+			/*}else{
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "accessToken", facebook.getAccessToken() );
 				paramMap.put( "_a", "connect" );
@@ -487,9 +724,16 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 						refreshViewFromSetupSocial();
 					}
 				});
-			}
+			}*/
 		}else if( v.equals( twitterConfigText ) ){
-			
+			if(listener != null){
+				SharedPreferences myPreferences = this.getActivity().getSharedPreferences( ProfileLayoutWebView.SHARE_PREF_WEB_VIEW_TYPE, this.getActivity().MODE_PRIVATE );
+				SharedPreferences.Editor prefsEditor = myPreferences.edit();
+				prefsEditor.putString( ProfileLayoutWebView.WEB_VIEW_TYPE, ProfileLayoutWebView.WEB_VIEW_TYPE_CONNECT_TWITTER );
+				prefsEditor.putInt( ProfileLayoutWebView.CONNECT_TWITTER_FROM, ProfileLayoutWebView.CONNECT_TWITTER_FROM_SHARE_PRODUCT );
+				prefsEditor.commit();
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PROFILE_WEBVIEW );
+			}
 		}else if( listener != null ){
 			if( v.equals( productButton ) ){
 				SharedPreferences myPref = this.getActivity().getSharedPreferences( ShareProductSearchLayout.SHARE_PREF_SEARCH_TYPE, this.getActivity().MODE_PRIVATE );
@@ -515,11 +759,22 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 				prefsEditor.putString( ShareProductSearchLayout.SHARE_PREF_KEY_SEARCH_TYPE, ShareProductSearchLayout.SHARE_PREF_KEY_SEARCH_GENDER );
 		        prefsEditor.commit();
 				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_SHARE_IMAGE_DETAIL_SEARCH_VALUE );
+			}else if( v.equals( backButton ) ){
+				InputMethodManager imm = (InputMethodManager) this.getActivity().getSystemService(
+					      Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow( priceEditText.getWindowToken(), 0 );
+					imm.hideSoftInputFromWindow( captionEditText.getWindowToken(), 0 );
+
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_BACK_BUTTON );
 			}
 		}
 	}
 	
 	private void onShareURLSuccess(JSONObject jsonObject) {
+		if( loadingDialog.isShowing() ){
+			loadingDialog.dismiss();
+		}
+		
 		//Can't redirect to product_detail page.
 		if( listener != null ){
 			//Load Product Data
@@ -534,6 +789,43 @@ public class ShareImageDetailLayout extends AbstractViewLayout implements OnClic
 	
 	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener){
 		this.listener = listener;
+	}
+
+	@Override
+	public void afterTextChanged(Editable s) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void beforeTextChanged(CharSequence s, int start, int count,
+			int after) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onTextChanged(CharSequence s, int start, int before, int count) {
+		final String setTextString = s.toString().replace("$", "");
+		if( setTextString.length() == 0 ||
+			productName.getText().length() == 0 ||
+			brandName.getText().length() == 0 ||
+			locationName.getText().length() == 0 ||
+			genderName.getText().length() == 0 ){
+			shareButton.setTextColor( R.color.NameColorGrey );
+			shareButton.setEnabled( false );
+		}else{
+			shareButton.setTextColor( Color.WHITE );
+			shareButton.setEnabled( true );
+		}
+		
+		if( setTextString.length() > 0 ){
+			String setTextShow = "$"+setTextString;
+			priceEditText.removeTextChangedListener( this );
+			priceEditText.setText( setTextShow );
+			priceEditText.setSelection( setTextShow.length() );
+			priceEditText.addTextChangedListener( this );
+		}
 	}
 
 }

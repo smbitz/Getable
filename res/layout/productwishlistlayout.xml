@@ -1,39 +1,71 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-	android:orientation="vertical" android:layout_width="match_parent"
-	android:layout_height="match_parent" android:background="#ffffff">
-	
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <com.codegears.getable.ui.AppHeader
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+        </com.codegears.getable.ui.AppHeader>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center" >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
+
+                <ImageButton
+                    android:id="@+id/productWishlistBackButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:background="@null"
+                    android:src="@drawable/back_button" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="3.5" >
+            </LinearLayout>
+        </LinearLayout>
+        
+    </FrameLayout>
+
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" android:background="#63bfec">
-
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/logo_name" android:layout_gravity="center"/>
-
-    </LinearLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" android:background="#887f79">
+        android:background="#887f79"
+        android:orientation="vertical" >
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" >
+            android:layout_height="50dp"
+            android:background="#887f79" >
+
+            <LinearLayout
+                android:layout_width="5dp"
+                android:layout_height="match_parent" >
+            </LinearLayout>
 
             <TextView
-                android:id="@+id/textView1"
+                android:id="@+id/productWishlistChooseWishlistText"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:text="Choose a wishlist to add to:"
-                android:textAppearance="?android:attr/textAppearanceMedium" />
-
+                android:textColor="#ffffff" />
         </LinearLayout>
-
     </LinearLayout>
 
     <LinearLayout
@@ -62,44 +94,106 @@
                         android:id="@+id/productWishlistListView"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:cacheColorHint="#00000000" >
+                        android:cacheColorHint="#00000000"
+                        android:divider="#c0bbb8"
+                        android:dividerHeight="0.5dp" android:listSelector="#00000000">
                     </ListView>
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
+                    android:layout_height="50dp"
+                    android:background="#ffffff"
                     android:orientation="vertical" >
 
-                    <Button
-                        android:id="@+id/productWishlistCreateButton"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Create New Wishlist" />
+                    <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="50dp" >
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:orientation="horizontal" >
+
+                            <LinearLayout
+                                android:layout_width="5dp"
+                                android:layout_height="match_parent" >
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/productWishlistCreateWishlistText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:text="Create New Wishlist"
+                                android:textColor="#000000" />
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="3.7" >
+                            </LinearLayout>
+
+                            <ImageView
+                                android:id="@+id/imageView1"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_gravity="center"
+                                android:src="@drawable/image_arrow_right" />
+
+                            <LinearLayout
+                                android:layout_width="5dp"
+                                android:layout_height="match_parent" >
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <Button
+                            android:id="@+id/productWishlistCreateButton"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent"
+                            android:background="@null" />
+                    </FrameLayout>
+                </LinearLayout>
+
+                <ImageView
+                    android:id="@+id/ImageView06"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:src="@drawable/image_line" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical" >
                 </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
+                android:id="@+id/productWishlistCreateLayout"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:orientation="vertical" android:id="@+id/productWishlistCreateLayout" android:visibility="gone">
+                android:orientation="vertical" android:visibility="gone">
 
                 <LinearLayout
+                    android:id="@+id/productWishlistCreateLayoutTop"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:orientation="vertical" android:layout_weight="1" android:clickable="true" android:id="@+id/productWishlistCreateLayoutTop">
+                    android:layout_weight="1"
+                    android:clickable="true"
+                    android:orientation="vertical" >
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
+                    android:layout_height="wrap_content" android:background="#63bfec">
 
                     <EditText
                         android:id="@+id/productWishlistCreateLayoutNameEditText"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:ems="10" >
+                        android:ems="10"
+                        android:lines="1" >
 
                         <requestFocus />
                     </EditText>
@@ -109,14 +203,11 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_weight="1"
-                        android:text="Button" />
-
+                        android:text="Button"
+                        android:visibility="gone" />
                 </LinearLayout>
-
             </LinearLayout>
-
         </FrameLayout>
-
     </LinearLayout>
-    
+
 </LinearLayout>

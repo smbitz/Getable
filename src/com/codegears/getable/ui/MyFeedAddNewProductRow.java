@@ -1,10 +1,13 @@
 package com.codegears.getable.ui;
 
+import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
 import com.codegears.getable.data.ProductActivityData;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
+import android.text.Html;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -14,7 +17,7 @@ public class MyFeedAddNewProductRow extends LinearLayout {
 	
 	private ImageView userImageView;
 	private ImageView productImageView;
-	private TextView userName;
+	private String userNameText;
 	private TextView productName;
 	private TextView numLike;
 	private TextView numComment;
@@ -25,6 +28,8 @@ public class MyFeedAddNewProductRow extends LinearLayout {
 	private MyFeedLikeButton likeButton;
 	private MyFeedCommentButton commentButton;
 	private MyfeedWishlistButton wishlistButton;
+	private TextView postTime;
+	private TextView detailText;
 	
 	public MyFeedAddNewProductRow(Context context) {
 		super(context);
@@ -32,13 +37,14 @@ public class MyFeedAddNewProductRow extends LinearLayout {
 		
 		userImageView = (ImageView) findViewById( R.id.myFeedAddNewProductRowUserImage );
 		productImageView = (ImageView) findViewById( R.id.myFeedAddNewProductRowProductImage );
-		userName = (TextView) findViewById( R.id.myFeedAddNewProductRowUserName );
 		productName = (TextView) findViewById( R.id.myFeedAddNewProductRowProductName );
 		numLike = (TextView) findViewById( R.id.myFeedAddNewProductRowLikeNum );
 		numComment = (TextView) findViewById( R.id.myFeedAddNewProductRowCommentNum );
 		likeButtonLayout = (LinearLayout) findViewById( R.id.myFeedAddNewProductRowLikeImageLayout );
 		commentButtonLayout = (LinearLayout) findViewById( R.id.myFeedAddNewProductRowCommentImageLayout );
 		wishlistButtonLayout = (LinearLayout) findViewById( R.id.myFeedAddNewProductRowWishlistImageLayout );
+		postTime = (TextView) findViewById( R.id.myFeedAddNewProductRowTime );
+		detailText = (TextView) findViewById( R.id.myFeedAddNewProductRowDetailText );
 		
 		likeButton = new MyFeedLikeButton( this.getContext() );
 		commentButton = new MyFeedCommentButton( this.getContext() );
@@ -48,12 +54,21 @@ public class MyFeedAddNewProductRow extends LinearLayout {
 		commentButtonLayout.addView( commentButton );
 		wishlistButtonLayout.addView( wishlistButton );
 		
-		userName.setTextColor( Color.parseColor( this.getResources().getString( R.color.NameColorBlue ) ) );
+		//Set font
+		productName.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		numLike.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		numComment.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		postTime.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		detailText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		
 		productName.setTextColor( Color.parseColor( this.getResources().getString( R.color.NameColorBlue ) ) );
+		
+		detailText.setText( Html.fromHtml( userNameText+" added a new product." ) );
 	}
 
 	public void setUserName(String setUserName) {
-		userName.setText( setUserName );
+		userNameText = "<font color='#63bfec'>"+setUserName+"</font>";
+		detailText.setText( Html.fromHtml( userNameText+" added a new product." ) );
 	}
 
 	public void setProductName(String setProductName) {
@@ -70,6 +85,10 @@ public class MyFeedAddNewProductRow extends LinearLayout {
 	
 	public void setActivityData(ProductActivityData setData){
 		activityData = setData;
+	}
+	
+	public void setPostTime( String setPostTime ){
+		postTime.setText( setPostTime );
 	}
 	
 	public ProductActivityData getActivityData(){
@@ -96,4 +115,7 @@ public class MyFeedAddNewProductRow extends LinearLayout {
 		return wishlistButton;
 	}
 	
+	public int getNumLike() {
+		return Integer.parseInt( numLike.getText().toString() );
+	}
 }

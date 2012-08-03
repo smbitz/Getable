@@ -1,10 +1,12 @@
 package com.codegears.getable.ui;
 
+import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
 import com.codegears.getable.data.MetroData;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -22,6 +24,8 @@ public class MetroListTextView extends LinearLayout {
 		viewLayout = (LinearLayout) findViewById( R.id.metroListLayout );
 		
 		metroText = (TextView) findViewById( R.id.metroListViewText );
+		
+		metroText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
 	}
 	
 	public void setItemNormal(){

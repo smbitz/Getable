@@ -38,6 +38,7 @@ import com.codegears.getable.ui.ProductBrandName;
 import com.codegears.getable.ui.UserName;
 import com.codegears.getable.ui.UserProfileHeader;
 import com.codegears.getable.ui.UserProfileImageLayout;
+import com.codegears.getable.util.CalculateTime;
 import com.codegears.getable.util.Config;
 import com.codegears.getable.util.ImageLoader;
 import com.codegears.getable.util.RoundScaleNumber;
@@ -53,7 +54,9 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.text.InputType;
+import android.util.DisplayMetrics;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
@@ -65,8 +68,10 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Gallery;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.SlidingDrawer;
 import android.widget.TextView;
 
 public class ProductDetailLayout extends AbstractViewLayout implements OnClickListener, OnItemClickListener {
@@ -108,7 +113,6 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 	private MyApp app;
 	private LinearLayout likeButtonLayout;
 	private LikeButton likeButton;
-	//private List<String> appCookie;
 	private FollowButton userHeaderFollowButton;
 	private String followUserURL;
 	private LinearLayout userHeaderFollowButtonLayout;
@@ -119,28 +123,37 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 	private RelatedAdapter relatedAdapter;
 	private RoundScaleNumber roundScaleNumber;
 	private AsyncHttpClient asyncHttpClient;
+	private int numberLike;
+	private ImageButton backButton;
+	private LinearLayout moreCommentLayout;
+	private LinearLayout viewAllCommentTextLayout;
+	private TextView viewAllCommentText;
+	private SlidingDrawer relateProduct;
+	private LinearLayout commentLayoutTop;
 	
 	public ProductDetailLayout( Activity activity ) {
 		super( activity );
 		View.inflate( this.getContext(), R.layout.productdetaillayout, this );
-		
+
 		SharedPreferences myPrefs = this.getActivity().getSharedPreferences( SHARE_PREF_PRODUCT_ACT_ID, this.getActivity().MODE_PRIVATE );
 		productActivityId = myPrefs.getString( SHARE_PREF_KEY_ACTIVITY_ID, null );
 		
-		loadingDialog = ProgressDialog.show(this.getActivity(), "", 
-	               "Loading. Please wait...", true, true);
+		loadingDialog = new ProgressDialog( this.getContext() );
+		loadingDialog.setTitle("");
+		loadingDialog.setMessage("Loading. Please wait...");
+		loadingDialog.setIndeterminate( true );
+		loadingDialog.setCancelable( true );
 		
 		app = (MyApp) this.getActivity().getApplication();
 		asyncHttpClient = app.getAsyncHttpClient();
 		userHeader = new UserProfileHeader( this.getContext() );
 		config = new Config( this.getContext() );
 		arrayCommentLayout = new ArrayList<CommentRowLayout>();
-		//appCookie = app.getAppCookie();
 		relateActivityData = new ArrayList<ProductActivityData>();
 		imageLoader = new ImageLoader( this.getContext() );
 		relatedAdapter = new RelatedAdapter();
 		roundScaleNumber = new RoundScaleNumber();
-		
+
 		userProfileImageLayout = (UserProfileImageLayout) userHeader.getUserProfileImageLayout();
 		userHeaderFollowButtonLayout = (LinearLayout) userHeader.getFollowButtonLayout();
 		userHeaderFollowButtonLayout.setVisibility( View.GONE );
@@ -159,9 +172,16 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		commentButton = (Button) findViewById( R.id.productDetailCommentButton );
 		likeButtonLayout = (LinearLayout) findViewById( R.id.productDetailLikeButtonLayout );
 		likeButton = new LikeButton( this.getContext() );
+		likeButton.setLayoutParams( new LayoutParams( LayoutParams.WRAP_CONTENT, LayoutParams.WRAP_CONTENT ) );
 		likeButtonLayout.addView( likeButton );
 		wishlistButton = (Button) findViewById( R.id.productDetailWishlistButton );
 		relatedGallery = (Gallery) findViewById( R.id.productDetailRelatedGallery );
+		backButton = (ImageButton) findViewById( R.id.productDetailBackButton );
+		moreCommentLayout = (LinearLayout) findViewById( R.id.productDetailMoreCommentLayout );
+		viewAllCommentTextLayout = (LinearLayout) findViewById( R.id.productDetailViewAllCommentTextLayout );
+		viewAllCommentText = (TextView) findViewById( R.id.productDetailViewAllCommentText );
+		relateProduct = (SlidingDrawer) findViewById( R.id.productDetailSlidingDrawer );
+		commentLayoutTop = (LinearLayout) findViewById( R.id.productDetailCommentTextBoxLayoutTop );
 		
 		productBrandNameLayout = (LinearLayout) findViewById( R.id.productDetailNameLayout );
 		productBrandName = new ProductBrandName( this.getContext() );
@@ -180,6 +200,15 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		productNumComment = new ProductNumComment( this.getContext() );
 		productCommentNumLayout.addView( productNumComment );
 		
+		//Set font
+		productBrandName.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		productDescription.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		productPrice.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		productStoreAddress.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		productNumLike.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		productNumComment.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		viewAllCommentText.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		
 		photoOptionsButton.setOnClickListener( this );
 		userProfileImageLayout.setOnClickListener( this );
 		productBrandName.setOnClickListener( this );
@@ -191,11 +220,25 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		likeButton.setOnClickListener( this );
 		userHeaderFollowButton.setOnClickListener( this );
 		wishlistButton.setOnClickListener( this );
+		backButton.setOnClickListener( this );
+		viewAllCommentTextLayout.setOnClickListener( this );
 		relatedGallery.setOnItemClickListener( this );
+		commentLayoutTop.setOnClickListener( this );
 		
 		//Set gallery align left
-		MarginLayoutParams mlp = (MarginLayoutParams) relatedGallery.getLayoutParams();
+		/*MarginLayoutParams mlp = (MarginLayoutParams) relatedGallery.getLayoutParams();
 		mlp.setMargins(-(this.getWidth()/2+310), 
+		               mlp.topMargin, 
+		               mlp.rightMargin, 
+		               mlp.bottomMargin
+		);*/
+		
+		DisplayMetrics metrics = new DisplayMetrics();
+		this.getActivity().getWindowManager().getDefaultDisplay().getMetrics(metrics);
+		
+		MarginLayoutParams mlp = (MarginLayoutParams) relatedGallery.getLayoutParams();
+		float resizeValue = (float) (70/480f);
+		mlp.setMargins((int) -(metrics.widthPixels/2+(resizeValue*metrics.widthPixels)), 
 		               mlp.topMargin, 
 		               mlp.rightMargin, 
 		               mlp.bottomMargin
@@ -208,6 +251,7 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		        if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
 		            (keyCode == KeyEvent.KEYCODE_ENTER)) {
 		          // Perform action on key press
+		          commentTextBoxLayout.setVisibility( View.GONE );
 		          submitCommentText();
 		          return true;
 		        }
@@ -221,10 +265,12 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		getProductCommentURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/comments.json"+urlVar1;
 		getProductLikeURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/likes.json";
 		getRelatedProductURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/recommended.json"+urlVar1;
-		
-		//NetworkThreadUtil.getRawDataWithCookie( getProductDataURL, null, appCookie, this );
-		//NetworkThreadUtil.getRawData( getProductCommentURL, null, this);
-		//NetworkThreadUtil.getRawDataWithCookie( getRelatedProductURL, null, appCookie, this );
+
+		loadData();
+	}
+	
+	private void loadData(){
+		loadingDialog.show();
 		
 		asyncHttpClient.get( getProductDataURL, new JsonHttpResponseHandler(){
 			@Override
@@ -245,11 +291,15 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		asyncHttpClient.get( getRelatedProductURL, new JsonHttpResponseHandler(){
 			@Override
 			public void onSuccess(JSONObject getJsonObject) {
-				// TODO Auto-generated method stub
 				super.onSuccess(getJsonObject);
 				onGetRelatedProductURL(getJsonObject);
 			}
 		});
+	}
+	
+	private void recycleView(){
+		relateActivityData.clear();
+		arrayCommentLayout.clear();
 	}
 	
 	private void onGetProductDataURLSuccess(JSONObject jsonObject){
@@ -282,6 +332,7 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		final String setDescription = newData.getProduct().getDescription();
 		final String setPrice = newData.getProduct().getPrice();
 		final String setAddress = newData.getProduct().getStore().getName()+" - "+newData.getProduct().getStore().getStreetAddress();
+		numberLike = newData.getStatisitc().getNumberOfLikes();
 		final String setNumLike = String.valueOf( newData.getStatisitc().getNumberOfLikes() )+" Likes";
 		final String setNumComment = String.valueOf( newData.getStatisitc().getNumberOfComments() )+" Comments";
 		final StoreData setStoreData = newData.getProduct().getStore();
@@ -291,6 +342,7 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		final String setUserName = newData.getActor().getName();
 		final Bitmap setUserImage = userImageBitmap;
 		final ActorData setUserData = newData.getActor();
+		final String setPostTimeText = CalculateTime.getPostTime( newData.getActivityTime() );
 		this.getActivity().runOnUiThread( new Runnable() {
 			@Override
 			public void run() {
@@ -299,7 +351,11 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 				productBrandName.setBrandData( setBrandData );
 				productStoreAddress.setText( setAddress );
 				productStoreAddress.setStoreData( setStoreData );
-				productDescription.setText( setDescription );
+				if( setDescription.length() == 0 ){
+					productDescription.setVisibility( View.GONE );
+				}else{
+					productDescription.setText( setDescription );
+				}
 				
 				//Price text
 				if( !(setPrice.equals("")) && (setPrice != null) ){
@@ -315,8 +371,13 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 				productNumComment.setProductData( setProductData );
 				
 				//Set User Header
+				if( setUserName.length() > MyApp.PROFILE_HEADER_TEXT_NAME_LENGTH ){
+					userHeader.setMoreTextNameVisible();
+				}
+				
 				userHeader.setName( setUserName );
 				userHeader.setData( setUserData );
+				userHeader.setPostTime( setPostTimeText );
 				if( setUserImage != null ){
 					userProfileImageLayout.setUserImage( setUserImage );
 				}
@@ -349,7 +410,9 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 			}
 		});
 		
-		loadingDialog.dismiss();
+		if( loadingDialog.isShowing() ){
+			loadingDialog.dismiss();
+		}
 	}
 
 	private void onGetProduceCommentURLSuccess(JSONObject jsonObject){
@@ -402,21 +465,45 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 				
 				//Remove and add new view.
 				commentLayout.removeAllViews();
+				moreCommentLayout.removeAllViews();
+				int countArrray = 0;
 				for( CommentRowLayout fetchLayout:arrayCommentLayout ){
 					//Set Image
 					String imageURL = fetchLayout.getActivityData().getActor().getPicture().getImageUrls().getImageURLT();
 					imageLoader.DisplayImage( imageURL, ProductDetailLayout.this.getActivity(), fetchLayout.getUserImageView(), true, asyncHttpClient );
 					
-					commentLayout.addView( fetchLayout );
+					//Add data to layout
+					if( countArrray == (arrayCommentLayout.size()-1) ||
+						countArrray == (arrayCommentLayout.size()-2) ||
+						countArrray == (arrayCommentLayout.size()-3) ){
+						moreCommentLayout.addView( fetchLayout );
+						viewAllCommentText.setText( "view all "+arrayCommentLayout.size()+" comments" );
+					}else{
+						commentLayout.addView( fetchLayout );
+					}
+					
+					countArrray++;
+				}
+				
+				//Set text show
+				if( arrayCommentLayout.size() <= 3 ){
+					viewAllCommentTextLayout.setVisibility( View.GONE );
+				}else{
+					viewAllCommentTextLayout.setVisibility( View.VISIBLE );
 				}
 				
 				//Set new comment num text.
 				productNumComment.setText( String.valueOf( arrayCommentLayout.size() )+" Comments" );
 			}
 		});
+		
+		if( loadingDialog.isShowing() ){
+			loadingDialog.dismiss();
+		}
 	}
 	
 	private void onGetRelatedProductURL(JSONObject jsonObject){
+		System.out.println("ProductDetailREsult : "+jsonObject);
 		try {
 			JSONArray newArray = jsonObject.getJSONArray("entities");
 			for(int i = 0; i<newArray.length(); i++){
@@ -428,9 +515,14 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 			e.printStackTrace();
 		}
 		
+		System.out.println("ProductDetailREsultSize : "+relateActivityData.size());
 		relatedAdapter.setData( relateActivityData );
 		relatedGallery.setSpacing( 5 );
 		relatedGallery.setAdapter( relatedAdapter );
+		
+		if( loadingDialog.isShowing() ){
+			loadingDialog.dismiss();
+		}
 	}
 	
 	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener){
@@ -453,7 +545,7 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 			newIntent.putExtra( ProductPhotoOptions.PUT_EXTRA_ACTIVITY_ID, productActivityId );
 			this.getActivity().startActivityForResult(newIntent, MainActivity.REQUEST_PHOTO_OPTION);
 		}else if( v.equals( productBrandName ) ){
-			if(listener != null){
+			if(listener != null && productBrandName.getBrandData() != null ){
 				ProductBrandName productBrandName = (ProductBrandName) v;
 				SharedPreferences myPreferences = this.getActivity().getSharedPreferences( BrandFeedLayout.SHARE_PREF_VALUE_BRAND_ID, this.getActivity().MODE_PRIVATE );
 				SharedPreferences.Editor prefsEditor = myPreferences.edit();
@@ -462,16 +554,16 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_BRAND_FEED );
 			}
 		}else if( v.equals( productStoreAddress ) ){
-			if(listener != null){
+			if(listener != null && productStoreAddress.getStoreData() != null ){
 				ProductStoreAddress productStoreAddress = (ProductStoreAddress) v;
 				SharedPreferences myPreferences = this.getActivity().getSharedPreferences( StoreMainLayout.SHARE_PREF_VALUE_STORE_ID, this.getActivity().MODE_PRIVATE );
 				SharedPreferences.Editor prefsEditor = myPreferences.edit();
-				prefsEditor.putString( StoreMainLayout.SHARE_PREF_KEY_STORE_ID, productBrandName.getBrandData().getId() );
+				prefsEditor.putString( StoreMainLayout.SHARE_PREF_KEY_STORE_ID, productStoreAddress.getStoreData().getId() );
 				prefsEditor.commit();
 				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_STORE_MAIN);
 			}
 		}else if( v.equals( productNumLike ) ){
-			if(listener != null){
+			if(listener != null && productNumLike.getProductData() != null ){
 				ProductNumLike productNumLike = (ProductNumLike) v;
 				SharedPreferences myPreferences = this.getActivity().getSharedPreferences( ProductLikeLayout.SHARE_PREF_VALUE_PRODUCT_ID, this.getActivity().MODE_PRIVATE );
 				SharedPreferences.Editor prefsEditor = myPreferences.edit();
@@ -480,7 +572,7 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PRODUCT_LIKE_USER_LIST );
 			}
 		}else if( v.equals( productNumComment ) ){
-			if(listener != null){
+			if(listener != null && productNumComment.getProductData() != null ){
 				ProductNumComment productNumComment = (ProductNumComment) v;
 				SharedPreferences myPreferences = this.getActivity().getSharedPreferences( ProductCommentLayout.SHARE_PREF_VALUE_PRODUCT_COMMENT_ACT_ID, this.getActivity().MODE_PRIVATE );
 				SharedPreferences.Editor prefsEditor = myPreferences.edit();
@@ -500,25 +592,13 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		}else if( v.equals( commentSubmitButton ) ){
 			submitCommentText(); 
 		}else if( v.equals( likeButton ) ){
+			//loadingDialog.show();
+			
 			if( likeButton.getButtonStatus() == LikeButton.BUTTON_STATUS_LIKE ){
-				
-				asyncHttpClient.post( getProductLikeURL, new JsonHttpResponseHandler(){
-					@Override
-					public void onSuccess(JSONObject jsonObject) {
-						super.onSuccess(jsonObject);
-						ProductActivityData newData = new ProductActivityData( jsonObject );
-						String likeId = newData.getLike().getActivityData().getId();
-						likeButton.setLikeId( likeId );
-						
-						//On click like result.
-						//Set image liked
-						likeButton.setBackgroundResource( R.drawable.button_liked );
-						likeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKED );
-					}
-				});
+				loadDataFromLike();
 			}else if( likeButton.getButtonStatus() == LikeButton.BUTTON_STATUS_LIKED ){
 				String likeActivityId = likeButton.getLikeId();
-				getProductUnLikeURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+"/"+likeActivityId+".json";
+				getProductUnLikeURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+likeActivityId+".json";
 				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "_a", "delete" );
@@ -527,10 +607,24 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 					@Override
 					public void onSuccess(String arg0) {
 						super.onSuccess(arg0);
+						
 						//On click like result.
 						//Set image liked
 						likeButton.setBackgroundResource( R.drawable.button_like );
 						likeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKE );
+						
+						//-1 like
+						numberLike--;
+						productNumLike.setText( numberLike+" Likes" );
+						
+						if( loadingDialog.isShowing() ){
+							loadingDialog.dismiss();
+						}
+					}
+					
+					@Override
+					public void onFailure(Throwable arg0, String arg1) {
+						super.onFailure(arg0, arg1);
 					}
 				});
 			}
@@ -561,7 +655,58 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 				prefsEditor.commit();
 				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PRODUCT_WISHLIST );
 			}
+		}else if( v.equals( backButton ) ){
+			InputMethodManager imm = (InputMethodManager) this.getActivity().getSystemService(
+				      Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow( commentEditText.getWindowToken(), 0 );
+			
+			if(listener != null){
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_BACK_BUTTON );
+			}
+		}else if( v.equals( viewAllCommentTextLayout ) ){
+			if( commentLayout.getVisibility() == View.VISIBLE ){
+				commentLayout.setVisibility( View.GONE );
+				viewAllCommentText.setText( "view all "+arrayCommentLayout.size()+" comments" );
+			}else if( commentLayout.getVisibility() == View.GONE ){
+				commentLayout.setVisibility( View.VISIBLE );
+				viewAllCommentText.setText( "hide comments" );
+			}
+		}else if( v.equals( commentLayoutTop ) ){
+			commentTextBoxLayout.setVisibility( View.GONE );
 		}
+	}
+	
+	private void loadDataFromLike(){
+		asyncHttpClient.post( getProductLikeURL, new JsonHttpResponseHandler(){
+			@Override
+			public void onSuccess(JSONObject jsonObject) {
+				super.onSuccess(jsonObject);
+				
+				try {
+					String checkValue = jsonObject.getString("id");
+					ProductActivityData newData = new ProductActivityData( jsonObject );
+					String likeId = newData.getLike().getActivityData().getId();
+					likeButton.setLikeId( likeId );
+					
+					//On click like result.
+					//Set image liked
+					likeButton.setBackgroundResource( R.drawable.button_liked );
+					likeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKED );
+					
+					//+1 like
+					numberLike++;
+					productNumLike.setText( numberLike+" Likes" );
+					
+					if( loadingDialog.isShowing() ){
+						loadingDialog.dismiss();
+					}
+				} catch (JSONException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					//loadDataFromLike();
+				}
+			}
+		});
 	}
 
 	private void submitCommentText() {
@@ -594,8 +739,25 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 	
 	@Override
 	public void refreshView() {
-		// TODO Auto-generated method stub
+		loadingDialog.show();
+		recycleView();
 		
+		//+"&refreshValue="+(Math.random()*100)
+		asyncHttpClient.get( getProductDataURL, new JsonHttpResponseHandler(){
+			@Override
+			public void onSuccess(JSONObject getJsonObject) {
+				super.onSuccess(getJsonObject);
+				onGetProductDataURLSuccess(getJsonObject);
+			}
+		});
+		
+		asyncHttpClient.get( getProductCommentURL, new JsonHttpResponseHandler(){
+			@Override
+			public void onSuccess(JSONObject getJsonObject) {
+				super.onSuccess(getJsonObject);
+				onGetProduceCommentURLSuccess(getJsonObject);
+			}
+		});
 	}
 	
 	private class RelatedAdapter extends BaseAdapter {
@@ -603,7 +765,13 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 		private ArrayList<ProductActivityData> data;
 		
 		public void setData(ArrayList<ProductActivityData> relateActivityData) {
-			data = relateActivityData;
+			/*data = new Arraylist<ProductActivityData>();
+			data.put(relateActivityData.get(0));*/
+			//data = relateActivityData;
+			data = new ArrayList<ProductActivityData>();
+			for( ProductActivityData fetchItem : relateActivityData ){
+				data.add( fetchItem );
+			}
 		}
 		
 		@Override
@@ -632,6 +800,8 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 				returnView = (ProductImageThumbnail) convertView;
 			}
 			
+			System.out.println("ProductDetailREsultSize2 : "+relateActivityData.size());
+			System.out.println("CheckDataProductDetail : "+data.get( position )+", position : "+position);
 			String imageURL = data.get( position ).getProduct().getProductPicture().getImageUrls().getImageURLT();
 			
 			returnView.setProductData( data.get( position ) );
@@ -644,15 +814,17 @@ public class ProductDetailLayout extends AbstractViewLayout implements OnClickLi
 
 	@Override
 	public void onItemClick(AdapterView<?> arg0, View v, int arg2, long arg3) {
-		if(listener != null){
-			if( v instanceof  ProductImageThumbnail ){
-				ProductImageThumbnail productSelect = (ProductImageThumbnail) v;
-				SharedPreferences myPref = this.getActivity().getSharedPreferences( ProductDetailLayout.SHARE_PREF_PRODUCT_ACT_ID, this.getActivity().MODE_PRIVATE );
-				SharedPreferences.Editor prefsEditor = myPref.edit();
-				prefsEditor.putString( ProductDetailLayout.SHARE_PREF_KEY_ACTIVITY_ID, productSelect.getProductData().getId() );
-		        prefsEditor.commit();
-		        listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PRODUCTDETAIL );
-			}
+		if( v instanceof  ProductImageThumbnail ){
+			ProductImageThumbnail productSelect = (ProductImageThumbnail) v;
+			//relateProduct.animateClose();
+			//productActivityId = productSelect.getProductData().getId();
+			//loadDataFromRelate();
+			
+			SharedPreferences myPref = this.getActivity().getSharedPreferences( SHARE_PREF_PRODUCT_ACT_ID, this.getActivity().MODE_PRIVATE );
+			SharedPreferences.Editor prefsEditor = myPref.edit();
+			prefsEditor.putString( SHARE_PREF_KEY_ACTIVITY_ID, productSelect.getProductData().getId() );
+	        prefsEditor.commit();
+	        listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PRODUCTDETAIL );
 		}
 	}
 	

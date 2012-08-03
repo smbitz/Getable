@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical" android:background="#ffffff">
+	
+    <com.codegears.getable.ui.AppHeader
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent">
+    </com.codegears.getable.ui.AppHeader>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+
+            <ImageView
+                android:id="@+id/storeMainLayoutStoreImage"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_marginLeft="5dp"
+                android:layout_marginTop="5dp"
+                android:src="@drawable/empty_image" />
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="5dp"
+                android:orientation="vertical" >
+
+                <TextView
+                    android:id="@+id/storeMainLayoutStoreName"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    android:textColor="@color/NameColorDarkBlue" />
+
+                <TextView
+                    android:id="@+id/storeMainLayoutStoreAddress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content" />
+            </LinearLayout>
+        </LinearLayout>
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="200dp">
+
+        <com.google.android.maps.MapView
+            android:id="@+id/storeMainLayoutMapView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:apiKey="0SEWpIeH6ISLbi1uyG9btYIuPKYrhqMyGRax3zA"
+            android:clickable="true" android:layout_marginLeft="5dp" android:layout_marginRight="5dp" android:layout_marginTop="5dp">
+        </com.google.android.maps.MapView>
+
+    </LinearLayout>
+
+</LinearLayout>

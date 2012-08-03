@@ -34,6 +34,10 @@ public class ImageLoader {
 	private Activity activity;
 	private PhotosLoader photoLoaderThread = new PhotosLoader();
 	private AsyncHttpClient asyncHttpClient;
+	//private Boolean checkLoadImageSuccess = false;
+	//private byte[] byteArrayBitmap;
+	
+	//private Listener listener;
 	
 	public ImageLoader(Context context){
 		//Make the background thead low priority. This way it will not affect the UI performance
@@ -41,6 +45,7 @@ public class ImageLoader {
 	}
 	
 	public Bitmap DisplayImage( String imageURL, Activity currentAct , ImageView imageView, Boolean isUseCache, AsyncHttpClient getAsyncHttpClient ){
+		System.out.println("GetImageURL : "+imageURL);
 		asyncHttpClient = getAsyncHttpClient;
 		imageViews.put( imageView, imageURL );
 		Bitmap bitmap = null;
@@ -86,25 +91,11 @@ public class ImageLoader {
         this.activity = currentAct;
 	}
 	
-	private Bitmap getBitmap(String url) 
+	private void getBitmap(final PhotoToLoad photoToLoad, final GetBitmapListener listener) 
     {   
-        //from web
-        /*try {
-            Bitmap bitmap=null;
-            URL imageUrl = new URL( url );
-            HttpURLConnection conn = (HttpURLConnection)imageUrl.openConnection();
-            conn.setConnectTimeout(30000);
-            conn.setReadTimeout(30000);
-            InputStream is=conn.getInputStream();
-            bitmap = BitmapFactory.decodeStream( is );
-            return bitmap;
-        } catch (Exception ex){
-           ex.printStackTrace();
-           return null;
-        }*/
-		Bitmap bitmap = null;
+		/*Bitmap bitmap = null;
 		HttpClient client = asyncHttpClient.getHttpClient();
-		HttpGet httpGet = new HttpGet( url );
+		HttpGet httpGet = new HttpGet( photoToLoad.url );
 		
 		HttpResponse res;
 		InputStream is;
@@ -112,16 +103,29 @@ public class ImageLoader {
 			res = client.execute( httpGet, asyncHttpClient.getHttpContext() );
 			is = res.getEntity().getContent();
 			bitmap = BitmapFactory.decodeStream( is );
-            return bitmap;
+			listener.onBitmapSuccess( photoToLoad, bitmap );
+            //return bitmap;
 		} catch (ClientProtocolException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return null;
+			//return null;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
-			return null;
-		}
+			//return null;
+		}*/
+		
+		String[] allowedContentTypes = new String[] { "image/png", "image/jpeg", "image/gif", "image/jpg", "image/pjpeg", "image/jpeg;charset=UTF-8" };
+		asyncHttpClient.get( photoToLoad.url, new BinaryHttpResponseHandler( allowedContentTypes ){
+			@Override
+			public void onSuccess(byte[] byteValue) {
+				// TODO Auto-generated method stub
+				System.out.println("ResultByeArray1 : "+byteValue);
+				super.onSuccess(byteValue);
+				Bitmap bitmap = BitmapFactory.decodeByteArray( byteValue, 0, byteValue.length );
+				listener.onBitmapSuccess( photoToLoad, bitmap );
+			}
+		});
     }
 	
 	public void clearCache() {
@@ -160,7 +164,8 @@ public class ImageLoader {
         }
     }
 	
-    private class PhotosLoader extends Thread {
+    private class PhotosLoader extends Thread implements GetBitmapListener {
+    	
         public void run() {
             try {
                 while(true)
@@ -176,14 +181,16 @@ public class ImageLoader {
                         synchronized(photosQueue.photosToLoad){
                             photoToLoad=photosQueue.photosToLoad.pop();
                         }
-                        Bitmap bmp = getBitmap(photoToLoad.url);
+                        /*Bitmap bmp = ImageLoader.this.getBitmap(photoToLoad.url, this);
                         memoryCache.put(photoToLoad.url, bmp);
                         String tag = imageViews.get(photoToLoad.imageView);
                         if(tag!=null && tag.equals(photoToLoad.url)){
                             BitmapDisplayer bd = new BitmapDisplayer(bmp, photoToLoad.imageView);
                         //    Activity a=(Activity)photoToLoad.imageView.getContext();
                             activity.runOnUiThread(bd);
-                        }
+                        }*/
+                        //ImageLoader.this.getBitmap(photoToLoad.url, this);
+                        ImageLoader.this.getBitmap(photoToLoad, this);
                     }
                     if(Thread.interrupted())
                         break;
@@ -192,6 +199,18 @@ public class ImageLoader {
                 //allow thread to exit
             }
         }
+
+		@Override
+		public void onBitmapSuccess(PhotoToLoad photoToLoad, Bitmap bmp) {
+			// TODO Auto-generated method stub
+			 memoryCache.put(photoToLoad.url, bmp);
+             String tag = imageViews.get(photoToLoad.imageView);
+             if(tag!=null && tag.equals(photoToLoad.url)){
+                 BitmapDisplayer bd = new BitmapDisplayer(bmp, photoToLoad.imageView);
+             //    Activity a=(Activity)photoToLoad.imageView.getContext();
+                 activity.runOnUiThread(bd);
+             }
+		}
     }
     
     //Used to display bitmap in the UI thread
@@ -208,5 +227,9 @@ public class ImageLoader {
                // imageView.setImageResource(stub_id);
             }
         }
+    }
+
+    private interface GetBitmapListener {
+    	public void onBitmapSuccess(PhotoToLoad photoToLoad, Bitmap bitmap);
     }
 }

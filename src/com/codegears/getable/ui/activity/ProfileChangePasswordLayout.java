@@ -12,14 +12,18 @@ import org.w3c.dom.Document;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.TextView;
 
 import com.codegears.getable.BodyLayoutStackListener;
 import com.codegears.getable.MainActivity;
@@ -34,6 +38,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 
 public class ProfileChangePasswordLayout extends AbstractViewLayout implements OnClickListener {
 
@@ -49,6 +54,11 @@ public class ProfileChangePasswordLayout extends AbstractViewLayout implements O
 	private ProgressDialog loadingDialog;
 	private AsyncHttpClient asyncHttpClient;
 	private AlertDialog alertDialog;
+	private ImageButton backButton;
+	private TextView changePasswordText;
+	private TextView oldPasswordText;
+	private TextView newPasswordText;
+	private TextView repeatePasswordText;
 	
 	public ProfileChangePasswordLayout(Activity activity) {
 		super(activity);
@@ -64,9 +74,24 @@ public class ProfileChangePasswordLayout extends AbstractViewLayout implements O
 		oldPassword = (EditText) findViewById( R.id.profileChangePasswordOldPassword );
 		repeatePassword = (EditText) findViewById( R.id.profileChangePasswordRepeatePassword );
 		doneButton = (Button) findViewById( R.id.profileChangePasswordDoneButton );
+		backButton = (ImageButton) findViewById( R.id.profileChangePasswordBackButton );
+		changePasswordText = (TextView) findViewById( R.id.profileChangePasswordText);
+		oldPasswordText = (TextView) findViewById( R.id.profileChangePasswordOldPasswordText );
+		newPasswordText = (TextView) findViewById( R.id.profileChangePasswordNewPasswordText );
+		repeatePasswordText = (TextView) findViewById( R.id.profileChangePasswordRepeateText );
+		
+		//Set font
+		doneButton.setTypeface( Typeface.createFromAsset(this.getContext().getAssets(), MyApp.APP_FONT_PATH_2) );
+		changePasswordText.setTypeface( Typeface.createFromAsset(this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		oldPasswordText.setTypeface( Typeface.createFromAsset(this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		newPasswordText.setTypeface( Typeface.createFromAsset(this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		repeatePasswordText.setTypeface( Typeface.createFromAsset(this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		oldPassword.setTypeface( Typeface.createFromAsset(this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		newPassword.setTypeface( Typeface.createFromAsset(this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		repeatePassword.setTypeface( Typeface.createFromAsset(this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
 		
 		//Default done button.
-		doneButton.setTextColor( R.color.NameColorGrey );
+		doneButton.setTextColor( R.color.NameColorBlueSubmitEnableFalse );
 		doneButton.setEnabled( false );
 		
 		newPassword.addTextChangedListener( new TextWatcher() {
@@ -89,7 +114,7 @@ public class ProfileChangePasswordLayout extends AbstractViewLayout implements O
 				if( s.length() == 0 ||
 					oldPassword.getText().length() == 0 ||
 					repeatePassword.getText().length() == 0 ){
-					doneButton.setTextColor( R.color.NameColorGrey );
+					doneButton.setTextColor( R.color.NameColorBlueSubmitEnableFalse );
 					doneButton.setEnabled( false );
 				}else{
 					doneButton.setTextColor( Color.WHITE );
@@ -118,7 +143,7 @@ public class ProfileChangePasswordLayout extends AbstractViewLayout implements O
 				if( s.length() == 0 ||
 					newPassword.getText().length() == 0 ||
 					repeatePassword.getText().length() == 0 ){
-					doneButton.setTextColor( R.color.NameColorGrey );
+					doneButton.setTextColor( R.color.NameColorBlueSubmitEnableFalse );
 					doneButton.setEnabled( false );
 				}else{
 					doneButton.setTextColor( Color.WHITE );
@@ -147,7 +172,7 @@ public class ProfileChangePasswordLayout extends AbstractViewLayout implements O
 				if( s.length() == 0 ||
 					newPassword.getText().length() == 0 ||
 					oldPassword.getText().length() == 0 ){
-					doneButton.setTextColor( R.color.NameColorGrey );
+					doneButton.setTextColor( R.color.NameColorBlueSubmitEnableFalse );
 					doneButton.setEnabled( false );
 				}else{
 					doneButton.setTextColor( Color.WHITE );
@@ -157,6 +182,7 @@ public class ProfileChangePasswordLayout extends AbstractViewLayout implements O
 		});
 		
 		doneButton.setOnClickListener( this );
+		backButton.setOnClickListener( this );
 		
 		loadingDialog = new ProgressDialog( this.getActivity() );
 		loadingDialog.setTitle("");
@@ -186,6 +212,12 @@ public class ProfileChangePasswordLayout extends AbstractViewLayout implements O
 	@Override
 	public void onClick(View v) {
 		if( v.equals( doneButton ) ){
+			InputMethodManager imm = (InputMethodManager) this.getActivity().getSystemService(
+				      Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow( newPassword.getWindowToken(), 0 );
+				imm.hideSoftInputFromWindow( oldPassword.getWindowToken(), 0 );
+				imm.hideSoftInputFromWindow( repeatePassword.getWindowToken(), 0 );
+			
 			String oldPasswordText = oldPassword.getText().toString();
 			String newPasswordText = newPassword.getText().toString();
 			String repeatePasswordText = repeatePassword.getText().toString();
@@ -195,15 +227,6 @@ public class ProfileChangePasswordLayout extends AbstractViewLayout implements O
 				repeatePasswordText.length() > 0 ){
 				
 				if( newPasswordText.equals( repeatePasswordText ) ){
-					/*Map< String, String > newMapData = new HashMap<String, String>();
-			        newMapData.put( "existingPassword", oldPasswordText );
-			        newMapData.put( "newPassword", newPasswordText );
-			        newMapData.put( "confirmedPassword", repeatePasswordText );
-			        newMapData.put( "_a", "put" );
-			        String postData = NetworkUtil.createPostData( newMapData );
-			        
-			        NetworkThreadUtil.getRawDataWithCookie( changePasswordURL, postData, appCookie, this );*/
-					
 					HashMap<String, String> paramMap = new HashMap<String, String>();
 					paramMap.put( "existingPassword", oldPasswordText );
 					paramMap.put( "newPassword", newPasswordText );
@@ -272,27 +295,16 @@ public class ProfileChangePasswordLayout extends AbstractViewLayout implements O
 				});
 				alertDialog.show();
 			}
+		}else if( v.equals( backButton ) ){
+			InputMethodManager imm = (InputMethodManager) this.getActivity().getSystemService(
+				      Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow( newPassword.getWindowToken(), 0 );
+				imm.hideSoftInputFromWindow( oldPassword.getWindowToken(), 0 );
+				imm.hideSoftInputFromWindow( repeatePassword.getWindowToken(), 0 );
+
+			if(listener != null){
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_BACK_BUTTON );
+			}
 		}
 	}
-
-	/*@Override
-	public void onNetworkDocSuccess(String urlString, Document document) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onNetworkRawSuccess(String urlString, String result) {
-		loadingDialog.dismiss();
-		if(listener != null){
-			listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PROFILE_SETTINGS_BACK );
-		}
-	}
-
-	@Override
-	public void onNetworkFail(String urlString) {
-		// TODO Auto-generated method stub
-		
-	}*/
-
 }

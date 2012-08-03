@@ -3,35 +3,143 @@
 	android:orientation="vertical" android:layout_width="match_parent"
 	android:layout_height="match_parent" android:background="#ffffff">
 
-    <LinearLayout
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical" android:background="#63bfec">
+        android:layout_height="wrap_content" >
 
-        <ImageView
-            android:id="@+id/imageView1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/logo_name" android:layout_gravity="center"/>
+        <com.codegears.getable.ui.AppHeader
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+        </com.codegears.getable.ui.AppHeader>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center" >
 
-    </LinearLayout>
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
+
+                <ImageButton
+                    android:id="@+id/shareProductSearchLayoutBackButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:background="@null"
+                    android:src="@drawable/back_button" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="3.5" >
+            </LinearLayout>
+        </LinearLayout>
+
+    </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical" >
 
-        <EditText
-            android:id="@+id/shareProductSearchLayoutEditText"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10" android:lines="1">
-        </EditText>
+            android:orientation="vertical" android:id="@+id/shareProductSearchLayoutEditTextLayout" android:background="#63bfec">
 
+            <EditText
+                android:id="@+id/shareProductSearchLayoutEditText"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:ems="10"
+                android:lines="1" >
+
+                <requestFocus />
+            </EditText>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" android:id="@+id/shareProductSearchLayoutItemAddLayout" android:visibility="gone">
+
+            <LinearLayout
+                xmlns:android="http://schemas.android.com/apk/res/android"
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:background="#ffffff"
+                android:orientation="horizontal"
+                android:paddingLeft="5dp"
+                android:paddingRight="5dp" >
+
+                <ImageView
+                    android:id="@+id/imageView1"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:src="@drawable/button_close" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_marginLeft="5dp"
+                    android:gravity="center"
+                    android:orientation="vertical" >
+
+                    <LinearLayout
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left" >
+
+                        <TextView
+                            android:id="@+id/shareProductSearchLayoutItemAddText1"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Add &quot;"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:textColor="#000000" />
+
+                        <TextView
+                            android:id="@+id/shareProductSearchLayoutItemAddTextName"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:textColor="#000000" />
+
+                        <TextView
+                            android:id="@+id/shareProductSearchLayoutItemAddText2"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="&quot;"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            android:textColor="#000000" />
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/shareProductSearchLayoutItemAddText3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="left"
+                        android:text="Add this custom category" />
+                </LinearLayout>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/image_line" />
+
+        </LinearLayout>
+        
         <ListView
             android:id="@+id/shareProductSearchLayoutListView"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" android:cacheColorHint="#00000000" android:background="#ffffff" android:divider="#c0bbb8" android:dividerHeight="0.5dp">
+            android:layout_height="wrap_content" android:cacheColorHint="#00000000" android:background="#ffffff" android:divider="#c0bbb8" android:dividerHeight="0.5dp" android:listSelector="#00000000">
         </ListView>
 
     </LinearLayout>

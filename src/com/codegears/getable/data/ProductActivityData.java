@@ -55,6 +55,10 @@ public class ProductActivityData {
 		
 	}
 	
+	public void setMyRelation( MyRelationData setMyRelationData ){
+		myRelation = setMyRelationData;
+	}
+	
 	public ProductData getProduct(){
 		return product;
 	}
@@ -93,6 +97,10 @@ public class ProductActivityData {
 	
 	public ProductActivityType getType(){
 		return type;
+	}
+	
+	public String getActivityTime(){
+		return activityTime;
 	}
 	
 }

@@ -7,6 +7,7 @@ import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 
 import com.codegears.getable.BodyLayoutStackListener;
@@ -40,6 +41,7 @@ public class ProductSocialShareListLayout extends AbstractViewLayout implements 
 	private Config config;
 	private AsyncHttpClient asyncHttpClient;
 	private ProgressDialog loadingDialog;
+	private ImageButton backButton;
 
 	public ProductSocialShareListLayout(Activity activity) {
 		super(activity);
@@ -58,10 +60,12 @@ public class ProductSocialShareListLayout extends AbstractViewLayout implements 
 		setupSharingButton = (LinearLayout) findViewById( R.id.productSocialShareLayoutSetupShareButton );
 		facebookShareButton = (Button) findViewById( R.id.productSocialShareLayoutFacebookShareButton );
 		twitterShareButton = (Button) findViewById( R.id.productSocialShareLayoutTwitterShareButton );
+		backButton = (ImageButton) findViewById( R.id.productSocialShareListLayoutBackButton );
 		
 		setupSharingButton.setOnClickListener( this );
 		facebookShareButton.setOnClickListener( this );
 		twitterShareButton.setOnClickListener( this );
+		backButton.setOnClickListener( this );
 		
 		loadingDialog = new ProgressDialog( this.getActivity() );
 		loadingDialog.setTitle("");
@@ -142,6 +146,10 @@ public class ProductSocialShareListLayout extends AbstractViewLayout implements 
 				prefsEditor.putInt( ProductSocialShareLayout.SHARE_PREF_SOCIAL_TYPE, ProductSocialShareLayout.SHARE_PREF_SOCIAL_TYPE_TWITTER );
 		        prefsEditor.commit();
 				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_SHARE_SOCIAL_LAYOUT );
+			}
+		}else if( v.equals( backButton ) ){
+			if(listener != null){
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_BACK_BUTTON );
 			}
 		}
 	}

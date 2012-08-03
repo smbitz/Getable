@@ -30,7 +30,33 @@
                 android:text="Done" android:layout_gravity="center" android:background="@null" android:textColor="#ffffff" android:layout_weight="1" android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center" >
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
+
+                <ImageButton
+                    android:id="@+id/signUpActivityBackButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:background="@null"
+                    android:src="@drawable/back_button" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="3.5" >
+            </LinearLayout>
+        </LinearLayout>
+        
     </FrameLayout>
 
     <LinearLayout
@@ -44,7 +70,7 @@
         </LinearLayout>
 
         <TextView
-            android:id="@+id/textView1"
+            android:id="@+id/signUpActivitySignUpText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
@@ -80,7 +106,7 @@
 		            </LinearLayout>
 
 		            <TextView
-		                android:id="@+id/TextView08"
+		                android:id="@+id/signUpActivityEmailText"
 		                android:layout_width="wrap_content"
 		                android:layout_height="wrap_content"
 		                android:layout_gravity="center"
@@ -90,7 +116,7 @@
 		            <LinearLayout
 		                android:layout_width="wrap_content"
 		                android:layout_height="match_parent"
-		                android:layout_weight="3.7" >
+		                android:layout_weight="4.6" >
 		            </LinearLayout>
 
 		            <EditText
@@ -101,7 +127,10 @@
 		                android:layout_weight="1.5"
 		                android:background="@null"
 		                android:ems="10"
-		                android:textSize="15dp" android:lines="1">
+		                android:textSize="15dp" android:lines="1"
+		                android:hint="steve@example.com" 
+		                android:textColorHint="@color/NameColorGreyHint"
+		                android:ellipsize="end" android:inputType="textImeMultiLine">
 		            	<requestFocus />
 		            </EditText>
 
@@ -135,7 +164,7 @@
 		            </LinearLayout>
 
 		            <TextView
-		                android:id="@+id/TextView06"
+		                android:id="@+id/signUpActivityFirstNameText"
 		                android:layout_width="wrap_content"
 		                android:layout_height="wrap_content"
 		                android:layout_gravity="center"
@@ -145,7 +174,7 @@
 		            <LinearLayout
 		                android:layout_width="wrap_content"
 		                android:layout_height="match_parent"
-		                android:layout_weight="2.2" >
+		                android:layout_weight="2.5" >
 		            </LinearLayout>
 
 		            <EditText
@@ -156,7 +185,7 @@
 		                android:layout_weight="1.7"
 		                android:background="@null"
 		                android:ems="10"
-		                android:textSize="15dp" android:lines="1"/>
+		                android:textSize="15dp" android:lines="1" android:inputType="textImeMultiLine"/>
 
 		            <LinearLayout
 		                android:layout_width="5dp"
@@ -188,7 +217,7 @@
 		            </LinearLayout>
 
 		            <TextView
-		                android:id="@+id/TextView03"
+		                android:id="@+id/signUpActivityLastNameText"
 		                android:layout_width="wrap_content"
 		                android:layout_height="wrap_content"
 		                android:layout_gravity="center"
@@ -198,7 +227,7 @@
 		            <LinearLayout
 		                android:layout_width="wrap_content"
 		                android:layout_height="match_parent"
-		                android:layout_weight="2.2" >
+		                android:layout_weight="2.5" >
 		            </LinearLayout>
 
 		            <EditText
@@ -209,7 +238,7 @@
 		                android:layout_weight="1.5"
 		                android:background="@null"
 		                android:ems="10"
-		                android:textSize="15dp" android:lines="1"/>
+		                android:textSize="15dp" android:lines="1" android:inputType="textImeMultiLine"/>
 
 		            <LinearLayout
 		                android:layout_width="5dp"
@@ -241,7 +270,7 @@
 		            </LinearLayout>
 
 		            <TextView
-		                android:id="@+id/TextView05"
+		                android:id="@+id/signUpActivityPasswordText"
 		                android:layout_width="wrap_content"
 		                android:layout_height="wrap_content"
 		                android:layout_gravity="center"
@@ -251,7 +280,7 @@
 		            <LinearLayout
 		                android:layout_width="wrap_content"
 		                android:layout_height="match_parent"
-		                android:layout_weight="2.1" >
+		                android:layout_weight="3.5" >
 		            </LinearLayout>
 
 		            <EditText
@@ -263,7 +292,7 @@
 		                android:background="@null"
 		                android:ems="10"
 		                android:textSize="15dp"
-		                android:password="true" android:lines="1"/>
+		                android:password="true" android:lines="1" android:inputType="textImeMultiLine"/>
 
 		            <LinearLayout
 		                android:layout_width="5dp"
@@ -295,7 +324,7 @@
 	            </LinearLayout>
 
 	            <TextView
-	                android:id="@+id/TextView06"
+	                android:id="@+id/signUpActivityGenderText"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:layout_gravity="center"
@@ -310,7 +339,7 @@
 
 	            <TextView
 	                android:id="@+id/signUpActivityEditTextGender"
-	                android:layout_width="208dp"
+	                android:layout_width="205dp"
 	                android:layout_height="wrap_content"
 	                android:layout_gravity="center" android:textColor="#000000" android:textSize="15dp" android:background="@null"/>
 
@@ -344,7 +373,7 @@
 		            </LinearLayout>
 
 		            <TextView
-		                android:id="@+id/TextView02"
+		                android:id="@+id/signUpActivityMobilePhoneText"
 		                android:layout_width="wrap_content"
 		                android:layout_height="wrap_content"
 		                android:layout_gravity="center"
@@ -354,7 +383,7 @@
 		            <LinearLayout
 		                android:layout_width="wrap_content"
 		                android:layout_height="match_parent"
-		                android:layout_weight="1.2" >
+		                android:layout_weight="0.6" >
 		            </LinearLayout>
 
 		            <EditText
@@ -365,7 +394,10 @@
 		                android:background="@null"
 		                android:ems="10"
 		                android:textSize="15dp" android:id="@+id/signUpActivityEditTextMobilePhone" android:lines="1"
-		                android:numeric="integer">
+		                android:hint="optional"
+		                android:textColorHint="@color/NameColorGreyHint"
+		                android:numeric="integer"
+		                android:ellipsize="end" android:inputType="phone">
 		            </EditText>
 
 		            <LinearLayout
@@ -398,7 +430,7 @@
 		            </LinearLayout>
 
 		            <TextView
-		                android:id="@+id/TextView01"
+		                android:id="@+id/signUpActivityPictureText"
 		                android:layout_width="wrap_content"
 		                android:layout_height="wrap_content"
 		                android:layout_gravity="center"
@@ -408,7 +440,7 @@
 		            <LinearLayout
 		                android:layout_width="match_parent"
 		                android:layout_height="match_parent"
-		                android:layout_weight="1" >
+		                android:layout_weight="1.68" >
 		            </LinearLayout>
 
 		            <ImageView
@@ -447,28 +479,12 @@
 		            </LinearLayout>
 
 		            <TextView
-		                android:id="@+id/TextView07"
+		                android:id="@+id/signUpActivityDetailText"
 		                android:layout_width="wrap_content"
 		                android:layout_height="wrap_content"
 		                android:layout_gravity="center"
 		                android:text="Just a few quick steps to get your started. After signing up, you can find friends on Getable, take and share photos, and see photos from around the web."
 		                android:textColor="#000000" />
-
-		            <LinearLayout
-		                android:layout_width="wrap_content"
-		                android:layout_height="match_parent"
-		                android:layout_weight="3.2" >
-		            </LinearLayout>
-
-		            <EditText
-		                android:id="@+id/editProfilePhoneNumber"
-		                android:layout_width="wrap_content"
-		                android:layout_height="wrap_content"
-		                android:layout_gravity="center"
-		                android:layout_weight="2.1"
-		                android:background="@null"
-		                android:ems="10"
-		                android:textSize="15dp" />
 
 		            <LinearLayout
 		                android:layout_width="5dp"

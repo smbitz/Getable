@@ -11,20 +11,36 @@ public class ProductBrandFeedData {
 	private ActorData actor;
 	private ProductActivityStat statistic;
 	private ProductData product;
+	private MyRelationData myRelation;
 	
 	public ProductBrandFeedData(JSONObject setObject) {
-		try {
-			id = setObject.optString("id");
-			url = setObject.optString("url");
-			activityTime = setObject.optString("activityTime");
-			type = new ProductActivityType( setObject.getJSONObject("type") );
-			actor = new ActorData( setObject.getJSONObject("actor") );
-			statistic = new ProductActivityStat( setObject.getJSONObject("statistic") );
-			product = new ProductData( setObject.getJSONObject("product") );
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		id = setObject.optString("id");
+		url = setObject.optString("url");
+		activityTime = setObject.optString("activityTime");
+		
+		if( setObject.optJSONObject("type") != null ){
+			type = new ProductActivityType( setObject.optJSONObject("type") );
 		}
+		
+		if( setObject.optJSONObject("actor") != null ){
+			actor = new ActorData( setObject.optJSONObject("actor") );
+		}
+		
+		if( setObject.optJSONObject("statistic") != null ){
+			statistic = new ProductActivityStat( setObject.optJSONObject("statistic") );
+		}
+		
+		if( setObject.optJSONObject("product") != null ){
+			product = new ProductData( setObject.optJSONObject("product") );
+		}
+		
+		if( setObject.optJSONObject("myRelation") != null ){
+			myRelation = new MyRelationData( setObject.optJSONObject("myRelation") );
+		}
+	}
+	
+	public void setMyRelation( MyRelationData setMyRelationData ){
+		myRelation = setMyRelationData;
 	}
 	
 	public ProductData getProduct(){
@@ -41,5 +57,13 @@ public class ProductBrandFeedData {
 	
 	public ActorData getActor(){
 		return actor;
+	}
+	
+	public String getActivityTime(){
+		return activityTime;
+	}
+	
+	public MyRelationData getMyRelation(){
+		return myRelation;
 	}
 }

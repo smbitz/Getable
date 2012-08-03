@@ -1,9 +1,11 @@
 package com.codegears.getable.ui;
 
+import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
 import com.codegears.getable.data.ProductActivityData;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -16,6 +18,7 @@ public class NearbyItem extends LinearLayout {
 	private TextView productName;
 	private TextView productAddress;
 	private TextView distanceValue;
+	private TextView postTime;
 	private ProductActivityData activityData;
 	
 	public NearbyItem(Context context) {
@@ -27,6 +30,14 @@ public class NearbyItem extends LinearLayout {
 		productName = (TextView) findViewById( R.id.nearByItemProductName );
 		productAddress = (TextView) findViewById( R.id.nearByItemProductAddress );
 		distanceValue = (TextView) findViewById( R.id.nearByItemMiDistanceText );
+		postTime = (TextView) findViewById( R.id.nearByItemTime );
+		
+		//Set font
+		userName.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH_2) );
+		productName.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH_2) );
+		productAddress.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH_2) );
+		distanceValue.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH_2) );
+		postTime.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
 	}
 	
 	public ImageView getProductImageView(){
@@ -59,6 +70,14 @@ public class NearbyItem extends LinearLayout {
 	
 	public void setMiText( String setTextMi ){
 		distanceValue.setText( setTextMi );
+	}
+	
+	public void setPostTime( String setTextTime ){
+		postTime.setText( setTextTime );
+	}
+
+	public void setProductImageDefault() {
+		productImage.setImageResource( R.drawable.empty_image );
 	}
 	
 }

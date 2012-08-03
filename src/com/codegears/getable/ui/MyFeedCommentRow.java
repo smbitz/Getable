@@ -1,10 +1,13 @@
 package com.codegears.getable.ui;
 
+import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
 import com.codegears.getable.data.ProductActivityData;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
+import android.text.Html;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -12,37 +15,49 @@ import android.widget.TextView;
 
 public class MyFeedCommentRow extends LinearLayout {
 
-	private TextView userName;
-	private TextView targetUserName;
+	private String userNameText;
+	private String targetUserNameText;
 	private TextView commentText;
 	private ImageView userImageView;
 	private ImageView productImageView;
 	private ProductActivityData activityData;
+	private TextView postTime;
+	private TextView detailText;
 	
 	public MyFeedCommentRow(Context context) {
 		super(context);
 		View.inflate(context, R.layout.myfeedcommentrow, this);
 		
-		userName = (TextView) findViewById( R.id.myFeedCommentRowUserName );
-		targetUserName = (TextView) findViewById( R.id.myFeedCommentRowTargetUserName );
 		commentText = (TextView) findViewById( R.id.myFeedCommentRowCommentText );
 		userImageView = (ImageView) findViewById( R.id.myFeedCommentRowUserImage );
 		productImageView = (ImageView) findViewById( R.id.myFeedCommentRowProductImage );
+		postTime = (TextView) findViewById( R.id.myFeedCommentRowTime );
+		detailText = (TextView) findViewById( R.id.myFeedCommentRowDetailText );
 		
-		userName.setTextColor( Color.parseColor( this.getResources().getString( R.color.NameColorBlue ) ) );
-		targetUserName.setTextColor( Color.parseColor( this.getResources().getString( R.color.NameColorBlue ) ) );
+		//Set font
+		commentText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		postTime.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		detailText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		
+		detailText.setText( Html.fromHtml( userNameText+" commented on "+targetUserNameText+"'s post." ) );
 	}
 
 	public void setUserName(String setUserName) {
-		userName.setText( setUserName );
+		userNameText = "<font color='#63bfec'>"+setUserName+"</font>";
+		detailText.setText( Html.fromHtml( userNameText+" commented on "+targetUserNameText+"'s post." ) );
 	}
 
 	public void setTargetUserName(String setTargetUserName) {
-		targetUserName.setText( setTargetUserName );
+		targetUserNameText = "<font color='#63bfec'>"+setTargetUserName+"</font>";
+		detailText.setText( Html.fromHtml( userNameText+" commented on "+targetUserNameText+"'s post." ) );
 	}
 
 	public void setCommentText(String setCommentText) {
 		commentText.setText( setCommentText );
+	}
+	
+	public void setPostTime( String setPostTime ){
+		postTime.setText( setPostTime );
 	}
 	
 	public ImageView getUserImageView(){
@@ -59,6 +74,11 @@ public class MyFeedCommentRow extends LinearLayout {
 	
 	public ProductActivityData getActivityData(){
 		return activityData;
+	}
+
+	public void setTargetUserNameMine() {
+		targetUserNameText = "your";
+		detailText.setText( Html.fromHtml( userNameText+" commented on "+targetUserNameText+" post." ) );
 	}
 
 }

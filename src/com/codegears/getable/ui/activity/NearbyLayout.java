@@ -10,8 +10,10 @@ import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -28,8 +30,10 @@ import com.codegears.getable.NearByFilterActivity;
 import com.codegears.getable.R;
 import com.codegears.getable.data.ProductActivityData;
 import com.codegears.getable.ui.AbstractViewLayout;
+import com.codegears.getable.ui.FooterListView;
 import com.codegears.getable.ui.NearbyFilterSelectedButton;
 import com.codegears.getable.ui.NearbyItem;
+import com.codegears.getable.util.CalculateTime;
 import com.codegears.getable.util.Config;
 import com.codegears.getable.util.GetCurrentLocation;
 import com.codegears.getable.util.ImageLoader;
@@ -65,6 +69,8 @@ public class NearbyLayout extends AbstractViewLayout implements OnClickListener 
 	private NearbyFilterSelectedButton filterSelectedButton2;
 	private NearbyFilterSelectedButton filterSelectedButton3;
 	private AsyncHttpClient asyncHttpClient;
+	private TextView refineSearchText;
+	private ProgressDialog loadingDialog;
 	
 	public NearbyLayout(Activity activity) {
 		super(activity);
@@ -85,6 +91,19 @@ public class NearbyLayout extends AbstractViewLayout implements OnClickListener 
 		filterSelectedButton1 = (NearbyFilterSelectedButton) findViewById( R.id.nearbyLayoutFilterSelectedButton1 );
 		filterSelectedButton2 = (NearbyFilterSelectedButton) findViewById( R.id.nearbyLayoutFilterSelectedButton2 );
 		filterSelectedButton3 = (NearbyFilterSelectedButton) findViewById( R.id.nearbyLayoutFilterSelectedButton3 );
+		refineSearchText = (TextView) findViewById( R.id.nearbyLayoutRefineSearchText );
+		
+		loadingDialog = new ProgressDialog( this.getContext() );
+		loadingDialog.setTitle("");
+		loadingDialog.setMessage("Loading. Please wait...");
+		loadingDialog.setIndeterminate( true );
+		loadingDialog.setCancelable( true );
+		
+		//Set line at footer
+		nearByListView.addFooterView( new FooterListView( this.getContext() ) );
+		
+		//Set font
+		refineSearchText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
 		
 		filterButton.setOnClickListener( this );
 		filterSelectedButton1.setOnClickListener( this );
@@ -111,6 +130,8 @@ public class NearbyLayout extends AbstractViewLayout implements OnClickListener 
 	}
 	
 	public void loadData(){
+		loadingDialog.show();
+		
 		recycleResource();
 		
 		if( url_var_1 == null ){
@@ -144,6 +165,10 @@ public class NearbyLayout extends AbstractViewLayout implements OnClickListener 
 
 				nearByAdapter.setData( arrayProductData );
 				nearByListView.setAdapter( nearByAdapter );
+				
+				if( loadingDialog.isShowing() ){
+					loadingDialog.dismiss();
+				}
 			}
 		});
 	}
@@ -212,8 +237,8 @@ public class NearbyLayout extends AbstractViewLayout implements OnClickListener 
 	
 	@Override
 	public void refreshView() {
-		// TODO Auto-generated method stub
-		
+		recycleResource();
+		loadData();
 	}
 	
 	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener) {
@@ -252,6 +277,7 @@ public class NearbyLayout extends AbstractViewLayout implements OnClickListener 
 				returnView = new NearbyItem( NearbyLayout.this.getContext() );
 			}else{
 				returnView = (NearbyItem) convertView;
+				returnView.setProductImageDefault();
 			}
 			
 			String setUserName = data.get( position ).getActor().getName();
@@ -260,10 +286,12 @@ public class NearbyLayout extends AbstractViewLayout implements OnClickListener 
 								       data.get( position ).getProduct().getStore().getStreetAddress()+" "+
 								       data.get( position ).getProduct().getStore().getPostalCode();
 			String setProductImageURL = data.get( position ).getProduct().getProductPicture().getImageUrls().getImageURLT();
+			String setPostTime = CalculateTime.getPostTime( data.get( position ).getActivityTime() );
 			
 			returnView.setUserName( setUserName );
 			returnView.setProductName( setProductName );
 			returnView.setProductAddress( setProductAddress );
+			returnView.setPostTime( setPostTime );
 			returnView.setProductActivityData( data.get( position ) );
 			
 			//Set Mile Value.

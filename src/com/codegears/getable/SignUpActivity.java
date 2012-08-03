@@ -1,6 +1,9 @@
 package com.codegears.getable;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import org.apache.http.entity.mime.HttpMultipartMode;
@@ -10,26 +13,37 @@ import org.apache.http.entity.mime.content.StringBody;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.codegears.getable.data.ActorData;
 import com.codegears.getable.util.Config;
+import com.codegears.getable.util.RotateImage;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
+import android.app.ProgressDialog;
+import android.content.ContentResolver;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.Matrix;
+import android.graphics.Paint.Join;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
+import android.provider.MediaStore;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -39,7 +53,9 @@ public class SignUpActivity extends Activity implements OnClickListener {
 	private static final int REQUEST_SIGNUP_PICTURE = 0;
 
 	public static final int RESULT_SINGUP_PICTURE_FINISH = 0;
-	public static final int RESULT_SINGUP_PICTURE_CLOSE = 1;
+	public static final int RESULT_SINGUP_CHOOSE_PICTURE_FINISH = 1;
+	public static final int RESULT_SINGUP_PICTURE_CLOSE = 2;
+	public static final int RESULT_SINGUP_TAKE_PICTURE_FINISH = 3;
 	
 	private MyApp app;
 	private Config config;
@@ -59,6 +75,19 @@ public class SignUpActivity extends Activity implements OnClickListener {
 	private Bitmap userPicture;
 	private String signUpURL;
 	private AlertDialog alertDialog;
+	private ImageButton backButton;
+	private TextView signUpText;
+	private TextView emailText;
+	private TextView firstNameText;
+	private TextView lastNameText;
+	private TextView passwordText;
+	private TextView genderText;
+	private TextView mobilePhoneText;
+	private TextView pictureText;
+	private TextView detailText;
+	private ProgressDialog loadingDialog;
+	private RotateImage rotateImage;
+	private String extStorageDirectory;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -69,6 +98,13 @@ public class SignUpActivity extends Activity implements OnClickListener {
 		config = new Config( this );
 		asyncHttpClient = app.getAsyncHttpClient();
 		alertDialog = new AlertDialog.Builder( this ).create();
+		rotateImage = new RotateImage();
+		extStorageDirectory = Environment.getExternalStorageDirectory().toString()+MyApp.TEMP_IMAGE_DIRECTORY_NAME;
+		
+		File tempDirectory = new File( extStorageDirectory );
+		if( !(tempDirectory.exists()) ){
+			tempDirectory.mkdir();
+		}
 		
 		emailEditText = (EditText) findViewById( R.id.signUpActivityEditTextEmail );
 		firstNameEditText = (EditText) findViewById( R.id.signUpActivityEditTextFirstname );
@@ -79,9 +115,43 @@ public class SignUpActivity extends Activity implements OnClickListener {
 		doneButton = (Button) findViewById( R.id.signUpActivityDoneButton );
 		genderLayout = (LinearLayout) findViewById( R.id.signUpActivityLayoutGender );
 		profileImage = (ImageView) findViewById( R.id.signUpActivityProfileImage );
+		backButton = (ImageButton) findViewById( R.id.signUpActivityBackButton );
+		signUpText = (TextView) findViewById( R.id.signUpActivitySignUpText );
+		emailText = (TextView) findViewById( R.id.signUpActivityEmailText );
+		firstNameText = (TextView) findViewById( R.id.signUpActivityFirstNameText );
+		lastNameText = (TextView) findViewById( R.id.signUpActivityLastNameText );
+		passwordText = (TextView) findViewById( R.id.signUpActivityPasswordText );
+		genderText = (TextView) findViewById( R.id.signUpActivityGenderText );
+		mobilePhoneText = (TextView) findViewById( R.id.signUpActivityMobilePhoneText );
+		pictureText = (TextView) findViewById( R.id.signUpActivityPictureText );
+		detailText = (TextView) findViewById( R.id.signUpActivityDetailText );
+		
+		loadingDialog = new ProgressDialog( this );
+		loadingDialog.setTitle("");
+		loadingDialog.setMessage("Loading. Please wait...");
+		loadingDialog.setIndeterminate( true );
+		loadingDialog.setCancelable( true );
+		
+		//Set font
+		signUpText.setTypeface( Typeface.createFromAsset(this.getAssets(), MyApp.APP_FONT_PATH) );
+		emailText.setTypeface( Typeface.createFromAsset(this.getAssets(), MyApp.APP_FONT_PATH) );
+		firstNameText.setTypeface( Typeface.createFromAsset(this.getAssets(), MyApp.APP_FONT_PATH) );
+		lastNameText.setTypeface( Typeface.createFromAsset(this.getAssets(), MyApp.APP_FONT_PATH) );
+		passwordText.setTypeface( Typeface.createFromAsset(this.getAssets(), MyApp.APP_FONT_PATH) );
+		genderText.setTypeface( Typeface.createFromAsset(this.getAssets(), MyApp.APP_FONT_PATH) );
+		mobilePhoneText.setTypeface( Typeface.createFromAsset(this.getAssets(), MyApp.APP_FONT_PATH) );
+		pictureText.setTypeface( Typeface.createFromAsset(this.getAssets(), MyApp.APP_FONT_PATH) );
+		detailText.setTypeface( Typeface.createFromAsset(this.getAssets(), MyApp.APP_FONT_PATH) );
+		emailEditText.setTypeface( Typeface.createFromAsset(this.getAssets(), MyApp.APP_FONT_PATH) );
+		firstNameEditText.setTypeface( Typeface.createFromAsset(this.getAssets(), MyApp.APP_FONT_PATH) );
+		lastNameEditText.setTypeface( Typeface.createFromAsset(this.getAssets(), MyApp.APP_FONT_PATH) );
+		passwordEditText.setTypeface( Typeface.createFromAsset(this.getAssets(), MyApp.APP_FONT_PATH) );
+		genderTextview.setTypeface( Typeface.createFromAsset(this.getAssets(), MyApp.APP_FONT_PATH) );
+		mobileEditText.setTypeface( Typeface.createFromAsset(this.getAssets(), MyApp.APP_FONT_PATH) );
+		doneButton.setTypeface( Typeface.createFromAsset(this.getAssets(), MyApp.APP_FONT_PATH_2) );
 		
 		//Default done button.
-		doneButton.setTextColor( R.color.NameColorGrey );
+		doneButton.setTextColor( R.color.NameColorBlueSubmitEnableFalse );
 		doneButton.setEnabled( false );
 		
 		emailEditText.addTextChangedListener( new TextWatcher() {
@@ -105,7 +175,7 @@ public class SignUpActivity extends Activity implements OnClickListener {
 					firstNameEditText.getText().length() == 0 ||
 					lastNameEditText.getText().length() == 0 ||
 					passwordEditText.getText().length() == 0){
-					doneButton.setTextColor( R.color.NameColorGrey );
+					doneButton.setTextColor( R.color.NameColorBlueSubmitEnableFalse );
 					doneButton.setEnabled( false );
 				}else{
 					doneButton.setTextColor( Color.WHITE );
@@ -135,7 +205,7 @@ public class SignUpActivity extends Activity implements OnClickListener {
 					emailEditText.getText().length() == 0 ||
 					lastNameEditText.getText().length() == 0 ||
 					passwordEditText.getText().length() == 0){
-					doneButton.setTextColor( R.color.NameColorGrey );
+					doneButton.setTextColor( R.color.NameColorBlueSubmitEnableFalse );
 					doneButton.setEnabled( false );
 				}else{
 					doneButton.setTextColor( Color.WHITE );
@@ -165,7 +235,7 @@ public class SignUpActivity extends Activity implements OnClickListener {
 					emailEditText.getText().length() == 0 ||
 					firstNameEditText.getText().length() == 0 ||
 					passwordEditText.getText().length() == 0){
-					doneButton.setTextColor( R.color.NameColorGrey );
+					doneButton.setTextColor( R.color.NameColorBlueSubmitEnableFalse );
 					doneButton.setEnabled( false );
 				}else{
 					doneButton.setTextColor( Color.WHITE );
@@ -195,7 +265,7 @@ public class SignUpActivity extends Activity implements OnClickListener {
 					emailEditText.getText().length() == 0 ||
 					firstNameEditText.getText().length() == 0 ||
 					lastNameEditText.getText().length() == 0){
-					doneButton.setTextColor( R.color.NameColorGrey );
+					doneButton.setTextColor( R.color.NameColorBlueSubmitEnableFalse );
 					doneButton.setEnabled( false );
 				}else{
 					doneButton.setTextColor( Color.WHITE );
@@ -207,6 +277,7 @@ public class SignUpActivity extends Activity implements OnClickListener {
 		doneButton.setOnClickListener( this );
 		genderLayout.setOnClickListener( this );
 		profileImage.setOnClickListener( this );
+		backButton.setOnClickListener( this );
 		
 		userPicture = BitmapFactory.decodeResource( this.getResources(), R.drawable.user_image_default );
 		
@@ -222,6 +293,11 @@ public class SignUpActivity extends Activity implements OnClickListener {
 			customDialogMaleButton = (Button) dialog.findViewById( R.id.customDialogGenderMaleButton );
 			customDialogFemaleButton = (Button) dialog.findViewById( R.id.customDialogGenderFemaleButton );
 			customDialogNotSayButton = (Button) dialog.findViewById( R.id.customDialogGenderNotSayButton );
+			
+			//Set font
+			customDialogMaleButton.setTypeface( Typeface.createFromAsset( this.getAssets(), MyApp.APP_FONT_PATH ) );
+			customDialogFemaleButton.setTypeface( Typeface.createFromAsset( this.getAssets(), MyApp.APP_FONT_PATH ) );
+			customDialogNotSayButton.setTypeface( Typeface.createFromAsset( this.getAssets(), MyApp.APP_FONT_PATH ) );
 			
 			customDialogMaleButton.setOnClickListener( new OnClickListener() {
 				@Override
@@ -256,6 +332,8 @@ public class SignUpActivity extends Activity implements OnClickListener {
 			Intent intent = new Intent( this, ProfileChangeImagePopupDialog.class );
 			this.startActivityForResult( intent, REQUEST_SIGNUP_PICTURE );
 		}else if( v.equals( doneButton ) ){
+			loadingDialog.show();
+			
 			final String signUpEmail = emailEditText.getText().toString();
 			String signUpFirstName = firstNameEditText.getText().toString();
 			String signUpLastName = lastNameEditText.getText().toString();
@@ -297,25 +375,52 @@ public class SignUpActivity extends Activity implements OnClickListener {
 				@Override
 				public void onSuccess(JSONObject jsonObject) {
 					super.onSuccess(jsonObject);
+					if( loadingDialog.isShowing() ){
+						loadingDialog.dismiss();
+					}
 					try {
-						app.setUserId( jsonObject.getString( "id" ) );
-						Intent intent = new Intent( SignUpActivity.this, MainActivity.class );
+						String checkValue = jsonObject.getString( "id" );
+						ActorData actorData = new ActorData( jsonObject );
+						app.setUserId( actorData.getId() );
+						app.setCurrentProfileData( actorData );
+						Intent intent = new Intent( SignUpActivity.this, FindFriendActivity.class );
 						SignUpActivity.this.startActivity( intent );
 					} catch (JSONException e) {
 						e.printStackTrace();
-						alertDialog.setTitle( "Error" );
-						alertDialog.setMessage( "User with email "+signUpEmail+" already existed." );
-						alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
-							@Override
-							public void onClick(DialogInterface dialog, int which) {
-								// TODO Auto-generated method stub
-								alertDialog.dismiss();
-							}
-						});
-						alertDialog.show();
+						JSONObject errorObject;
+						try {
+							errorObject = jsonObject.getJSONObject( "error" );
+							String message = errorObject.optString( "message" );
+							alertDialog.setTitle( "Error" );
+							alertDialog.setMessage( message );
+							alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									// TODO Auto-generated method stub
+									alertDialog.dismiss();
+								}
+							});
+							alertDialog.show();
+						} catch (JSONException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+							alertDialog.setTitle( "Error" );
+							alertDialog.setMessage( "Sign up fail." );
+							alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									// TODO Auto-generated method stub
+									alertDialog.dismiss();
+								}
+							});
+							alertDialog.show();
+						}
+						
 					}
 				}
 			});
+		}else if( v.equals( backButton ) ){
+			this.finish();
 		}
 	}
 	
@@ -326,6 +431,83 @@ public class SignUpActivity extends Activity implements OnClickListener {
 			if( resultCode == RESULT_SINGUP_PICTURE_FINISH ){
 				userPicture = (Bitmap) data.getParcelableExtra( ProfileChangeImagePopupDialog.BITMAP_USER_SIGNUP );
 				profileImage.setImageBitmap( userPicture );
+			}else if( resultCode == RESULT_SINGUP_CHOOSE_PICTURE_FINISH ){
+				Uri imageURI = data.getParcelableExtra( ProfileChangeImagePopupDialog.BITMAP_USER_SIGNUP );
+				
+				try {
+					Bitmap bitmap = MediaStore.Images.Media.getBitmap(this.getContentResolver(), imageURI);
+					
+					//Check for rotate and scale down image
+					Matrix matrix = new Matrix();
+					if( bitmap.getHeight() > MyApp.IMAGE_HEIGHT_UPLOAD_DEFAULT_SIZE ){
+						float scaleValue = (MyApp.IMAGE_HEIGHT_UPLOAD_DEFAULT_SIZE/bitmap.getHeight());
+						
+						int newWidth = (int) ((int) bitmap.getWidth()*scaleValue);//(int) (photo.getWidth()*scaleValue);
+						int newHeight = (int) MyApp.IMAGE_HEIGHT_UPLOAD_DEFAULT_SIZE;//(int) (photo.getHeight()*scaleValue);
+						
+						bitmap = Bitmap.createScaledBitmap( bitmap, newWidth, newHeight, false );
+					}
+					int rotation = rotateImage.getGalleryPhotoOrientation( this, imageURI );
+					if (rotation != 0f) {
+					     matrix.preRotate(rotation);
+					}
+					
+					userPicture = Bitmap.createBitmap( bitmap, 0, 0, bitmap.getWidth(), bitmap.getHeight(), matrix, true);
+					profileImage.setImageBitmap( userPicture );
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+			}else if( resultCode == RESULT_SINGUP_TAKE_PICTURE_FINISH ){
+				loadingDialog.show();
+				
+				File photoFormStorage = new File( extStorageDirectory, ProfileChangeImagePopupDialog.TEMP_TAKE_IMAGE_FROM_CHANGE_IMAGE_FILE_NAME );
+				Uri selectedImage = Uri.fromFile( photoFormStorage );
+				
+	            getContentResolver().notifyChange(selectedImage, null);
+	            ContentResolver cr = getContentResolver();
+				
+	            Bitmap photo;
+				try {
+					photo = android.provider.MediaStore.Images.Media.getBitmap(cr, selectedImage);
+					
+					//Check for rotate and scale down image
+					Matrix matrix = new Matrix();
+					if( photo.getHeight() > MyApp.IMAGE_HEIGHT_UPLOAD_DEFAULT_SIZE ){
+						float scaleValue = (MyApp.IMAGE_HEIGHT_UPLOAD_DEFAULT_SIZE/photo.getHeight());
+						
+						int newWidth = (int) ((int) photo.getWidth()*scaleValue);//(int) (photo.getWidth()*scaleValue);
+						int newHeight = (int) MyApp.IMAGE_HEIGHT_UPLOAD_DEFAULT_SIZE;//(int) (photo.getHeight()*scaleValue);
+						
+						photo = Bitmap.createScaledBitmap( photo, newWidth, newHeight, false );
+					}
+					int rotation = rotateImage.getCameraPhotoOrientation( this, selectedImage, selectedImage.getPath() );
+					if (rotation != 0f) {
+					     matrix.preRotate(rotation);
+					}
+					
+					userPicture = Bitmap.createBitmap( photo, 0, 0, photo.getWidth(), photo.getHeight(), matrix, true);
+					profileImage.setImageBitmap( userPicture );
+					
+					if( loadingDialog.isShowing() ){
+						loadingDialog.dismiss();
+					}
+				} catch (FileNotFoundException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					if( loadingDialog.isShowing() ){
+						loadingDialog.dismiss();
+					}
+				} catch (IOException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+					if( loadingDialog.isShowing() ){
+						loadingDialog.dismiss();
+					}
+				}
 			}
 		}
 	}

@@ -16,14 +16,24 @@ import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.JsonHttpResponseHandler;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.graphics.Typeface;
 import android.os.Bundle;
+import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.View.OnFocusChangeListener;
+import android.view.View.OnKeyListener;
+import android.view.View.OnTouchListener;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
@@ -32,12 +42,17 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class NearByFilterActivity extends Activity implements TextWatcher, CompoundButtonGroupListener, OnClickListener, OnRangeSeekBarChangeListener<Integer> {
+public class NearByFilterActivity extends Activity implements TextWatcher, CompoundButtonGroupListener, OnClickListener, OnRangeSeekBarChangeListener<Integer>, OnItemClickListener {
 	
-	public static String PUT_EXTRA_URL_VAR_1 = "PUT_EXTRA_URL_VAR_1";
-	public static String PUT_EXTRA_URL_VAR_2 = "PUT_EXTRA_URL_VAR_2";
-	public static String PUT_EXTRA_URL_VAR_3 = "PUT_EXTRA_URL_VAR_3";
-	public static String PUT_EXTRA_URL_VAR_4 = "PUT_EXTRA_URL_VAR_4";
+	public static final String PUT_EXTRA_URL_VAR_1 = "PUT_EXTRA_URL_VAR_1";
+	public static final String PUT_EXTRA_URL_VAR_2 = "PUT_EXTRA_URL_VAR_2";
+	public static final String PUT_EXTRA_URL_VAR_3 = "PUT_EXTRA_URL_VAR_3";
+	public static final String PUT_EXTRA_URL_VAR_4 = "PUT_EXTRA_URL_VAR_4";
+	
+	private static final String DISTANCE_VALUE_1 = "0.5";
+	private static final String DISTANCE_VALUE_2 = "1";
+	private static final String DISTANCE_VALUE_3 = "10";
+	private static final String DISTANCE_VALUE_4 = "25";
 	
 	public static int PRICE_MINIMUM = 0;
 	public static int PRICE_MAXIMUM = 1000;
@@ -64,6 +79,8 @@ public class NearByFilterActivity extends Activity implements TextWatcher, Compo
 	private TextView priceMaximumText;
 	private TextView dollarSignPriceMaximum;
 	private AsyncHttpClient asyncHttpClient;
+	private Boolean showDropDownState;
+	private String tempEditText;
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -75,7 +92,8 @@ public class NearByFilterActivity extends Activity implements TextWatcher, Compo
 		asyncHttpClient = app.getAsyncHttpClient();
 		//appCookie = app.getAppCookie();
 		arrayDataBrandStoreName = new ArrayList<String>();
-		distanceButtonGroup = new CompoundButtonGroup();
+		distanceButtonGroup = new CompoundButtonGroup( false );
+		showDropDownState = true;
 		
 		brandStoreEditText = (AutoCompleteTextView) findViewById( R.id.nearByFilterEditText );
 		distanceButton1 = (ToggleButton) findViewById( R.id.nearbyFilterDistanceButton1 );
@@ -87,6 +105,25 @@ public class NearByFilterActivity extends Activity implements TextWatcher, Compo
 		priceMinimumText = (TextView) findViewById( R.id.nearByFilterPriceMinimumText );
 		priceMaximumText = (TextView) findViewById( R.id.nearByFilterPriceMaximumText );
 		dollarSignPriceMaximum = (TextView) findViewById( R.id.nearByFilterDollarSignPriceMaximum );
+		
+		//Set font
+		brandStoreEditText.setTypeface( Typeface.createFromAsset( this.getAssets(), MyApp.APP_FONT_PATH) );
+		priceMinimumText.setTypeface( Typeface.createFromAsset( this.getAssets(), MyApp.APP_FONT_PATH) );
+		priceMaximumText.setTypeface( Typeface.createFromAsset( this.getAssets(), MyApp.APP_FONT_PATH) );
+		dollarSignPriceMaximum.setTypeface( Typeface.createFromAsset( this.getAssets(), MyApp.APP_FONT_PATH) );
+		
+		brandStoreEditText.setOnKeyListener(new OnKeyListener() {
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				// If the event is a key-down event on the "enter" button
+		        if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+		            (keyCode == KeyEvent.KEYCODE_ENTER)) {
+		          // Perform action on key press
+		          return true;
+		        }
+		        return false;
+			}
+		});
 		
 		// create RangeSeekBar as Integer range between 20 and 75
 		RangeSeekBar<Integer> seekBar = new RangeSeekBar<Integer>(PRICE_MINIMUM, PRICE_MAXIMUM, this);
@@ -121,9 +158,10 @@ public class NearByFilterActivity extends Activity implements TextWatcher, Compo
 		doneButton.setOnClickListener( this );
 		seekBar.setOnRangeSeekBarChangeListener( this );
 		seekBar.setNotifyWhileDragging( true );
+		brandStoreEditText.setOnItemClickListener( this );
 		
 		resultTxt1 = "";
-		resultTxt2 = "0.5";
+		resultTxt2 = "";
 		resultTxt3 = "";
 		resultTxt4 = "";
 		
@@ -132,39 +170,52 @@ public class NearByFilterActivity extends Activity implements TextWatcher, Compo
 
 	@Override
 	public void afterTextChanged( Editable s ) {
-		clearDataAndStatus();
-		
-		String tempURL = getBrandStoreDataURL+"&q="+s;
-		tempURL = tempURL.replace( " ", "%20" );
-		
-		//NetworkThreadUtil.getRawDataWithCookie( tempURL, null, appCookie, this );
-		asyncHttpClient.post(
-			tempURL, 
-			new JsonHttpResponseHandler(){
-				@Override
-				public void onSuccess(JSONObject jsonObject) {
-					super.onSuccess(jsonObject);
-					try {
-						JSONArray jsonArray = jsonObject.getJSONArray("values");
-						for(int i = 0; i<jsonArray.length(); i++){
-							//Load Brand/Store Data
-							String name = jsonArray.optString( i );
-							arrayDataBrandStoreName.add( name );
+		System.out.println("CheckSValue : "+s.toString());
+		System.out.println("CheckTempEditText : "+tempEditText);
+		if( !(s.toString().equals( tempEditText )) ){
+			clearDataAndStatus();
+			
+			String tempURL = getBrandStoreDataURL+"&q="+s;
+			tempURL = tempURL.replace( " ", "%20" );
+			
+			if( showDropDownState ){
+				System.out.println("EditTextShowDropDown");
+				//NetworkThreadUtil.getRawDataWithCookie( tempURL, null, appCookie, this );
+				asyncHttpClient.post(
+					tempURL, 
+					new JsonHttpResponseHandler(){
+						@Override
+						public void onSuccess(JSONObject jsonObject) {
+							super.onSuccess(jsonObject);
+							try {
+								JSONArray jsonArray = jsonObject.getJSONArray("values");
+								for(int i = 0; i<jsonArray.length(); i++){
+									//Load Brand/Store Data
+									String name = jsonArray.optString( i );
+									arrayDataBrandStoreName.add( name );
+								}
+							} catch (JSONException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+							
+							final ArrayAdapter<String> adapter = new ArrayAdapter<String>(NearByFilterActivity.this, R.layout.nearbyautocompleteitem, arrayDataBrandStoreName);
+							brandStoreEditText.setAdapter( adapter );
+							brandStoreEditText.showDropDown();
 						}
-					} catch (JSONException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-					
-					final ArrayAdapter<String> adapter = new ArrayAdapter<String>(NearByFilterActivity.this, R.layout.nearbyautocompleteitem, arrayDataBrandStoreName);
-					brandStoreEditText.setAdapter( adapter );
-					brandStoreEditText.showDropDown();
-				}
-			});
+				});
+			}else{
+				System.out.println("EditTextHideDropDown");
+				brandStoreEditText.dismissDropDown();
+				showDropDownState = true;
+			}
+			
+			tempEditText = s.toString();
+		}
 	}
 
 	@Override
-	public void beforeTextChanged( CharSequence s, int start, int count,	int after ) {
+	public void beforeTextChanged( CharSequence s, int start, int count, int after ) {
 		// TODO Auto-generated method stub
 		
 	}
@@ -174,43 +225,6 @@ public class NearByFilterActivity extends Activity implements TextWatcher, Compo
 		// TODO Auto-generated method stub
 		
 	}
-
-	/*@Override
-	public void onNetworkDocSuccess(String urlString, Document document) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onNetworkRawSuccess(String urlString, String result) {
-		try {
-			JSONObject jsonObject = new JSONObject( result );
-			JSONArray jsonArray = jsonObject.getJSONArray("values");
-			for(int i = 0; i<jsonArray.length(); i++){
-				//Load Brand/Store Data
-				String name = jsonArray.optString( i );
-				arrayDataBrandStoreName.add( name );
-			}
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		final ArrayAdapter<String> adapter = new ArrayAdapter<String>(this, R.layout.nearbyautocompleteitem, arrayDataBrandStoreName);
-		this.runOnUiThread( new Runnable() {
-			@Override
-			public void run() {
-				brandStoreEditText.setAdapter( adapter );
-				brandStoreEditText.showDropDown();
-			}
-		});
-	}
-
-	@Override
-	public void onNetworkFail(String urlString) {
-		// TODO Auto-generated method stub
-		
-	}*/
 	
 	private void clearDataAndStatus() {
 		arrayDataBrandStoreName.clear();
@@ -219,13 +233,13 @@ public class NearByFilterActivity extends Activity implements TextWatcher, Compo
 	@Override
 	public void onButtonGroupClick(CompoundButton cButton) {
 		if( cButton.equals( distanceButton1 ) ){
-			resultTxt2 = "0.5";
+			resultTxt2 = DISTANCE_VALUE_1;
 		}else if( cButton.equals( distanceButton2 ) ){
-			resultTxt2 = "1";
+			resultTxt2 = DISTANCE_VALUE_2;
 		}else if( cButton.equals( distanceButton3 ) ){
-			resultTxt2 = "10";
+			resultTxt2 = DISTANCE_VALUE_3;
 		}else if( cButton.equals( distanceButton4 ) ){
-			resultTxt2 = "25";
+			resultTxt2 = DISTANCE_VALUE_4;
 		}
 	}
 
@@ -276,6 +290,12 @@ public class NearByFilterActivity extends Activity implements TextWatcher, Compo
     		return true;
 		}
 		return super.onKeyUp(keyCode, event);
+	}
+
+	@Override
+	public void onItemClick(AdapterView<?> arg0, View arg1, int arg2, long arg3) {
+		showDropDownState = false;
+		System.out.println("OnItemClickHideDropDown!!");
 	}
 	
 }

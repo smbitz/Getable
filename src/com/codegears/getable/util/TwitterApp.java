@@ -98,6 +98,10 @@ public class TwitterApp {
 		return mSession.getUsername();
 	}
 	
+	public String getUserId() {
+		return mSession.getUserId();
+	}
+	
 	public void updateStatus(String status) throws Exception {
 		try {
 			mTwitter.updateStatus(status);
@@ -152,8 +156,8 @@ public class TwitterApp {
 					configureToken();
 				
 					User user = mTwitter.verifyCredentials();
-				
-			        mSession.storeAccessToken(mAccessToken, user.getName());
+					
+			        mSession.storeAccessToken(mAccessToken, user.getName(), String.valueOf( user.getId() ) );
 			        
 			        what = 0;
 				} catch (Exception e){

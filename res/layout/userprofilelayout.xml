@@ -10,10 +10,42 @@
         android:layout_height="match_parent"
         android:orientation="vertical" android:background="#ffffff">
 
+        <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
         <com.codegears.getable.ui.AppHeader
-	        android:layout_height="wrap_content"
-	        android:layout_width="match_parent">
-	    </com.codegears.getable.ui.AppHeader>
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+        </com.codegears.getable.ui.AppHeader>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center" >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
+
+                <ImageButton
+                    android:id="@+id/userProfileBackButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:background="@null"
+                    android:src="@drawable/back_button" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="3.5" >
+            </LinearLayout>
+        </LinearLayout>
+
+    </FrameLayout>
 
         <LinearLayout
             android:id="@+id/userProfileHeaderLayout"

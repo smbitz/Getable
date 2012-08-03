@@ -10,14 +10,18 @@ import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -56,7 +60,6 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 	private ProfileSettingNotificationButton notificationLikePushButton;
 	private ProfileSettingNotificationButton notificationLikeEmailButton;
 	private MyApp app;
-	//private List<String> appCookie;
 	private Config config;
 	private ActorData currentActorData;
 	private String changeNotificationSettingURL;
@@ -72,6 +75,19 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 	private int twitterButtonStatus;
 	private String getCurrentUserDataURL;
 	private String connectFacebookURL;
+	private ImageButton backButton;
+	private TextView accountText;
+	private TextView changePssswordText;
+	private TextView sharingText;
+	private TextView facebookText;
+	private TextView twitterText;
+	private TextView notificationText;
+	private TextView followingText;
+	private TextView commentText;
+	private TextView likeText;
+	private ImageView facebookArrowImage;
+	private ImageView twitterArrorImage;
+	private AlertDialog alertDialog;
 	
 	public ProfileChangeSettingsLayout(Activity activity) {
 		super(activity);
@@ -88,6 +104,7 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 		facebook = app.getFacebook();
 		twitter = new TwitterApp( this.getContext(), MyApp.TWITTER_CONSUMER_KEY, MyApp.TWITTER_SECRET_KEY );
 		currentActorData = app.getCurrentProfileData();
+		alertDialog = new AlertDialog.Builder( this.getContext() ).create();
 		
 		changePasswordButton = (LinearLayout) findViewById( R.id.profileChangeSettingChangePasswordButton );
 		notificationFollowPushButton = (ProfileSettingNotificationButton) findViewById( R.id.profileChangeSettingsFollowPushButton );
@@ -100,6 +117,31 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 		facebookConfigText = (TextView) findViewById( R.id.profileChangeSettingFacebookConfigText );
 		twitterConfigButton = (ToggleButton) findViewById( R.id.profileChangeSettingTwitterConfigButton );
 		twitterConfigText = (TextView) findViewById( R.id.profileChangeSettingTwitterConfigText );
+		backButton = (ImageButton) findViewById( R.id.profileChangeSettingBackButton );
+		accountText = (TextView) findViewById( R.id.profileChangeSettingAccountText );
+		changePssswordText = (TextView) findViewById( R.id.profileChangeSettingChangePasswordText );
+		sharingText = (TextView) findViewById( R.id.profileChangeSettingSharingText );
+		facebookText = (TextView) findViewById( R.id.profileChangeSettingFacebookText );
+		twitterText = (TextView) findViewById( R.id.profileChangeSettingTwitterText );
+		notificationText = (TextView) findViewById( R.id.profileChangeSettingNotificationText );
+		followingText = (TextView) findViewById( R.id.profileChangeSettingFollowingText );
+		commentText = (TextView) findViewById( R.id.profileChangeSettingCommentText );
+		likeText = (TextView) findViewById( R.id.profileChangeSettingLikeText );
+		facebookArrowImage = (ImageView) findViewById( R.id.profileChangeSettingFacebookArrowImage );
+		twitterArrorImage = (ImageView) findViewById( R.id.profileChangeSettingTwitterArrowImage );
+		
+		//Set font
+		accountText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		changePssswordText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		sharingText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		facebookText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		twitterText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		notificationText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		followingText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		commentText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		likeText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		facebookConfigText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		twitterConfigText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
 		
 		changePasswordButton.setOnClickListener( this );
 		notificationFollowPushButton.setOnClickListener( this );
@@ -112,6 +154,7 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 		twitterConfigButton.setOnClickListener( this );
 		facebookConfigText.setOnClickListener( this );
 		twitterConfigText.setOnClickListener( this );
+		backButton.setOnClickListener( this );
 		
 		twitter.setListener( new TwDialogListener() {
 			@Override
@@ -142,8 +185,10 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 		//Set facebook and twitter button status default.
 		facebookConfigButton.setVisibility( View.GONE );
 		facebookConfigText.setVisibility( View.GONE );
+		facebookArrowImage.setVisibility( View.GONE );
 		twitterConfigButton.setVisibility( View.GONE );
 		twitterConfigText.setVisibility( View.GONE );
+		twitterArrorImage.setVisibility( View.GONE );
 		
 		//Set Facebook and Twitter config button;
 		if( currentActorData.getSocialConnections().getFacebook().getStatus() ){
@@ -159,6 +204,7 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 			}
 		}else{
 			facebookConfigText.setVisibility( View.VISIBLE );
+			facebookArrowImage.setVisibility( View.VISIBLE );
 		}
 		
 		if( currentActorData.getSocialConnections().getTwitter().getStatus() ){
@@ -174,6 +220,7 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 			}
 		}else{
 			twitterConfigText.setVisibility( View.VISIBLE );
+			twitterArrorImage.setVisibility( View.VISIBLE );
 		}
 		
 		//Set notification button
@@ -273,14 +320,6 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 			loadingDialog.show();
 			ProfileSettingNotificationButton notificationButton = (ProfileSettingNotificationButton) v;
 			if( notificationButton.getButtonStatus() == ProfileSettingNotificationButton.NOTIFICATION_STATUS_ON ){
-				/*Map< String, String > newMapData = new HashMap<String, String>();
-		        newMapData.put( "followed", "false" );
-		        newMapData.put( "_followed", "on" );
-		        newMapData.put( "channel", "2" );
-		        newMapData.put( "_a", "put" );
-		        String postData = NetworkUtil.createPostData( newMapData );
-				NetworkThreadUtil.getRawDataWithCookie( changeNotificationSettingURL, postData, appCookie, this );*/
-				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "followed", "false" );
 				paramMap.put( "_followed", "on" );
@@ -308,14 +347,6 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 				notificationButton.setButtonStatus( ProfileSettingNotificationButton.NOTIFICATION_STATUS_OFF );
 				notificationButton.setImageResource( R.drawable.notification_icon_push_1 );
 			}else if( notificationButton.getButtonStatus() == ProfileSettingNotificationButton.NOTIFICATION_STATUS_OFF  ){
-				/*Map< String, String > newMapData = new HashMap<String, String>();
-				newMapData.put( "followed", "true" );
-		        newMapData.put( "_followed", "on" );
-		        newMapData.put( "channel", "2" );
-		        newMapData.put( "_a", "put" );
-		        String postData = NetworkUtil.createPostData( newMapData );
-				NetworkThreadUtil.getRawDataWithCookie( changeNotificationSettingURL, postData, appCookie, this );*/
-				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "followed", "true" );
 				paramMap.put( "_followed", "on" );
@@ -347,14 +378,6 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 			loadingDialog.show();
 			ProfileSettingNotificationButton notificationButton = (ProfileSettingNotificationButton) v;
 			if( notificationButton.getButtonStatus() == ProfileSettingNotificationButton.NOTIFICATION_STATUS_ON ){
-				/*Map< String, String > newMapData = new HashMap<String, String>();
-				newMapData.put( "followed", "false" );
-		        newMapData.put( "_followed", "on" );
-		        newMapData.put( "channel", "1" );
-		        newMapData.put( "_a", "put" );
-		        String postData = NetworkUtil.createPostData( newMapData );
-				NetworkThreadUtil.getRawDataWithCookie( changeNotificationSettingURL, postData, appCookie, this );*/
-				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "followed", "false" );
 				paramMap.put( "_followed", "on" );
@@ -382,14 +405,6 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 				notificationButton.setButtonStatus( ProfileSettingNotificationButton.NOTIFICATION_STATUS_OFF );
 				notificationButton.setImageResource( R.drawable.notification_icon_email_1 );
 			}else if( notificationButton.getButtonStatus() == ProfileSettingNotificationButton.NOTIFICATION_STATUS_OFF ){
-				/*Map< String, String > newMapData = new HashMap<String, String>();
-		        newMapData.put( "followed", "true" );
-		        newMapData.put( "_followed", "on" );
-		        newMapData.put( "channel", "1" );
-		        newMapData.put( "_a", "put" );
-		        String postData = NetworkUtil.createPostData( newMapData );
-				NetworkThreadUtil.getRawDataWithCookie( changeNotificationSettingURL, postData, appCookie, this );*/
-				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "followed", "true" );
 				paramMap.put( "_followed", "on" );
@@ -421,14 +436,6 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 			loadingDialog.show();
 			ProfileSettingNotificationButton notificationButton = (ProfileSettingNotificationButton) v;
 			if( notificationButton.getButtonStatus() == ProfileSettingNotificationButton.NOTIFICATION_STATUS_ON ){
-				/*Map< String, String > newMapData = new HashMap<String, String>();
-		        newMapData.put( "commented", "false" );
-		        newMapData.put( "_commented", "on" );
-		        newMapData.put( "channel", "2" );
-		        newMapData.put( "_a", "put" );
-		        String postData = NetworkUtil.createPostData( newMapData );
-				NetworkThreadUtil.getRawDataWithCookie( changeNotificationSettingURL, postData, appCookie, this );*/
-				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "commented", "false" );
 				paramMap.put( "_commented", "on" );
@@ -456,14 +463,6 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 				notificationButton.setButtonStatus( ProfileSettingNotificationButton.NOTIFICATION_STATUS_OFF );
 				notificationButton.setImageResource( R.drawable.notification_icon_push_1 );
 			}else if( notificationButton.getButtonStatus() == ProfileSettingNotificationButton.NOTIFICATION_STATUS_OFF ){
-				/*Map< String, String > newMapData = new HashMap<String, String>();
-				newMapData.put( "commented", "true" );
-		        newMapData.put( "_commented", "on" );
-		        newMapData.put( "channel", "2" );
-		        newMapData.put( "_a", "put" );
-		        String postData = NetworkUtil.createPostData( newMapData );
-				NetworkThreadUtil.getRawDataWithCookie( changeNotificationSettingURL, postData, appCookie, this );*/
-				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "commented", "true" );
 				paramMap.put( "_commented", "on" );
@@ -495,14 +494,6 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 			loadingDialog.show();
 			ProfileSettingNotificationButton notificationButton = (ProfileSettingNotificationButton) v;
 			if( notificationButton.getButtonStatus() == ProfileSettingNotificationButton.NOTIFICATION_STATUS_ON ){
-				/*Map< String, String > newMapData = new HashMap<String, String>();
-		        newMapData.put( "commented", "false" );
-		        newMapData.put( "_commented", "on" );
-		        newMapData.put( "channel", "1" );
-		        newMapData.put( "_a", "put" );
-		        String postData = NetworkUtil.createPostData( newMapData );
-				NetworkThreadUtil.getRawDataWithCookie( changeNotificationSettingURL, postData, appCookie, this );*/
-				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "commented", "false" );
 				paramMap.put( "_commented", "on" );
@@ -530,14 +521,6 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 				notificationButton.setButtonStatus( ProfileSettingNotificationButton.NOTIFICATION_STATUS_OFF );
 				notificationButton.setImageResource( R.drawable.notification_icon_email_1 );
 			}else if( notificationButton.getButtonStatus() == ProfileSettingNotificationButton.NOTIFICATION_STATUS_OFF ){
-				/*Map< String, String > newMapData = new HashMap<String, String>();
-		        newMapData.put( "commented", "true" );
-		        newMapData.put( "_commented", "on" );
-		        newMapData.put( "channel", "1" );
-		        newMapData.put( "_a", "put" );
-		        String postData = NetworkUtil.createPostData( newMapData );
-				NetworkThreadUtil.getRawDataWithCookie( changeNotificationSettingURL, postData, appCookie, this );*/
-				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "commented", "true" );
 				paramMap.put( "_commented", "on" );
@@ -569,14 +552,6 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 			loadingDialog.show();
 			ProfileSettingNotificationButton notificationButton = (ProfileSettingNotificationButton) v;
 			if( notificationButton.getButtonStatus() == ProfileSettingNotificationButton.NOTIFICATION_STATUS_ON ){
-				/*Map< String, String > newMapData = new HashMap<String, String>();
-		        newMapData.put( "liked", "false" );
-		        newMapData.put( "_liked", "on" );
-		        newMapData.put( "channel", "2" );
-		        newMapData.put( "_a", "put" );
-		        String postData = NetworkUtil.createPostData( newMapData );
-				NetworkThreadUtil.getRawDataWithCookie( changeNotificationSettingURL, postData, appCookie, this );*/
-				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "liked", "false" );
 				paramMap.put( "_liked", "on" );
@@ -604,14 +579,6 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 				notificationButton.setButtonStatus( ProfileSettingNotificationButton.NOTIFICATION_STATUS_OFF );
 				notificationButton.setImageResource( R.drawable.notification_icon_push_1 );
 			}else if( notificationButton.getButtonStatus() == ProfileSettingNotificationButton.NOTIFICATION_STATUS_OFF ){
-				/*Map< String, String > newMapData = new HashMap<String, String>();
-				newMapData.put( "liked", "true" );
-		        newMapData.put( "_liked", "on" );
-		        newMapData.put( "channel", "2" );
-		        newMapData.put( "_a", "put" );
-		        String postData = NetworkUtil.createPostData( newMapData );
-				NetworkThreadUtil.getRawDataWithCookie( changeNotificationSettingURL, postData, appCookie, this );*/
-				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "liked", "true" );
 				paramMap.put( "_liked", "on" );
@@ -643,14 +610,6 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 			loadingDialog.show();
 			ProfileSettingNotificationButton notificationButton = (ProfileSettingNotificationButton) v;
 			if( notificationButton.getButtonStatus() == ProfileSettingNotificationButton.NOTIFICATION_STATUS_ON ){
-				/*Map< String, String > newMapData = new HashMap<String, String>();
-				newMapData.put( "liked", "false" );
-		        newMapData.put( "_liked", "on" );
-		        newMapData.put( "channel", "1" );
-		        newMapData.put( "_a", "put" );
-		        String postData = NetworkUtil.createPostData( newMapData );
-				NetworkThreadUtil.getRawDataWithCookie( changeNotificationSettingURL, postData, appCookie, this );*/
-				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "liked", "false" );
 				paramMap.put( "_liked", "on" );
@@ -678,14 +637,6 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 				notificationButton.setButtonStatus( ProfileSettingNotificationButton.NOTIFICATION_STATUS_OFF );
 				notificationButton.setImageResource( R.drawable.notification_icon_email_1 );
 			}else if( notificationButton.getButtonStatus() == ProfileSettingNotificationButton.NOTIFICATION_STATUS_OFF ){
-				/*Map< String, String > newMapData = new HashMap<String, String>();
-		        newMapData.put( "liked", "true" );
-		        newMapData.put( "_liked", "on" );
-		        newMapData.put( "channel", "1" );
-		        newMapData.put( "_a", "put" );
-		        String postData = NetworkUtil.createPostData( newMapData );
-				NetworkThreadUtil.getRawDataWithCookie( changeNotificationSettingURL, postData, appCookie, this );*/
-				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "liked", "true" );
 				paramMap.put( "_liked", "on" );
@@ -733,74 +684,171 @@ public class ProfileChangeSettingsLayout extends AbstractViewLayout implements O
 			prefsEditor.commit();
 		}else if( v.equals( facebookConfigText ) ){
 			loadingDialog.show();
-			
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences( this.getActivity() );
-			String currentAccessToken = prefs.getString( ConnectFacebook.FACEBOOK_ACCESS_TOKEN, null );
-			long expires = prefs.getLong( ConnectFacebook.FACEBOOK_ACCESS_EXPIRES, 0);
-			if(currentAccessToken != null) {
-	            facebook.setAccessToken(currentAccessToken);
-	        }
-	        if(expires != 0) {
-	            facebook.setAccessExpires(expires);
-	        }
-			
-			if( !facebook.isSessionValid() ){
-				facebook.authorize( this.getActivity(), new DialogListener() {
+			facebook.authorize( this.getActivity(), MyApp.FACEBOOK_PERMISSION, new DialogListener() {
+				
+				@Override
+				public void onFacebookError(FacebookError e) { 
+					System.out.println("ProfileChangeSettingError1 : "+e);
+					alertDialog.setTitle( "Error" );
+					alertDialog.setMessage( "Cannot connect facebook." );
+					alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							// TODO Auto-generated method stub
+							alertDialog.dismiss();
+						}
+					});
+					alertDialog.show();
 					
-					@Override
-					public void onFacebookError(FacebookError e) { }
+					if( loadingDialog.isShowing() ){
+						loadingDialog.dismiss();
+					}
+				}
+				
+				@Override
+				public void onError(DialogError e) {
+					System.out.println("ProfileChangeSettingError2 : "+e);
+					alertDialog.setTitle( "Error" );
+					alertDialog.setMessage( "Cannot connect facebook." );
+					alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							// TODO Auto-generated method stub
+							alertDialog.dismiss();
+						}
+					});
+					alertDialog.show();
 					
-					@Override
-					public void onError(DialogError e) { }
+					if( loadingDialog.isShowing() ){
+						loadingDialog.dismiss();
+					}
+				}
+				
+				@Override
+				public void onComplete(Bundle values) {
+					String token = facebook.getAccessToken();  //get access token
+					Long expires = facebook.getAccessExpires();  //get access expire
 					
-					@Override
-					public void onComplete(Bundle values) {
-						String token = facebook.getAccessToken();  //get access token
-						Long expires = facebook.getAccessExpires();  //get access expire
-						
-						SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences( ProfileChangeSettingsLayout.this.getActivity() );
-						SharedPreferences.Editor editor = prefs.edit();
-						editor.putString( ConnectFacebook.FACEBOOK_ACCESS_TOKEN , token);
-						editor.putLong( ConnectFacebook.FACEBOOK_ACCESS_EXPIRES , expires);
-						editor.commit();
-						
-						HashMap<String, String> paramMap = new HashMap<String, String>();
-						paramMap.put( "accessToken", facebook.getAccessToken() );
-						paramMap.put( "_a", "connect" );
-						RequestParams params = new RequestParams(paramMap);
-						asyncHttpClient.post( connectFacebookURL, params, new AsyncHttpResponseHandler(){
-							@Override
-							public void onSuccess(String arg0) {
-								super.onSuccess(arg0);
+					SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences( ProfileChangeSettingsLayout.this.getActivity() );
+					SharedPreferences.Editor editor = prefs.edit();
+					editor.putString( ConnectFacebook.FACEBOOK_ACCESS_TOKEN , token);
+					editor.putLong( ConnectFacebook.FACEBOOK_ACCESS_EXPIRES , expires);
+					editor.commit();
+					
+					HashMap<String, String> paramMap = new HashMap<String, String>();
+					paramMap.put( "accessToken", facebook.getAccessToken() );
+					paramMap.put( "_a", "connect" );
+					RequestParams params = new RequestParams(paramMap);
+					asyncHttpClient.post( connectFacebookURL, params, new JsonHttpResponseHandler(){
+						@Override
+						public void onSuccess(JSONObject jsonObject) {
+							super.onSuccess(jsonObject);
+							try {
+								String checkValue = jsonObject.getString( "status" );
 								refreshView();
+							} catch (JSONException e) {
+								System.out.println("ProfileChangeSettingError3 : "+e);
+								e.printStackTrace();
+								if( loadingDialog.isShowing() ){
+									loadingDialog.dismiss();
+								}
+								
+								JSONObject errorObject;
+								try {
+									errorObject = jsonObject.getJSONObject( "error" );
+									String message = errorObject.optString( "message" );
+									alertDialog.setTitle( "Error" );
+									alertDialog.setMessage( message );
+									alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+										@Override
+										public void onClick(DialogInterface dialog, int which) {
+											// TODO Auto-generated method stub
+											alertDialog.dismiss();
+										}
+									});
+									alertDialog.show();
+								} catch (JSONException e1) {
+									System.out.println("ProfileChangeSettingError4 : "+e);
+									// TODO Auto-generated catch block
+									e1.printStackTrace();
+									alertDialog.setTitle( "Error" );
+									alertDialog.setMessage( "Cannot connect facebook." );
+									alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+										@Override
+										public void onClick(DialogInterface dialog, int which) {
+											// TODO Auto-generated method stub
+											alertDialog.dismiss();
+										}
+									});
+									alertDialog.show();
+								}
 							}
-						});
+						}
+						
+						@Override
+						public void onFailure(Throwable arg0, JSONObject arg1) {
+							// TODO Auto-generated method stub
+							System.out.println("ProfileChangeSettingError5 : "+arg1);
+							super.onFailure(arg0, arg1);
+							if( loadingDialog.isShowing() ){
+								loadingDialog.dismiss();
+							}
+							
+							alertDialog.setTitle( "Error" );
+							alertDialog.setMessage( "Cannot connect facebook." );
+							alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									// TODO Auto-generated method stub
+									alertDialog.dismiss();
+								}
+							});
+							alertDialog.show();
+						}
+						
+						@Override
+						public void onFailure(Throwable arg0, String arg1) {
+							System.out.println("ProfileChangeSettingError6 : "+arg1);
+							super.onFailure(arg0, arg1);
+							if( loadingDialog.isShowing() ){
+								loadingDialog.dismiss();
+							}
+							
+							alertDialog.setTitle( "Error" );
+							alertDialog.setMessage( "Cannot connect facebook." );
+							alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									// TODO Auto-generated method stub
+									alertDialog.dismiss();
+								}
+							});
+							alertDialog.show();
+						}
+					});
+				}
+				
+				@Override
+				public void onCancel() {
+					if( loadingDialog.isShowing() ){
+						loadingDialog.dismiss();
 					}
-					
-					@Override
-					public void onCancel() { }
-					
-				});
-			}else{
-				HashMap<String, String> paramMap = new HashMap<String, String>();
-				paramMap.put( "accessToken", facebook.getAccessToken() );
-				paramMap.put( "_a", "connect" );
-				RequestParams params = new RequestParams(paramMap);
-				asyncHttpClient.post( connectFacebookURL, params, new AsyncHttpResponseHandler(){
-					@Override
-					public void onSuccess(String arg0) {
-						super.onSuccess(arg0);
-						refreshView();
-					}
-				});
-			}
+				}
+				
+			});
 		}else if( v.equals( twitterConfigText ) ){
-			if( !(twitter.hasAccessToken()) ){
-				twitter.authorize();
+			if(listener != null){
+				SharedPreferences myPreferences = this.getActivity().getSharedPreferences( ProfileLayoutWebView.SHARE_PREF_WEB_VIEW_TYPE, this.getActivity().MODE_PRIVATE );
+				SharedPreferences.Editor prefsEditor = myPreferences.edit();
+				prefsEditor.putString( ProfileLayoutWebView.WEB_VIEW_TYPE, ProfileLayoutWebView.WEB_VIEW_TYPE_CONNECT_TWITTER );
+				prefsEditor.putInt( ProfileLayoutWebView.CONNECT_TWITTER_FROM, ProfileLayoutWebView.CONNECT_TWITTER_FROM_SETTINGS );
+				prefsEditor.commit();
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PROFILE_WEBVIEW );
+			}
+		}else if( v.equals( backButton ) ){
+			if(listener != null){
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_BACK_BUTTON );
 			}
 		}
-	}
-	
-	
-	
+	}	
 }

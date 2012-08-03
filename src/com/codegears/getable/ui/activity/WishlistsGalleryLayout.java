@@ -30,6 +30,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
@@ -38,6 +39,8 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.Gallery;
 import android.widget.GridView;
+import android.widget.ImageButton;
+import android.widget.TextView;
 import android.view.View.OnClickListener;
 
 public class WishlistsGalleryLayout extends AbstractViewLayout implements OnItemClickListener, OnClickListener {
@@ -58,6 +61,8 @@ public class WishlistsGalleryLayout extends AbstractViewLayout implements OnItem
 	private ImageLoader imageLoader;
 	private MyApp app;
 	private AsyncHttpClient asyncHttpClient;
+	private ImageButton backButton;
+	private TextView filterTextView;
 	
 	public WishlistsGalleryLayout(Activity activity) {
 		super(activity);
@@ -75,8 +80,13 @@ public class WishlistsGalleryLayout extends AbstractViewLayout implements OnItem
 		asyncHttpClient = app.getAsyncHttpClient();
 		config = new Config(this.getContext());
 		imageLoader = new ImageLoader( this.getContext() );
+		backButton = (ImageButton) findViewById( R.id.wishlistsGalleryBackButton );
+		filterTextView = (TextView) findViewById( R.id.wishlistsGalleryFilterText );
+		
+		filterTextView.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH ) );
 		
 		filterButton.setOnClickListener( this );
+		backButton.setOnClickListener( this );
 		
 		urlVar1 = "?page.number=1&page.size=32";
 		urlVar2 = "&sort.properties[0].name=product.brand.name&sort.properties[0].reverse=false";
@@ -116,6 +126,8 @@ public class WishlistsGalleryLayout extends AbstractViewLayout implements OnItem
 	@Override
 	public void refreshView(Intent getData) {
 		urlVar2 = getData.getExtras().getString( WishlistsFilterActivity.PUT_EXTRA_URL_VAR_1 );
+		String filterText = getData.getExtras().getString( WishlistsFilterActivity.PUT_EXTRA_FILTER_TEXT );
+		filterTextView.setText( filterText );
 		loadData();
 	}
 	
@@ -154,19 +166,6 @@ public class WishlistsGalleryLayout extends AbstractViewLayout implements OnItem
 
 		@Override
 		public View getView(int position, View convertView, ViewGroup arg2) {
-			/*ProductImageThumbnailDetail returnView;
-			
-			if (convertView == null) {
-				ProductImageThumbnailDetail newImageThumbnailDetail = new ProductImageThumbnailDetail( WishlistsGalleryLayout.this.getContext() );
-				returnView = newImageThumbnailDetail;
-			}else{
-				returnView = (ProductImageThumbnailDetail) convertView;
-			}
-			
-			returnView.setProductData( arrayProductData.get( position ) );
-			returnView.setProductImage( arrayProductImage.get( position ) );
-			returnView.setProductName( arrayProductData.get( position ).getProduct().getBrand().getName() );
-			returnView.setUserName( arrayProductData.get( position ).getActor().getName() );*/
 			ProductImageThumbnail returnView;
 			
 			if (convertView == null) {
@@ -200,46 +199,15 @@ public class WishlistsGalleryLayout extends AbstractViewLayout implements OnItem
 		}
 	}
 
-	/*@Override
-	public void onNetworkDocSuccess(String urlString, Document document) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onNetworkRawSuccess(String urlString, String result) {
-		try {
-			JSONObject jsonObject = new JSONObject(result);
-			JSONArray newArray = jsonObject.getJSONArray("entities");
-			for(int i = 0; i<newArray.length(); i++){
-				//Load Product Data
-				ProductActivityData newData = new ProductActivityData( (JSONObject) newArray.get(i) );
-				arrayProductData.add(newData);
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		
-		wishlistsGalleryAdapter.setData( arrayProductData );
-		this.getActivity().runOnUiThread( new Runnable() {
-			@Override
-			public void run() {
-				wishlistsGalleryGrid.setAdapter( wishlistsGalleryAdapter );
-			}
-		});
-	}
-
-	@Override
-	public void onNetworkFail(String urlString) {
-		// TODO Auto-generated method stub
-		
-	}*/
-
 	@Override
 	public void onClick(View v) {
 		if( v.equals( filterButton ) ){
 			Intent newIntent = new Intent( this.getContext(), WishlistsFilterActivity.class );
 			this.getActivity().startActivityForResult( newIntent, MainActivity.REQUEST_WISHLISTS_FILTER );
+		}else if( v.equals( backButton ) ){
+			if(listener != null){
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_BACK_BUTTON );
+			}
 		}
 	}
 }

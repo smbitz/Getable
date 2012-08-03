@@ -27,50 +27,118 @@
                 android:orientation="horizontal" android:layout_weight="1">
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="0.2" >
+                    android:layout_weight="2.6" >
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="0.2"
-                    android:orientation="vertical" >
+                    android:orientation="vertical" android:layout_weight="1.2">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" >
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent" android:layout_weight="1">
+
+                            <TextView
+                                android:id="@+id/userProfileName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:lines="1"
+                                android:textColor="#ffffff" android:textSize="16dp" android:inputType="textImeMultiLine" android:ellipsize="end" android:ems="10"/>
+
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent">
+
+                            <TextView
+                                android:id="@+id/userProfileMoreTexName"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text=" ..."
+                                android:textColor="#ffffff"
+                                android:textSize="16dp"
+                                android:visibility="gone" />
+
+                        </LinearLayout>
+
+                    </LinearLayout>
 
                     <TextView
                         android:id="@+id/userProfileName"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:textAppearance="?android:attr/textAppearanceMedium"
-                        android:textColor="#ffffff" />
-
-                    <TextView
-                        android:id="@+id/userProfileName"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
                         android:textColor="#ffffff" />
                 </LinearLayout>
 
                 <LinearLayout
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="1" >
+                    android:layout_weight="2.6" >
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/userProfilePostTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="0.2"
-                    android:textColor="#ffffff" />
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.6" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" >
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" android:layout_weight="1">
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent">
+
+                            <TextView
+                                android:id="@+id/userProfilePostTime"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:lines="1"
+                                android:textColor="#ffffff" android:textSize="11dp"/>
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent">
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent" android:layout_weight="1">
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/userProfileHeaderFollowButtonLayout"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content">
+
+                        </LinearLayout>
+
+                    </LinearLayout>
+
+                </FrameLayout>
 
                 <LinearLayout
-                    android:id="@+id/userProfileHeaderFollowButtonLayout"
-                    android:layout_width="wrap_content"
+                    android:layout_width="match_parent"
                     android:layout_height="match_parent"
-                    android:layout_weight="0.2" >
+                    android:layout_weight="2.6" >
                 </LinearLayout>
+
             </LinearLayout>
 
         </LinearLayout>

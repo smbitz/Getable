@@ -11,11 +11,14 @@ import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 
@@ -29,6 +32,7 @@ import com.codegears.getable.data.ProductActorLikeData;
 import com.codegears.getable.ui.AbstractViewLayout;
 import com.codegears.getable.ui.CommentRowLayout;
 import com.codegears.getable.ui.FollowButton;
+import com.codegears.getable.ui.FooterListView;
 import com.codegears.getable.ui.UserFollowItemLayout;
 import com.codegears.getable.ui.UserWishlistsGrouptItem;
 import com.codegears.getable.util.Config;
@@ -58,6 +62,8 @@ public class ProductLikeLayout extends AbstractViewLayout implements OnClickList
 	private MyApp app;
 	//private List<String> appCookie;
 	private AsyncHttpClient asyncHttpClient;
+	private ProgressDialog loadingDialog;
+	private ImageButton backButton;
 	
 	public ProductLikeLayout(Activity activity) {
 		super(activity);
@@ -68,6 +74,7 @@ public class ProductLikeLayout extends AbstractViewLayout implements OnClickList
 		
 		app = (MyApp) this.getActivity().getApplication();
 		likeListView = (ListView) findViewById( R.id.productLikeLayoutListview );
+		backButton = (ImageButton) findViewById( R.id.productLikeLayoutBackButton );
 		listLikeAdapter = new LikeAdapter();
 		config = new Config( this.getContext() );
 		imageLoader = new ImageLoader( this.getContext() );
@@ -75,14 +82,34 @@ public class ProductLikeLayout extends AbstractViewLayout implements OnClickList
 		//appCookie = app.getAppCookie();
 		asyncHttpClient = app.getAsyncHttpClient();
 		
+		loadingDialog = new ProgressDialog( this.getContext() );
+		loadingDialog.setTitle("");
+		loadingDialog.setMessage("Loading. Please wait...");
+		loadingDialog.setIndeterminate( true );
+		loadingDialog.setCancelable( true );
+		
+		//Set line at footer
+		likeListView.addFooterView( new FooterListView( this.getContext() ) );
+		
 		getLikeDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+productId+"/likes.json";
 		
-		//NetworkThreadUtil.getRawDataWithCookie(getLikeDataURL, null, appCookie, this);
+		backButton.setOnClickListener( this );
+		
+		loadData();
+	}
+	
+	public void recycleResource(){
+		arrayLikeData.clear();
+	}
+	
+	public void loadData(){
+		loadingDialog.show();
 		
 		asyncHttpClient.get( getLikeDataURL, new JsonHttpResponseHandler(){
 			@Override
 			public void onSuccess(JSONObject jsonObject) {
 				super.onSuccess(jsonObject);
+				
 				try {
 					JSONArray newArray = jsonObject.getJSONArray("entities");
 					for(int i = 0; i<newArray.length(); i++){
@@ -96,10 +123,14 @@ public class ProductLikeLayout extends AbstractViewLayout implements OnClickList
 				
 				listLikeAdapter.setData( arrayLikeData );
 				likeListView.setAdapter( listLikeAdapter );
+				
+				if( loadingDialog.isShowing() ){
+					loadingDialog.dismiss();
+				}
 			}
 		});
 	}
-
+	
 	@Override
 	public void refreshView(Intent getData) {
 		// TODO Auto-generated method stub
@@ -108,8 +139,8 @@ public class ProductLikeLayout extends AbstractViewLayout implements OnClickList
 	
 	@Override
 	public void refreshView() {
-		// TODO Auto-generated method stub
-		
+		recycleResource();
+		loadData();
 	}
 	
 	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener){
@@ -149,10 +180,14 @@ public class ProductLikeLayout extends AbstractViewLayout implements OnClickList
 			}else{
 				returnView = (UserFollowItemLayout) convertView;
 				returnView.getFollowButton().setVisibility( View.VISIBLE );
+				returnView.setUserImageDefault();
 			}
 			
-			String getUserImageURL = data.get( position ).getLike().getActivityData().getActor().getPicture().getImageUrls().getImageURLT();
+			//String getUserImageURL = data.get( position ).getLike().getActivityData().getActor().getPicture().getImageUrls().getImageURLT();
+			String getUserImageURL = data.get( position ).getActor().getPicture().getImageUrls().getImageURLT();
 			String getUserName = data.get( position ).getActor().getName();
+			
+			System.out.println("Name : "+getUserName+", MyImageURL : "+getUserImageURL);
 			
 			imageLoader.DisplayImage(getUserImageURL, ProductLikeLayout.this.getActivity(), returnView.getUserImageView(), true, asyncHttpClient );
 			returnView.setMainText( getUserName );
@@ -170,15 +205,16 @@ public class ProductLikeLayout extends AbstractViewLayout implements OnClickList
 				//Set text/image follow/following
 				if( data.get( position ).getActor().getMyRelation().getFollowActivity() != null ){
 					//followButton.setText( "Following" );
-					followButton.setBackgroundResource( R.drawable.button_following );
+					followButton.setImageResource( R.drawable.button_following );
 					followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
 				}else{
 					//followButton.setText( "Follow" );
-					followButton.setBackgroundResource( R.drawable.button_follow );
+					followButton.setImageResource( R.drawable.button_follow );
 					followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
 				}
 				
 				followButton.setOnClickListener( ProductLikeLayout.this );
+				followButton.setTag( data.get( position ) );
 			}
 			
 			return returnView;
@@ -186,92 +222,16 @@ public class ProductLikeLayout extends AbstractViewLayout implements OnClickList
 		
 	}
 
-	/*@Override
-	public void onNetworkDocSuccess(String urlString, Document document) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onNetworkRawSuccess(String urlString, String result) {
-		if( urlString.equals( getLikeDataURL ) ){
-			try {
-				JSONObject jsonObject = new JSONObject(result);
-				JSONArray newArray = jsonObject.getJSONArray("entities");
-				for(int i = 0; i<newArray.length(); i++){
-					//Load Like Data
-					ProductActorLikeData newData = new ProductActorLikeData( (JSONObject) newArray.get(i) );
-					arrayLikeData.add( newData );
-				}
-			} catch (JSONException e) {
-				e.printStackTrace();
-			}
-			
-			listLikeAdapter.setData( arrayLikeData );
-			this.getActivity().runOnUiThread( new Runnable() {
-				@Override
-				public void run() {
-					likeListView.setAdapter( listLikeAdapter );
-				}
-			});
-		}
-	}
-
-	@Override
-	public void onNetworkFail(String urlString) {
-		// TODO Auto-generated method stub
-		
-	}*/
-
 	@Override
 	public void onClick(View v) {
 		if( v instanceof FollowButton ){
 			final FollowButton followButton = (FollowButton) v;
+			final ProductActorLikeData followButtonActorData = (ProductActorLikeData) v.getTag();
 			followButton.setEnabled( false );
 			if( followButton.getFollowButtonStatus() == FollowButton.BUTTON_STATUS_UNFOLLOW ){
 				String followUserId = followButton.getActorData().getId();
 				
 				followUserURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+followUserId+"/followers.json";
-				/*Map< String, String > newMapData = new HashMap<String, String>();
-				newMapData.put( "_a", "follow" );
-				String postData = NetworkUtil.createPostData( newMapData );
-				
-				NetworkThreadUtil.getRawDataWithCookie(followUserURL, postData, appCookie, new NetworkThreadListener() {
-					
-					@Override
-					public void onNetworkRawSuccess(String urlString, String result) {
-						try {
-							JSONObject jsonObject = new JSONObject(result);
-							ActorData actorData = null;
-							if( jsonObject.optJSONObject("followedUser") != null ){
-								actorData = new ActorData( jsonObject.optJSONObject("followedUser") );
-							}
-							followButton.setActorData( actorData );
-						} catch (JSONException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-						
-						ProductLikeLayout.this.getActivity().runOnUiThread( new Runnable() {
-							@Override
-							public void run() {
-								followButton.setEnabled( true );
-							}
-						});
-					}
-					
-					@Override
-					public void onNetworkFail(String urlString) {
-						// TODO Auto-generated method stub
-						
-					}
-					
-					@Override
-					public void onNetworkDocSuccess(String urlString, Document document) {
-						// TODO Auto-generated method stub
-						
-					}
-				});*/
 				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "_a", "follow" );
@@ -285,6 +245,7 @@ public class ProductLikeLayout extends AbstractViewLayout implements OnClickList
 							actorData = new ActorData( jsonObject.optJSONObject("followedUser") );
 						}
 						followButton.setActorData( actorData );
+						followButtonActorData.setActorData( actorData );
 						
 						followButton.setEnabled( true );
 					}
@@ -292,40 +253,12 @@ public class ProductLikeLayout extends AbstractViewLayout implements OnClickList
 				
 				//Set text/image follow/following
 				//followButton.setText( "Following" );
-				followButton.setBackgroundResource( R.drawable.button_following );
+				followButton.setImageResource( R.drawable.button_following );
 				followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_FOLLOWING );
 			}else if( followButton.getFollowButtonStatus() == FollowButton.BUTTON_STATUS_FOLLOWING ){
 				String followActivityId = followButton.getActorData().getMyRelation().getFollowActivity().getId();
 				
 				unFollowUserURL = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+followActivityId+".json";
-				/*Map< String, String > newMapData = new HashMap<String, String>();
-				newMapData.put( "_a", "delete" );
-				String postData = NetworkUtil.createPostData( newMapData );
-				
-				NetworkThreadUtil.getRawDataWithCookie(unFollowUserURL, postData, appCookie, new NetworkThreadListener() {
-					
-					@Override
-					public void onNetworkRawSuccess(String urlString, String result) {
-						ProductLikeLayout.this.getActivity().runOnUiThread( new Runnable() {
-							@Override
-							public void run() {
-								followButton.setEnabled( true );
-							}
-						});
-					}
-					
-					@Override
-					public void onNetworkFail(String urlString) {
-						// TODO Auto-generated method stub
-						
-					}
-					
-					@Override
-					public void onNetworkDocSuccess(String urlString, Document document) {
-						// TODO Auto-generated method stub
-						
-					}
-				});*/
 				
 				HashMap<String, String> paramMap = new HashMap<String, String>();
 				paramMap.put( "_a", "delete" );
@@ -335,13 +268,18 @@ public class ProductLikeLayout extends AbstractViewLayout implements OnClickList
 					public void onSuccess(String arg0) {
 						super.onSuccess(arg0);
 						followButton.setEnabled( true );
+						followButtonActorData.getActor().getMyRelation().setFollowActivity( null );
 					}
 				});
 				
 				//Set text/image follow/following
 				//followButton.setText( "Follow" );
-				followButton.setBackgroundResource( R.drawable.button_follow );
+				followButton.setImageResource( R.drawable.button_follow );
 				followButton.setFollowButtonStatus( FollowButton.BUTTON_STATUS_UNFOLLOW );
+			}
+		}else if( v.equals( backButton ) ){
+			if(listener != null){
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_BACK_BUTTON );
 			}
 		}else if(listener != null){
 			if( v instanceof UserFollowItemLayout ){

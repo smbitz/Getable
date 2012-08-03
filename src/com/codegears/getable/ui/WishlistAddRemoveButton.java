@@ -1,5 +1,6 @@
 package com.codegears.getable.ui;
 
+import com.codegears.getable.R;
 import com.codegears.getable.data.WishlistData;
 
 import android.content.Context;
@@ -15,7 +16,6 @@ public class WishlistAddRemoveButton extends Button {
 	
 	public WishlistAddRemoveButton(Context context) {
 		super(context);
-		this.setText( "Add/Remove" );
 	}
 	
 	public void setButtonState( int buttonStateValue ){
@@ -24,6 +24,10 @@ public class WishlistAddRemoveButton extends Button {
 	
 	public void setWishlistData( WishlistData setData ){
 		data = setData;
+	}
+	
+	public void setImageButton( int resid ){
+		this.setBackgroundResource( resid );
 	}
 	
 	public WishlistData getWishlistData(){

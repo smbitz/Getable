@@ -28,15 +28,19 @@ import com.facebook.android.Facebook;
 import com.loopj.android.http.AsyncHttpClient;
 import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.JsonHttpResponseHandler;
+import com.loopj.android.http.PersistentCookieStore;
 import com.loopj.android.http.RequestParams;
 
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.ProgressDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.provider.ContactsContract;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -48,7 +52,6 @@ public class ProfileLayout extends AbstractViewLayout implements OnClickListener
 	
 	private BodyLayoutStackListener listener;
 	private MyApp app;
-	private List<String> appCookie;
 	private Config config;
 	private ImageView userImage;
 	private TextView userName;
@@ -70,20 +73,41 @@ public class ProfileLayout extends AbstractViewLayout implements OnClickListener
 	private ActorData actorData;
 	private AsyncHttpClient asyncHttpClient;
 	private Facebook facebook;
+	private ProgressDialog loadingDialog;
+	private TextView findFriendText;
+	private TextView inviteFriendText;
+	private TextView myProfileText;
+	private TextView accountText;
+	private TextView editProfileText;
+	private TextView changeSettingText;
+	private TextView changeProfilePicText;
+	private TextView logoutText;
+	private TextView aboutText;
+	private TextView sendFeedBackText;
+	private TextView helpText;
+	private TextView termsAndServiceText;
+	private TextView privacyPolicyText;
+	private TextView userNameMoreText;
 	
 	public ProfileLayout(Activity activity) {
 		super(activity);
 		View.inflate( this.getContext(), R.layout.profilelayout, this );
 		
 		app = (MyApp) this.getActivity().getApplication();
-		appCookie = app.getAppCookie();
 		asyncHttpClient = app.getAsyncHttpClient();
 		config = new Config( this.getActivity() );
 		imageLoader = new ImageLoader( this.getContext() );
 		facebook = app.getFacebook();
 		
+		loadingDialog = new ProgressDialog( this.getContext() );
+		loadingDialog.setTitle("");
+		loadingDialog.setMessage("Loading. Please wait...");
+		loadingDialog.setIndeterminate( true );
+		loadingDialog.setCancelable( true );
+		
 		userImage = (ImageView) findViewById( R.id.profileLayoutUserImage );
 		userName = (TextView) findViewById( R.id.profileLayoutUserName );
+		userNameMoreText = (TextView) findViewById( R.id.profileLayoutMoreUserName );
 		myProfileButton = (LinearLayout) findViewById( R.id.profileLayoutMyProfileButton );
 		findFriendsButton = (LinearLayout) findViewById( R.id.profileLayoutFindFriendsButton );
 		inviteFriendsButton = (LinearLayout) findViewById( R.id.profileLayoutInviteFriendsButton );
@@ -95,6 +119,35 @@ public class ProfileLayout extends AbstractViewLayout implements OnClickListener
 		changeSettingsButton = (LinearLayout) findViewById( R.id.profileLayoutChangeSettingsButton );
 		changeProfilePicButton = (LinearLayout) findViewById( R.id.profileLayoutChangeProfilePicButton );
 		logoutButton = (LinearLayout) findViewById( R.id.profileLayoutLogoutButton );
+		findFriendText = (TextView) findViewById( R.id.profileLayoutFindFriendText );
+		inviteFriendText = (TextView) findViewById( R.id.profileLayoutInviteFriendText );
+		myProfileText = (TextView) findViewById( R.id.profileLayoutMyProfileText );
+		accountText = (TextView) findViewById( R.id.profileLayoutAccountText );
+		editProfileText = (TextView) findViewById( R.id.profileLayoutEditProfileText );
+		changeSettingText = (TextView) findViewById( R.id.profileLayoutChangeSettingText );
+		changeProfilePicText = (TextView) findViewById( R.id.profileLayoutChangeProfilePicText );
+		logoutText = (TextView) findViewById( R.id.profileLayoutLogoutText );
+		aboutText = (TextView) findViewById( R.id.profileLayoutAboutText );
+		sendFeedBackText = (TextView) findViewById( R.id.profileLayoutSendFeedBackText );
+		helpText = (TextView) findViewById( R.id.profileLayoutHelpText );
+		termsAndServiceText = (TextView) findViewById( R.id.profileLayoutTermOfServiceText );
+		privacyPolicyText = (TextView) findViewById( R.id.profileLayoutPrivacyPolicyText );
+		
+		//Set font
+		userName.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		findFriendText.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		inviteFriendText.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		myProfileText.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		accountText.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		editProfileText.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		changeSettingText.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		changeProfilePicText.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		logoutText.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		aboutText.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		sendFeedBackText.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		helpText.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		termsAndServiceText.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		privacyPolicyText.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
 		
 		myProfileButton.setOnClickListener( this );
 		findFriendsButton.setOnClickListener( this );
@@ -110,29 +163,48 @@ public class ProfileLayout extends AbstractViewLayout implements OnClickListener
 		
 		userId = app.getUserId();
 		
-		getUserDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"users/"+userId+".json";
+		getUserDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"me.json";
 		logoutURL = config.get( MyApp.URL_DEFAULT ).toString()+"guest.json";
 		
 		loadData();
 	}
 	
 	public void loadData(){
+		loadingDialog.show();
+		
 		asyncHttpClient.post( getUserDataURL,  new JsonHttpResponseHandler(){
 			@Override
 			public void onSuccess(JSONObject jsonObject) {
 				// TODO Auto-generated method stub
 				super.onSuccess(jsonObject);
-				actorData = new ActorData( jsonObject );
+				System.out.println("ProfileLayoutCheckValue : "+jsonObject);
+				if( loadingDialog.isShowing() ){
+					loadingDialog.dismiss();
+				}
 				
-				if( actorData != null ){
-					String userImageURL = actorData.getPicture().getImageUrls().getImageURLT();
-					final String userNameText = actorData.getName();
-					
-					imageLoader.DisplayImage( userImageURL, ProfileLayout.this.getActivity(), userImage, true, asyncHttpClient );
+				try {
+					String checkValue = jsonObject.getString( "id" );
+					actorData = new ActorData( jsonObject );
+					if( actorData != null ){
+						String userImageURL = actorData.getPicture().getImageUrls().getImageURLT();
+						final String userNameText = actorData.getName();
+						
+						imageLoader.DisplayImage( userImageURL, ProfileLayout.this.getActivity(), userImage, true, asyncHttpClient );
 
-					userName.setText( userNameText );
-					
-					app.setCurrentProfileData( actorData );
+						userName.setText( userNameText );
+						
+						//Check more text
+						if( userNameText.length() >= MyApp.PROFILE_LAYOUT_HEADER_TEXT_NAME_LENGTH ){
+							userNameMoreText.setVisibility( View.VISIBLE );
+						}else{
+							userNameMoreText.setVisibility( View.GONE );
+						}
+						
+						app.setCurrentProfileData( actorData );
+					}
+				} catch (JSONException e) {
+					e.printStackTrace();
+					//loadData();
 				}
 			}
 		});
@@ -152,51 +224,6 @@ public class ProfileLayout extends AbstractViewLayout implements OnClickListener
 	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener) {
 		this.listener = listener;
 	}
-
-	/*@Override
-	public void onNetworkDocSuccess(String urlString, Document document) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onNetworkRawSuccess(String urlString, String result) {
-		if( urlString.equals( getUserDataURL ) ){
-			JSONObject jsonObject;
-			try {
-				jsonObject = new JSONObject( result );
-				actorData = new ActorData( jsonObject );
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			if( actorData != null ){
-				String userImageURL = actorData.getPicture().getImageUrls().getImageURLT();
-				final String userNameText = actorData.getName();
-				
-				imageLoader.DisplayImage( userImageURL, ProfileLayout.this.getActivity(), userImage, true );
-				
-				this.getActivity().runOnUiThread( new Runnable() {
-					@Override
-					public void run() {
-						userName.setText( userNameText );
-					}
-				});
-				
-				app.setCurrentProfileData( actorData );
-			}
-		}else if( urlString.equals( logoutURL ) ){
-			//Send to logout page.
-			this.getActivity().finish();
-		}
-	}
-
-	@Override
-	public void onNetworkFail(String urlString) {
-		// TODO Auto-generated method stub
-		
-	}*/
 
 	@Override
 	public void onClick(View v) {
@@ -253,8 +280,10 @@ public class ProfileLayout extends AbstractViewLayout implements OnClickListener
 			}
 		}else if( v.equals( changeProfilePicButton ) ){
 			Intent newIntent = new Intent( this.getActivity(), ProfileChangeImagePopupDialog.class );
-			this.getActivity().startActivityForResult( newIntent, MainActivity.REQUEST_USER_CAHNGE_IMAGE );
+			this.getActivity().startActivityForResult( newIntent, MainActivity.REQUEST_USER_CHANGE_IMAGE );
 		}else if( v.equals( logoutButton ) ){
+			loadingDialog.show();
+			
 			AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder( this.getContext() );
 			
 			// set title
@@ -277,7 +306,7 @@ public class ProfileLayout extends AbstractViewLayout implements OnClickListener
 								// TODO Auto-generated method stub
 								super.onSuccess(arg0);
 								
-								//Delete SharedPreferences
+								//Clear Data
 								SharedPreferences loginPref = ProfileLayout.this.getActivity().getSharedPreferences( SplashActivity.SHARE_PREF_USER_INFO, ProfileLayout.this.getActivity().MODE_PRIVATE );
 								SharedPreferences.Editor prefsEditor = loginPref.edit();
 								prefsEditor.putString( SplashActivity.SHARE_PREF_KEY_USER_EMAIL, null );
@@ -300,8 +329,11 @@ public class ProfileLayout extends AbstractViewLayout implements OnClickListener
 									e.printStackTrace();
 								}
 								
+								app.setUserId( null );
+								app.setCurrentProfileData( null );
+								
 								Intent intent = new Intent( ProfileLayout.this.getContext(), LoginActivity.class );
-								ProfileLayout.this.getActivity().startActivity( intent );
+								ProfileLayout.this.getActivity().startActivityForResult( intent, MainActivity.REQUEST_LOGIN_ACTIVITY_FROM_LOGOUT );
 							}
 						});
 					}
@@ -310,6 +342,10 @@ public class ProfileLayout extends AbstractViewLayout implements OnClickListener
 					public void onClick(DialogInterface dialog,int id) {
 						// if this button is clicked, just close
 						// the dialog box and do nothing
+						if( loadingDialog.isShowing() ){
+							loadingDialog.dismiss();
+						}
+						
 						dialog.cancel();
 					}
 				});

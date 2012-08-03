@@ -12,8 +12,10 @@ public class ProductActorFollowData {
 	private String url;
 	private ActorData followedUser;
 	private MyRelationData myRelation;
+	private boolean followButtonToggleState;
 	
 	public ProductActorFollowData( JSONObject setObject ) {
+		followButtonToggleState = false;
 		try {
 			id = setObject.optString("id");
 			actor = new ActorData( setObject.getJSONObject("actor") );
@@ -30,6 +32,22 @@ public class ProductActorFollowData {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	public void setClickedCheck(boolean check){
+		followButtonToggleState = check;
+	}
+	
+	public void setFollowedUser( ActorData setFollowedUser ){
+		followedUser = setFollowedUser;
+	}
+	
+	public void setActorData( ActorData setActorData ){
+		actor = setActorData;
+	}
+	
+	public boolean getClickedCheck(){
+		return followButtonToggleState;
 	}
 	
 	public ActorData getFollowedUser(){

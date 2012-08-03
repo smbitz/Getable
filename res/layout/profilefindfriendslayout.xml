@@ -4,10 +4,59 @@
     android:layout_height="match_parent"
     android:orientation="vertical" >
     
-	<com.codegears.getable.ui.AppHeader
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent">
-    </com.codegears.getable.ui.AppHeader>
+	<FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <com.codegears.getable.ui.AppHeader
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+        </com.codegears.getable.ui.AppHeader>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" android:layout_gravity="center">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent" android:layout_weight="5">
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/profileFindFriendsLayoutSkipButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Skip" android:layout_gravity="center" android:background="@null" android:textColor="#ffffff" android:layout_weight="1" android:textAppearance="?android:attr/textAppearanceMedium" android:visibility="invisible"/>
+
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center" >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
+
+                <ImageButton
+                    android:id="@+id/profileFindFriendsLayoutBackButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:background="@null"
+                    android:src="@drawable/back_button" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="3.5" >
+            </LinearLayout>
+        </LinearLayout>
+
+    </FrameLayout>
 
 	<LinearLayout
 	    android:layout_width="match_parent"
@@ -31,12 +80,12 @@
 	            </LinearLayout>
 
 	            <TextView
-	                android:id="@+id/TextView02"
+	                android:id="@+id/profileFindFriendsFromContactText"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:layout_gravity="center"
 	                android:text="From my contact list"
-	                android:textColor="@color/NameColorGrey" />
+	                android:textColor="#000000" />
 
 	            <LinearLayout
 	                android:layout_width="wrap_content"
@@ -81,12 +130,12 @@
 	            </LinearLayout>
 
 	            <TextView
-	                android:id="@+id/TextView01"
+	                android:id="@+id/profileFindFriendsFromFacebookText"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:layout_gravity="center"
 	                android:text="Facebook Friends"
-	                android:textColor="@color/NameColorGrey" />
+	                android:textColor="#000000" />
 
 	            <LinearLayout
 	                android:layout_width="wrap_content"
@@ -131,12 +180,12 @@
 	            </LinearLayout>
 
 	            <TextView
-	                android:id="@+id/TextView07"
+	                android:id="@+id/profileFindFriendsFromTwitterText"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:layout_gravity="center"
 	                android:text="Twitter Friends"
-	                android:textColor="@color/NameColorGrey" />
+	                android:textColor="#000000" />
 
 	            <LinearLayout
 	                android:layout_width="wrap_content"
@@ -181,12 +230,12 @@
 	            </LinearLayout>
 
 	            <TextView
-	                android:id="@+id/TextView06"
+	                android:id="@+id/profileFindFriendsFromSearchText"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:layout_gravity="center"
 	                android:text="Search names and usernames"
-	                android:textColor="@color/NameColorGrey" />
+	                android:textColor="#000000" />
 
 	            <LinearLayout
 	                android:layout_width="wrap_content"
@@ -231,12 +280,12 @@
 	            </LinearLayout>
 
 	            <TextView
-	                android:id="@+id/TextView05"
+	                android:id="@+id/profileFindFriendsFromSuggestText"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:layout_gravity="center"
 	                android:text="Suggested users"
-	                android:textColor="@color/NameColorGrey" />
+	                android:textColor="#000000" />
 
 	            <LinearLayout
 	                android:layout_width="wrap_content"

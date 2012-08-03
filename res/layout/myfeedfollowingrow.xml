@@ -54,28 +54,16 @@
                 android:layout_weight="1" >
 
                 <TextView
-                    android:id="@+id/myFeedFollowingUserName"
+                    android:id="@+id/myFeedFollowingDetailText"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="UserName" />
-
-                <TextView
-                    android:id="@+id/textView2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=" is now following " />
-
-                <TextView
-                    android:id="@+id/myFeedFollowingTargetUserName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="TextView" />
+                    android:layout_height="wrap_content"/>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_weight="1" >
                 </LinearLayout>
+
             </LinearLayout>
 
             <LinearLayout

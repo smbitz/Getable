@@ -7,18 +7,22 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
 import android.os.Environment;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 
 import com.codegears.getable.BodyLayoutStackListener;
 import com.codegears.getable.MainActivity;
+import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
 import com.codegears.getable.ui.AbstractViewLayout;
 import com.codegears.getable.ui.CropView;
@@ -26,8 +30,7 @@ import android.view.View.OnClickListener;
 
 public class ShareImageCropLayout extends AbstractViewLayout implements OnClickListener {
 	
-	public static final String TEMP_IMAGE_FILE_NAME = "shareImageTmp.PNG";
-	public static final String TEMP_IMAGE_DIRECTORY_NAME = "/getable/"; 
+	public static final String TEMP_IMAGE_FILE_NAME = "shareImageTmp.PNG"; 
 	
 	private CropView cropImageView;
 	private Button doneButton;
@@ -35,6 +38,8 @@ public class ShareImageCropLayout extends AbstractViewLayout implements OnClickL
 	private BodyLayoutStackListener listener;
 	private String extStorageDirectory;
 	private Activity activity;
+	private ImageButton backButton;
+	private ProgressDialog loadingDialog;
 	
 	public ShareImageCropLayout(Activity activity) {
 		super(activity);
@@ -43,10 +48,17 @@ public class ShareImageCropLayout extends AbstractViewLayout implements OnClickL
 		
 		cropImageView = (CropView) findViewById( R.id.shareImageCropImageView );
 		doneButton = (Button) findViewById( R.id.shareImageCropDoneButton );
+		backButton = (ImageButton) findViewById( R.id.shareImageCropBackButton );
 		Bitmap arrow = BitmapFactory.decodeResource( this.getResources(), R.drawable.crop_image_button );
 		cropImageView.setButton( arrow, arrow, arrow, arrow );
 		
-		extStorageDirectory = Environment.getExternalStorageDirectory().toString()+TEMP_IMAGE_DIRECTORY_NAME;
+		loadingDialog = new ProgressDialog( this.getContext() );
+		loadingDialog.setTitle("");
+		loadingDialog.setMessage("Loading. Please wait...");
+		loadingDialog.setIndeterminate( true );
+		loadingDialog.setCancelable( true );
+		
+		extStorageDirectory = Environment.getExternalStorageDirectory().toString()+MyApp.TEMP_IMAGE_DIRECTORY_NAME;
 		
 		File tempDirectory = new File( extStorageDirectory );
 		if( !(tempDirectory.exists()) ){
@@ -54,12 +66,13 @@ public class ShareImageCropLayout extends AbstractViewLayout implements OnClickL
 		}
 		
 		doneButton.setOnClickListener( this );
+		backButton.setOnClickListener( this );
 	}
 	
 	public void setImage(final Bitmap bitmap ){
-				cropImageView.setCropRatio( 1 );
-				cropImageView.setImageBitmap( bitmap );
-				cropImageView.setBitmap(bitmap);			
+		cropImageView.setCropRatio( 1 );
+		cropImageView.setImageBitmap( bitmap );
+		cropImageView.setBitmap( bitmap );			
 	}
 
 	@Override
@@ -82,6 +95,8 @@ public class ShareImageCropLayout extends AbstractViewLayout implements OnClickL
 	public void onClick(View v) {
 		if(listener != null){
 			if( v.equals( doneButton ) ){
+				loadingDialog.show();
+				
 				//Delete old value.
 				SharedPreferences myPref = this.getActivity().getSharedPreferences( ShareImageDetailLayout.SHARE_PREF_DETAIL_VALUE, this.getActivity().MODE_PRIVATE );
 				SharedPreferences.Editor prefsEditor = myPref.edit();
@@ -97,7 +112,7 @@ public class ShareImageCropLayout extends AbstractViewLayout implements OnClickL
 				
 		        OutputStream outStream = null;
 		        File file = new File(extStorageDirectory, TEMP_IMAGE_FILE_NAME);
-		        
+				
 		        try {
 		        	Bitmap bitmap = cropImageView.getCropImage();
 		        	
@@ -114,6 +129,12 @@ public class ShareImageCropLayout extends AbstractViewLayout implements OnClickL
 				}
 		        
 				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_SHARE_IMAGE_DETAIL );
+				
+				if( loadingDialog.isShowing() ){
+					loadingDialog.dismiss();
+				}
+			}else if( v.equals( backButton ) ){
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_BACK_BUTTON );
 			}
 		}
 	}

@@ -2,6 +2,10 @@ package com.codegears.getable;
 
 import java.util.ArrayList;
 
+import kankan.wheel.widget.WheelView;
+import kankan.wheel.widget.adapters.AbstractWheelAdapter;
+import kankan.wheel.widget.adapters.AbstractWheelTextAdapter;
+
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -21,7 +25,9 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.View;
@@ -35,14 +41,13 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
-public class GalleryFilterActivity extends Activity implements CompoundButtonGroupListener, OnClickListener, NetworkThreadListener {
+public class GalleryFilterActivity extends Activity implements CompoundButtonGroupListener, OnClickListener {
 	
 	private static final String URL_VAR_LOCAL_TEXT_LAT = "&currentCoordinate.latitude=";
 	private static final String URL_VAR_LOCAL_TEXT_LNG = "&currentCoordinate.longitude=";
 	private static final String URL_VAR_LOCAL_TEXT_METOR = "&metro=";
 	private static final String URL_VAR_LOCAL_TEXT_POPULAR = "&sort.properties[0].name=statistic.score.active&sort.properties[0].reverse=true&sort.properties[1].name=statistic.score.allTime&sort.properties[1].reverse=true";
 	private static final String URL_VAR_LOCAL_TEXT_RECENT = "&sort.properties[0].name=activityTime&sort.properties[0].reverse=true";
-	private static final String URL_GET_METROS = "URL_GET_METROS";
 	public static final String PUT_EXTRA_URL_VAR_1 = "PUT_EXTRA_URL_VAR_1";
 	public static final String PUT_EXTRA_URL_VAR_2 = "PUT_EXTRA_URL_VAR_2";
 	public static final String PUT_EXTRA_FILTER_1 = "PUT_EXTRA_FILTER_1";
@@ -54,6 +59,16 @@ public class GalleryFilterActivity extends Activity implements CompoundButtonGro
 	private static final String DEFAULT_SHOW_TEXT_FILTER_1 = SHOW_TEXT_FILTER_1_1;
 	private static final String DEFAULT_SHOW_TEXT_FILTER_2 = SHOW_TEXT_FILTER_2_1;
 	
+	public static final String SHARE_PREF_GALLERY_FILTER = "SHARE_PREF_GALLERY_FILTER";
+	public static final String SHARE_PREF_KEY_LOCATION = "SHARE_PREF_KEY_LOCATION";
+	public static final String SHARE_PREF_KEY_SORT = "SHARE_PREF_KEY_SORT";
+	public static final String SHARE_PREF_KEY_LOCATION_CITY_ID = "SHARE_PREF_KEY_LOCATION_CITY_ID";
+	private static final String SHARE_PREF_VALUE_LOCATION_LOCAL = "SHARE_PREF_VALUE_LOCATION_LOCAL";
+	private static final String SHARE_PREF_VALUE_LOCATION_ALL = "SHARE_PREF_VALUE_LOCATION_ALL";
+	private static final String SHARE_PREF_VALUE_LOCATION_CITY = "SHARE_PREF_VALUE_LOCATION_CITY";
+	private static final String SHARE_PREF_VALUE_SORT_POPULAR = "SHARE_PREF_VALUE_SORT_POPULAR";
+	private static final String SHARE_PREF_VALUE_SORT_RECENT = "SHARE_PREF_VALUE_SORT_RECENT";
+
 	private CompoundButtonGroup locationButtonGroup;
 	private CompoundButtonGroup sortButtonGroup;
 	private ToggleButton localButton;
@@ -67,7 +82,9 @@ public class GalleryFilterActivity extends Activity implements CompoundButtonGro
 	private String currentLat;
 	private String currentLng;
 	private GetCurrentLocation getCurrentLocation;
-	private ListView metroList;
+	//private ListView metroList;
+	private WheelView metroWheelView;
+	//private MetroAdapter metroAdapter;
 	private MetroAdapter metroAdapter;
 	private Config config;
 	private ArrayList<MetroData> arrayMetroName;
@@ -79,6 +96,12 @@ public class GalleryFilterActivity extends Activity implements CompoundButtonGro
 	private MetroListTextView metroListTextViewTemp;
 	private MyApp app;
 	private AsyncHttpClient asyncHttpClient;
+	private SharedPreferences galleryFilterPref;
+	private SharedPreferences.Editor galleryFilterPrefEditor;
+	private int metroArrayPosition;
+	private ArrayList<MetroListTextView> arrayMetroListTextView;
+	private TextView locationText; 
+	private TextView sortText;
 	
 	@Override
     public void onCreate(Bundle savedInstanceState) {
@@ -88,13 +111,20 @@ public class GalleryFilterActivity extends Activity implements CompoundButtonGro
       app = (MyApp) this.getApplication();
       asyncHttpClient = app.getAsyncHttpClient();
       
-      locationButtonGroup = new CompoundButtonGroup();
-      sortButtonGroup = new CompoundButtonGroup();
+      locationButtonGroup = new CompoundButtonGroup( true );
+      sortButtonGroup = new CompoundButtonGroup( true );
+      arrayMetroListTextView = new ArrayList<MetroListTextView>();
       closeButton = (Button) findViewById( R.id.galleryFilterCloseButton );
       
       locationButtonGroup.setCompoundButtonGroupListener( this );
       sortButtonGroup.setCompoundButtonGroupListener( this );
       closeButton.setOnClickListener( this );
+      
+      locationText = (TextView) findViewById( R.id.galleryFilterLocationText );
+      sortText = (TextView) findViewById( R.id.galleryFilterSortText );
+      
+      locationText.setTypeface( Typeface.createFromAsset( this.getAssets(), MyApp.APP_FONT_PATH) );
+      sortText.setTypeface( Typeface.createFromAsset( this.getAssets(), MyApp.APP_FONT_PATH) );
       
       localButton = (ToggleButton) findViewById( R.id.galleryFilterLocalButton );
       allButton = (ToggleButton) findViewById( R.id.galleryFilterAllButton );
@@ -122,6 +152,7 @@ public class GalleryFilterActivity extends Activity implements CompoundButtonGro
       config = new Config( this );
       arrayMetroName = new ArrayList<MetroData>();
       metroLayout = (LinearLayout) findViewById( R.id.galleryFilterMetroLayout );
+      
       default_resultTxt1 = URL_VAR_LOCAL_TEXT_LAT+currentLat+URL_VAR_LOCAL_TEXT_LNG+currentLng;
       default_resultTxt2 = URL_VAR_LOCAL_TEXT_POPULAR;
       resultTxt1 = default_resultTxt1;
@@ -130,33 +161,106 @@ public class GalleryFilterActivity extends Activity implements CompoundButtonGro
       showText1 = DEFAULT_SHOW_TEXT_FILTER_1;
       showText2 = DEFAULT_SHOW_TEXT_FILTER_2;
       
-      metroList = (ListView) findViewById( R.id.galleryFilterMetrosList );
+     // metroList = (ListView) findViewById( R.id.galleryFilterMetrosList );
+      metroWheelView = (WheelView) findViewById( R.id.galleryFilterMetrosWheelView );
+      //metroAdapter = new MetroAdapter();
       metroAdapter = new MetroAdapter();
-      //NetworkThreadUtil.getRawData( config.get( URL_GET_METROS ).toString(), null, this );
       
-      asyncHttpClient.post( 
-    	config.get( URL_GET_METROS ).toString(),
-    	new JsonHttpResponseHandler(){
-    		@Override
-    		public void onSuccess(JSONObject jsonObject) {
-    			super.onSuccess(jsonObject);
-    			try {
-    				JSONArray newArray = jsonObject.getJSONArray("entities");
-    				//Load Metro Data
-    				for(int i = 0; i<newArray.length(); i++){
-    					MetroData newData = new MetroData( (JSONObject) newArray.get(i) );
-    					arrayMetroName.add( newData );
-    				}
-    			} catch (JSONException e) {
-    				// TODO Auto-generated catch block
-    				e.printStackTrace();
-    			}
+      galleryFilterPref = this.getSharedPreferences( SHARE_PREF_GALLERY_FILTER, this.MODE_PRIVATE );
+      galleryFilterPrefEditor = galleryFilterPref.edit();
+      
+      arrayMetroName = app.getAppArrayMetroData();
     			
-    			metroAdapter.setData( arrayMetroName );
-    			metroList.setAdapter( metroAdapter );
-    		}
-    	});
-    }
+      //Set selected filter
+      String locationFilterSelected = galleryFilterPref.getString( SHARE_PREF_KEY_LOCATION, null );
+      String locationCityIdFilterSelected = galleryFilterPref.getString( SHARE_PREF_KEY_LOCATION_CITY_ID, null );
+      String sortFilterSelected = galleryFilterPref.getString( SHARE_PREF_KEY_SORT, null );
+      if( locationFilterSelected == null ){
+    	  cityButton.setChecked( false );
+		  allButton.setChecked( false );
+		  localButton.setChecked( true );
+		  
+		  resultTxt1 = URL_VAR_LOCAL_TEXT_LAT+currentLat+URL_VAR_LOCAL_TEXT_LNG+currentLng;
+		  showText1 = SHOW_TEXT_FILTER_1_1;
+    	  
+    	  galleryFilterPrefEditor.putString( SHARE_PREF_KEY_LOCATION, SHARE_PREF_VALUE_LOCATION_LOCAL );
+          galleryFilterPrefEditor.commit();
+      }else{
+    	  if( locationFilterSelected.equals( SHARE_PREF_VALUE_LOCATION_LOCAL ) ){
+    		  cityButton.setChecked( false );
+    		  allButton.setChecked( false );
+    		  localButton.setChecked( true );
+    		  
+    		  resultTxt1 = URL_VAR_LOCAL_TEXT_LAT+currentLat+URL_VAR_LOCAL_TEXT_LNG+currentLng;
+  			  showText1 = SHOW_TEXT_FILTER_1_1;
+    		  
+    		  galleryFilterPrefEditor.putString( SHARE_PREF_KEY_LOCATION, SHARE_PREF_VALUE_LOCATION_LOCAL );
+    		  galleryFilterPrefEditor.commit();
+    	  }else if( locationFilterSelected.equals( SHARE_PREF_VALUE_LOCATION_ALL ) ){
+    		  localButton.setChecked( false );
+    		  cityButton.setChecked( false );
+    		  allButton.setChecked( true );
+    		  
+    		  resultTxt1 = "";
+  			  showText1 = SHOW_TEXT_FILTER_1_2;
+    		  
+    		  galleryFilterPrefEditor.putString( SHARE_PREF_KEY_LOCATION, SHARE_PREF_VALUE_LOCATION_ALL );
+    		  galleryFilterPrefEditor.commit();
+    	  }else if( locationFilterSelected.equals( SHARE_PREF_VALUE_LOCATION_CITY ) ){
+    		  allButton.setChecked( false );
+    		  localButton.setChecked( false );
+    		  cityButton.setChecked( true );
+    		  
+    		  metroLayout.setVisibility( View.VISIBLE );
+    		  for( int i = 0; i < arrayMetroName.size(); i++ ){
+    			  if( locationCityIdFilterSelected.equals( arrayMetroName.get( i ).getId() ) ){
+    				  metroArrayPosition = i;
+    			  }
+    		  }
+    		  
+			  resultTxt1 = URL_VAR_LOCAL_TEXT_METOR+arrayMetroName.get( metroArrayPosition ).getId();
+	  		  showText1 = arrayMetroName.get( metroArrayPosition ).getName();
+	  		  galleryFilterPrefEditor.putString( SHARE_PREF_KEY_LOCATION, SHARE_PREF_VALUE_LOCATION_CITY );
+	  		  galleryFilterPrefEditor.putString( SHARE_PREF_KEY_LOCATION_CITY_ID, arrayMetroName.get( metroArrayPosition ).getId() );
+	  		  galleryFilterPrefEditor.commit();
+    	  }
+      }
+      
+      if( sortFilterSelected == null ){
+    	  recentButton.setChecked( false );
+    	  popularButton.setChecked( true );
+    	  
+    	  resultTxt2 = URL_VAR_LOCAL_TEXT_POPULAR;
+		  showText2 = SHOW_TEXT_FILTER_2_1;
+    	  
+    	  galleryFilterPrefEditor.putString( SHARE_PREF_KEY_SORT, SHARE_PREF_VALUE_SORT_POPULAR );
+          galleryFilterPrefEditor.commit();  
+      }else if( sortFilterSelected.equals( SHARE_PREF_VALUE_SORT_POPULAR ) ){
+    	  recentButton.setChecked( false );
+    	  popularButton.setChecked( true );
+    	  
+    	  resultTxt2 = URL_VAR_LOCAL_TEXT_POPULAR;
+		  showText2 = SHOW_TEXT_FILTER_2_1;
+    	  
+    	  galleryFilterPrefEditor.putString( SHARE_PREF_KEY_SORT, SHARE_PREF_VALUE_SORT_POPULAR );
+          galleryFilterPrefEditor.commit();
+      }else if( sortFilterSelected.equals( SHARE_PREF_VALUE_SORT_RECENT ) ){
+    	  popularButton.setChecked( false );
+    	  recentButton.setChecked( true );
+    	  
+    	  resultTxt2 = URL_VAR_LOCAL_TEXT_RECENT;
+	      showText2 = SHOW_TEXT_FILTER_2_2;
+    	  
+    	  galleryFilterPrefEditor.putString( SHARE_PREF_KEY_SORT, SHARE_PREF_VALUE_SORT_RECENT );
+          galleryFilterPrefEditor.commit();
+      }
+      
+      //metroAdapter.setData( arrayMetroName, metroArrayPosition );
+	  //metroList.setAdapter( metroAdapter );
+      metroAdapter.setData( arrayMetroName );
+      metroWheelView.setViewAdapter( metroAdapter );
+      metroWheelView.setCurrentItem( metroArrayPosition );
+	}
 
 	@Override
 	public void onButtonGroupClick(CompoundButton compoundButton) {
@@ -164,26 +268,53 @@ public class GalleryFilterActivity extends Activity implements CompoundButtonGro
 			metroLayout.setVisibility( View.GONE );
 			resultTxt1 = URL_VAR_LOCAL_TEXT_LAT+currentLat+URL_VAR_LOCAL_TEXT_LNG+currentLng;
 			showText1 = SHOW_TEXT_FILTER_1_1;
+			
+			galleryFilterPrefEditor.putString( SHARE_PREF_KEY_LOCATION, SHARE_PREF_VALUE_LOCATION_LOCAL );
+	        galleryFilterPrefEditor.commit(); 
 		}else if( compoundButton.equals( allButton ) ){
 			metroLayout.setVisibility( View.GONE );
 			resultTxt1 = "";
 			showText1 = SHOW_TEXT_FILTER_1_2;
+			
+			galleryFilterPrefEditor.putString( SHARE_PREF_KEY_LOCATION, SHARE_PREF_VALUE_LOCATION_ALL );
+	        galleryFilterPrefEditor.commit(); 
 		}else if( compoundButton.equals( cityButton ) ){
 			metroLayout.setVisibility( View.VISIBLE );
 			resultTxt1 = URL_VAR_LOCAL_TEXT_METOR+arrayMetroName.get(0).getId();
 			showText1 = arrayMetroName.get(0).getName();
+			
+			galleryFilterPrefEditor.putString( SHARE_PREF_KEY_LOCATION, SHARE_PREF_VALUE_LOCATION_CITY );
+	        galleryFilterPrefEditor.putString( SHARE_PREF_KEY_LOCATION_CITY_ID, arrayMetroName.get(0).getId() );
+	        galleryFilterPrefEditor.commit(); 
 		}else if( compoundButton.equals( popularButton ) ){
 			resultTxt2 = URL_VAR_LOCAL_TEXT_POPULAR;
 			showText2 = SHOW_TEXT_FILTER_2_1;
+			
+			galleryFilterPrefEditor.putString( SHARE_PREF_KEY_SORT, SHARE_PREF_VALUE_SORT_POPULAR );
+	        galleryFilterPrefEditor.commit(); 
 		}else if( compoundButton.equals( recentButton ) ){
-			resultTxt1 = URL_VAR_LOCAL_TEXT_RECENT;
+			resultTxt2 = URL_VAR_LOCAL_TEXT_RECENT;
 			showText2 = SHOW_TEXT_FILTER_2_2;
+			
+			galleryFilterPrefEditor.putString( SHARE_PREF_KEY_SORT, SHARE_PREF_VALUE_SORT_RECENT );
+	        galleryFilterPrefEditor.commit();
 		}
+
 	}
 
 	@Override
 	public void onClick(View v) {
 		if( v.equals( closeButton ) ){
+			if( metroLayout.getVisibility() == View.VISIBLE ){
+				MetroData metroData = (MetroData) arrayMetroName.get( metroWheelView.getCurrentItem() );
+				resultTxt1 = URL_VAR_LOCAL_TEXT_METOR+metroData.getId();
+				showText1 = metroData.getName();
+				
+				galleryFilterPrefEditor.putString( SHARE_PREF_KEY_LOCATION, SHARE_PREF_VALUE_LOCATION_CITY );
+		        galleryFilterPrefEditor.putString( SHARE_PREF_KEY_LOCATION_CITY_ID, metroData.getId() );
+		        galleryFilterPrefEditor.commit(); 
+			}
+			
 			Intent intent = new Intent();
 			intent.putExtra( PUT_EXTRA_URL_VAR_1, resultTxt1 );
 			intent.putExtra(PUT_EXTRA_URL_VAR_2, resultTxt2 );
@@ -191,26 +322,38 @@ public class GalleryFilterActivity extends Activity implements CompoundButtonGro
 			intent.putExtra(PUT_EXTRA_FILTER_2, showText2 );
 			this.setResult( MainActivity.RESULT_GALLERY_FILTER_FINISH, intent );
 			this.finish();
-		}else if( v instanceof MetroListTextView ){
+		}/*else if( v instanceof MetroListTextView ){
 			if( metroListTextViewTemp != null ){
 				metroListTextViewTemp.setItemNormal();
 			}
 			
 			MetroListTextView metroData = (MetroListTextView) v;
-			metroData.setItemSelected();
+			//metroData.setItemSelected();
 			resultTxt1 = URL_VAR_LOCAL_TEXT_METOR+metroData.getData().getId();
 			showText1 = metroData.getData().getName();
 			
+			for( MetroListTextView item : arrayMetroListTextView ){
+				if( !(item.equals( metroData )) ){
+					item.setItemNormal();
+				}
+			}
+			
 			metroListTextViewTemp = metroData;
-		}
+			
+			galleryFilterPrefEditor.putString( SHARE_PREF_KEY_LOCATION, SHARE_PREF_VALUE_LOCATION_CITY );
+	        galleryFilterPrefEditor.putString( SHARE_PREF_KEY_LOCATION_CITY_ID, metroData.getData().getId() );
+	        galleryFilterPrefEditor.commit(); 
+		}*/
 	}
 	
-	private class MetroAdapter extends BaseAdapter{
+	/*private class MetroAdapter extends BaseAdapter{
 		
 		private ArrayList<MetroData> data;
+		private int selectedPostion;
 		
-		public void setData( ArrayList<MetroData> setData ){
+		public void setData( ArrayList<MetroData> setData, int setSelectedPosition ){
 			data = setData;
+			selectedPostion = setSelectedPosition;
 		}
 
 		@Override
@@ -240,6 +383,15 @@ public class GalleryFilterActivity extends Activity implements CompoundButtonGro
 				resultView = newTextView;
 			}else{
 				resultView = (MetroListTextView) convertView;
+				resultView.setItemNormal();
+			}
+			
+			arrayMetroListTextView.add( resultView );
+			
+			//Set Default Selected
+			if( position == selectedPostion ){
+				resultView.setItemSelected();
+				metroListTextViewTemp = resultView;
 			}
 			
 			resultView.setData( data.get( position ) );
@@ -248,42 +400,47 @@ public class GalleryFilterActivity extends Activity implements CompoundButtonGro
 			return resultView;
 		}
 		
-	}
-
-	@Override
-	public void onNetworkDocSuccess(String urlString, Document document) {
-		// TODO Auto-generated method stub
+	}*/
+	
+	private class MetroAdapter extends AbstractWheelAdapter {
 		
-	}
-
-	@Override
-	public void onNetworkRawSuccess(String urlString, String result) {
-		// TODO Auto-generated method stub
-		/*try {
-			JSONObject jsonObject = new JSONObject(result);
-			JSONArray newArray = jsonObject.getJSONArray("entities");
-			//Load Metro Data
-			for(int i = 0; i<newArray.length(); i++){
-				MetroData newData = new MetroData( (JSONObject) newArray.get(i) );
-				arrayMetroName.add( newData );
-			}
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+		private ArrayList<MetroData> data;
+		
+		public void setData( ArrayList<MetroData> setData ){
+			data = setData;
 		}
 		
-		metroAdapter.setData( arrayMetroName );
-		this.runOnUiThread( new Runnable() {
-			@Override
-			public void run() {
-				 metroList.setAdapter( metroAdapter );
-			}
-		});*/
-	}
+		@Override
+		public int getItemsCount() {
+			// TODO Auto-generated method stub
+			return data.size();
+		}
 
-	@Override
-	public void onNetworkFail(String urlString) {
-		// TODO Auto-generated method stub
+		@Override
+		public View getItem(int position, View convertView, ViewGroup parent) {
+			// TODO Auto-generated method stub
+			MetroListTextView resultView = null;
+			if( convertView == null ){
+				MetroListTextView newTextView = new MetroListTextView( GalleryFilterActivity.this );
+				resultView = newTextView;
+			}else{
+				resultView = (MetroListTextView) convertView;
+				//resultView.setItemNormal();
+			}
+			
+			arrayMetroListTextView.add( resultView );
+			
+			//Set Default Selected
+			/*if( position == selectedPostion ){
+				resultView.setItemSelected();
+				metroListTextViewTemp = resultView;
+			}*/
+			
+			resultView.setData( data.get( position ) );
+			resultView.setText( data.get( position ).getName() );
+			resultView.setOnClickListener( GalleryFilterActivity.this );
+			return resultView;
+		}
 		
 	}
 	

@@ -1,10 +1,13 @@
 package com.codegears.getable.ui;
 
+import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
 import com.codegears.getable.data.ProductActivityCommentsData;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -34,7 +37,13 @@ public class ProductCommentItemLayout extends LinearLayout {
 		deleteButtonLayout = (LinearLayout) findViewById( R.id.productCommentItemDeleteButtonLayout );
 		deleteButton = new CommentDeleteButton( context );
 		
+		deleteButtonLayout.setGravity( Gravity.CENTER_VERTICAL );
 		deleteButtonLayout.addView( deleteButton );
+		
+		//Set font
+		userName.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		commentText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		commentTime.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
 		
 		userName.setTextColor( Color.parseColor( this.getResources().getString( R.color.NameColorBlue ) ) );
 	}
@@ -47,12 +56,16 @@ public class ProductCommentItemLayout extends LinearLayout {
 		commentText.setText( setString );
 	}
 	
-	public void setCommentTime( String setString ){
+	public void setPostTime( String setString ){
 		commentTime.setText( setString );
 	}
 	
 	public void setProductCommentActivityData( ProductActivityCommentsData setData ){
 		productCommentActivityData = setData;
+	}
+	
+	public void setUsetImageDefault() {
+		userImage.setImageResource( R.drawable.user_image_default );
 	}
 	
 	public ImageView getUserImageView(){

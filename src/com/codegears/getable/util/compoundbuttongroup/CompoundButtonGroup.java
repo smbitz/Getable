@@ -10,15 +10,21 @@ public class CompoundButtonGroup implements OnClickListener {
 
 	private ArrayList< CompoundButton > button;
 	private CompoundButtonGroupListener listener;
+	private boolean isDefaultFirstClicked;
 
-	public CompoundButtonGroup() {
+	public CompoundButtonGroup( Boolean setDefaultFirstClicked  ) {
 		button = new ArrayList< CompoundButton >();
+		isDefaultFirstClicked = setDefaultFirstClicked;
 	}
 
 	public void addButton( CompoundButton button ) {
-		if ( this.button.size() == 0 ) {
-			button.setChecked( true );
-		} else {
+		if( isDefaultFirstClicked ){
+			if ( this.button.size() == 0 ) {
+				button.setChecked( true );
+			} else {
+				button.setChecked( false );
+			}
+		}else{
 			button.setChecked( false );
 		}
 		button.setOnClickListener( this );
@@ -31,17 +37,28 @@ public class CompoundButtonGroup implements OnClickListener {
 	
 	@Override
 	public void onClick( View view ) {
-		CompoundButton currentCheck = null;
-		CompoundButton clicked = (CompoundButton) view;
-		for ( CompoundButton cButton : button ) {
-			if ( (cButton.isChecked()) && (cButton != clicked) ) {
-				currentCheck = cButton;
+		if( isDefaultFirstClicked ){
+			CompoundButton currentCheck = null;
+			CompoundButton clicked = (CompoundButton) view;
+			for ( CompoundButton cButton : button ) {
+				if ( (cButton.isChecked()) && (cButton != clicked) ) {
+					currentCheck = cButton;
+				}
+				cButton.setChecked( false );
 			}
-			cButton.setChecked( false );
-		}
-		clicked.setChecked( true );
-		if ( (currentCheck != null) && (listener != null) ) {
-			listener.onButtonGroupClick( clicked );
+			clicked.setChecked( true );
+			if ( (currentCheck != null) && (listener != null) ) {
+				listener.onButtonGroupClick( clicked );
+			}
+		}else{
+			CompoundButton clicked = (CompoundButton) view;
+			for ( CompoundButton cButton : button ) {
+				cButton.setChecked( false );
+			}
+			clicked.setChecked( true );
+			if ( listener != null ) {
+				listener.onButtonGroupClick( clicked );
+			}
 		}
 	}
 }

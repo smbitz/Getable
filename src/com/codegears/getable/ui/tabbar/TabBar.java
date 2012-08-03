@@ -21,7 +21,7 @@ public class TabBar extends LinearLayout implements CompoundButtonGroupListener 
 
 	public TabBar( Context context, AttributeSet attrs ) {
 		super( context, attrs );
-		buttonGroup = new CompoundButtonGroup();
+		buttonGroup = new CompoundButtonGroup( true );
 		buttonGroup.setCompoundButtonGroupListener( this );
 		buttonViewMap = new HashMap<CompoundButton, ViewGroup>();
 	}

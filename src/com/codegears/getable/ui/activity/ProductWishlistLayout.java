@@ -10,22 +10,31 @@ import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
+import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.codegears.getable.BodyLayoutStackListener;
+import com.codegears.getable.MainActivity;
 import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
 import com.codegears.getable.data.ProductActivityData;
 import com.codegears.getable.data.WishlistData;
 import com.codegears.getable.ui.AbstractViewLayout;
+import com.codegears.getable.ui.FooterListView;
 import com.codegears.getable.ui.ProductWishlistItem;
 import com.codegears.getable.ui.WishlistAddRemoveButton;
 import com.codegears.getable.util.Config;
@@ -35,6 +44,8 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 import android.view.View.OnClickListener;
+import android.view.View.OnKeyListener;
+import android.view.inputmethod.InputMethodManager;
 
 public class ProductWishlistLayout extends AbstractViewLayout implements OnClickListener {
 	
@@ -57,6 +68,11 @@ public class ProductWishlistLayout extends AbstractViewLayout implements OnClick
 	private EditText wishlistNameEditText;
 	private Button wishlistNameSubmitButton;
 	private String wishlistURL;
+	private ProgressDialog loadingDialog;
+	private ImageButton backButton;
+	private TextView chooseWishlistText;
+	private TextView createWishlistText;
+	private BodyLayoutStackListener listener;
 	
 	public ProductWishlistLayout(Activity activity) {
 		super(activity);
@@ -70,8 +86,8 @@ public class ProductWishlistLayout extends AbstractViewLayout implements OnClick
 		try {
 			arrayWishlistId = new JSONArray( myPrefs.getString( SHARE_PREF_KEY_WISHLIST_ID, "" ) );
 		} catch (JSONException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
+			arrayWishlistId = new JSONArray();
 		}
 		
 		config = new Config( this.getContext() );
@@ -86,14 +102,54 @@ public class ProductWishlistLayout extends AbstractViewLayout implements OnClick
 		createWishlistLayoutTop = (LinearLayout) findViewById( R.id.productWishlistCreateLayoutTop );
 		wishlistNameEditText = (EditText) findViewById( R.id.productWishlistCreateLayoutNameEditText );
 		wishlistNameSubmitButton = (Button) findViewById( R.id.productWishlistCreateLayoutNameSubmitButton );
+		backButton = (ImageButton) findViewById( R.id.productWishlistBackButton );
+		chooseWishlistText = (TextView) findViewById( R.id.productWishlistChooseWishlistText );
+		createWishlistText = (TextView) findViewById( R.id.productWishlistCreateWishlistText );
+		
+		//Add foot view
+		wishlistList.addFooterView( new FooterListView( this.getContext() ) );
+		
+		//Set font
+		chooseWishlistText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		createWishlistText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		wishlistNameEditText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
 		
 		createButton.setOnClickListener( this );
 		createWishlistLayoutTop.setOnClickListener( this );
 		wishlistNameSubmitButton.setOnClickListener( this );
+		backButton.setOnClickListener( this );
+		
+		loadingDialog = new ProgressDialog( this.getContext() );
+		loadingDialog.setTitle("");
+		loadingDialog.setMessage("Loading. Please wait...");
+		loadingDialog.setIndeterminate( true );
+		loadingDialog.setCancelable( true );
+		
+		wishlistNameEditText.setOnKeyListener(new OnKeyListener() {
+			@Override
+			public boolean onKey(View v, int keyCode, KeyEvent event) {
+				// If the event is a key-down event on the "enter" button
+		        if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
+		            (keyCode == KeyEvent.KEYCODE_ENTER)) {
+		          // Perform action on key press
+	        	  InputMethodManager imm = (InputMethodManager) ProductWishlistLayout.this.getActivity().getSystemService(
+					      Context.INPUT_METHOD_SERVICE);
+				  imm.hideSoftInputFromWindow( wishlistNameEditText.getWindowToken(), 0 );
+		          submitCreatNewWishlist();
+		          return true;
+		        }
+		        return false;
+			}
+		});
 		
 		wishlistURL = config.get( MyApp.URL_DEFAULT )+"me/wishlists.json";
 		
-		//NetworkThreadUtil.getRawDataWithCookie( wishlistURL, null, appCookie, this );
+		loadData();
+	}
+	
+	private void loadData(){
+		loadingDialog.show();
+		
 		asyncHttpClient.get( wishlistURL, new JsonHttpResponseHandler(){
 			@Override
 			public void onSuccess(JSONObject getJsonObject) {
@@ -101,6 +157,23 @@ public class ProductWishlistLayout extends AbstractViewLayout implements OnClick
 				onWishlistURLSuccess(getJsonObject);
 			}
 		});
+	}
+	
+	private void submitCreatNewWishlist(){
+		createWishlistLayout.setVisibility( View.GONE );
+		String text = wishlistNameEditText.getText().toString();
+		if( !(text.equals("")) && !(text.equals(null)) ){
+			HashMap<String, String> paramMap = new HashMap<String, String>();
+			paramMap.put( "name", text );
+			RequestParams params = new RequestParams(paramMap);
+			asyncHttpClient.post( wishlistURL, params, new JsonHttpResponseHandler(){
+				@Override
+				public void onSuccess(JSONObject getJsonObject) {
+					super.onSuccess(getJsonObject);
+					onWishlistURLSuccess(getJsonObject);
+				}
+			});
+		}
 	}
 	
 	private void onWishlistURLSuccess(JSONObject jsonObject){
@@ -128,56 +201,28 @@ public class ProductWishlistLayout extends AbstractViewLayout implements OnClick
 			
 			String addRemoveWishlistURL = config.get( MyApp.URL_DEFAULT ).toString()+"me/wishlists/"+currentWishlistId+"/activities/"+productActivityId+".json";
 			
-			/*HashMap< String, String > addDataMap = new HashMap<String, String>();
-			addDataMap.put( "emtpy", "emtpy" );
-			String addPostData = NetworkUtil.createPostData( addDataMap );
-			
-			NetworkThreadUtil.getRawDataWithCookie(addRemoveWishlistURL, addPostData, appCookie, new NetworkThreadListener() {
-				
-				@Override
-				public void onNetworkRawSuccess(String urlString, String result) {
-					//Add new id to array
-					arrayWishlistId.put( newData.getId() );
-					
-					//Refresh adapter
-					arrayWishlistData.add( newData );
-					
-					wishlistAdapter.setData( arrayWishlistData );
-					ProductWishlistLayout.this.getActivity().runOnUiThread( new Runnable() {
-						@Override
-						public void run() {
-							wishlistList.setAdapter( wishlistAdapter );
-						}
-					});
-				}
-				
-				@Override
-				public void onNetworkFail(String urlString) {
-					// TODO Auto-generated method stub
-					
-				}
-				
-				@Override
-				public void onNetworkDocSuccess(String urlString, Document document) {
-					// TODO Auto-generated method stub
-					
-				}
-			});*/
-			
 			asyncHttpClient.post( addRemoveWishlistURL, new AsyncHttpResponseHandler(){
 				@Override
 				public void onSuccess(String arg0) {
 					super.onSuccess(arg0);
+					
 					//Add new id to array
 					arrayWishlistId.put( newData.getId() );
 					
 					//Refresh adapter
-					arrayWishlistData.add( newData );
+					/*arrayWishlistData.add( newData );
 					
 					wishlistAdapter.setData( arrayWishlistData );
-					wishlistList.setAdapter( wishlistAdapter );
+					wishlistList.setAdapter( wishlistAdapter );*/
+					Toast toast = Toast.makeText( ProductWishlistLayout.this.getContext(), "Your new Wish List was created and the item was added to it.", Toast.LENGTH_LONG );
+					toast.show();
+					refreshView();
 				}
 			});
+		}
+		
+		if( loadingDialog.isShowing() ){
+			loadingDialog.dismiss();
 		}
 	}
 
@@ -189,96 +234,13 @@ public class ProductWishlistLayout extends AbstractViewLayout implements OnClick
 	
 	@Override
 	public void refreshView() {
-		// TODO Auto-generated method stub
-		
+		recycleResource();
+		loadData();
 	}
-
-	/*@Override
-	public void onNetworkDocSuccess(String urlString, Document document) {
-		// TODO Auto-generated method stub
-		
+	
+	private void recycleResource(){
+		arrayWishlistData.clear();
 	}
-
-	@Override
-	public void onNetworkRawSuccess(String urlString, String result) {
-		try {
-			//Load Product Data
-			JSONObject jsonObject = new JSONObject( result );
-			if( jsonObject.optJSONArray( "entities" ) != null ){
-				JSONArray newArray = jsonObject.optJSONArray( "entities" );
-				for(int i = 0; i<newArray.length(); i++){
-					
-					//Load Product Data
-					WishlistData newData = null;
-					if( newArray.optJSONObject(i) != null ){
-						newData = new WishlistData( newArray.optJSONObject(i) );
-					}
-					
-					arrayWishlistData.add( newData );
-				}
-				
-				wishlistAdapter.setData( arrayWishlistData );
-				this.getActivity().runOnUiThread( new Runnable() {
-					@Override
-					public void run() {
-						wishlistList.setAdapter( wishlistAdapter );
-					}
-				});
-			}else{
-				//Create new wishlist data.
-				//Load Product Data
-				final WishlistData newData = new WishlistData( jsonObject );
-				String currentWishlistId = newData.getId();
-				
-				String addRemoveWishlistURL = config.get( MyApp.URL_DEFAULT ).toString()+"me/wishlists/"+currentWishlistId+"/activities/"+productActivityId+".json";
-				
-				HashMap< String, String > addDataMap = new HashMap<String, String>();
-				addDataMap.put( "emtpy", "emtpy" );
-				String addPostData = NetworkUtil.createPostData( addDataMap );
-				
-				NetworkThreadUtil.getRawDataWithCookie(addRemoveWishlistURL, addPostData, appCookie, new NetworkThreadListener() {
-					
-					@Override
-					public void onNetworkRawSuccess(String urlString, String result) {
-						//Add new id to array
-						arrayWishlistId.put( newData.getId() );
-						
-						//Refresh adapter
-						arrayWishlistData.add( newData );
-						
-						wishlistAdapter.setData( arrayWishlistData );
-						ProductWishlistLayout.this.getActivity().runOnUiThread( new Runnable() {
-							@Override
-							public void run() {
-								wishlistList.setAdapter( wishlistAdapter );
-							}
-						});
-					}
-					
-					@Override
-					public void onNetworkFail(String urlString) {
-						// TODO Auto-generated method stub
-						
-					}
-					
-					@Override
-					public void onNetworkDocSuccess(String urlString, Document document) {
-						// TODO Auto-generated method stub
-						
-					}
-				});
-			}
-		} catch (JSONException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-	}
-
-	@Override
-	public void onNetworkFail(String urlString) {
-		// TODO Auto-generated method stub
-		
-	}*/
 	
 	private class WishlistAdapter extends BaseAdapter {
 		
@@ -306,7 +268,7 @@ public class ProductWishlistLayout extends AbstractViewLayout implements OnClick
 		@Override
 		public View getView(int position, View convertView, ViewGroup arg2) {
 			
-			int chechWishlist = 0;
+			int checkWishlist = 0;
 			
 			ProductWishlistItem wishlistItem;
 			if( convertView == null ){
@@ -318,8 +280,10 @@ public class ProductWishlistLayout extends AbstractViewLayout implements OnClick
 			//Set information
 			String numQty = String.valueOf( data.get( position ).getStatistic().getNumberOfActivities() );
 			String wishlistName = data.get( position ).getName();
-			String wishlistId = data.get( position ).getId();
+			final String wishlistId = data.get( position ).getId();
 			WishlistAddRemoveButton addRemoveButton = wishlistItem.getAddRemoveButton();
+			
+			addRemoveButton.setWishlistData( data.get( position ) );
 			
 			wishlistItem.setItemQty( numQty );
 			wishlistItem.setName( wishlistName );
@@ -327,20 +291,23 @@ public class ProductWishlistLayout extends AbstractViewLayout implements OnClick
 			if( arrayWishlistId != null ){
 				for( int i = 0; i < arrayWishlistId.length(); i++ ){
 					if( arrayWishlistId.optString( i ).equals( wishlistId ) ){
-						chechWishlist++;
+						checkWishlist++;
 					}
 				}
 				
 				//Set button image and status.
-				if( chechWishlist > 0 ){
-					addRemoveButton.setText( "Remove" );
+				if( checkWishlist > 0 ){
+					//addRemoveButton.setText( "Remove" );
+					addRemoveButton.setImageButton( R.drawable.remove_button );
 					addRemoveButton.setButtonState( WishlistAddRemoveButton.BUTTON_STATE_REMOVE );
 				}else{
-					addRemoveButton.setText( "Add" );
+					//addRemoveButton.setText( "Add" );
+					addRemoveButton.setImageButton( R.drawable.add_button );
 					addRemoveButton.setButtonState( WishlistAddRemoveButton.BUTTON_STATE_ADD );
 				}
 			}else{
-				addRemoveButton.setText( "Add" );
+				//addRemoveButton.setText( "Add" );
+				addRemoveButton.setImageButton( R.drawable.add_button );
 				addRemoveButton.setButtonState( WishlistAddRemoveButton.BUTTON_STATE_ADD );
 			}
 			
@@ -352,98 +319,59 @@ public class ProductWishlistLayout extends AbstractViewLayout implements OnClick
 		
 	}
 
+	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener) {
+		this.listener = listener;
+	}
+	
 	@Override
 	public void onClick(View v) {
 		if( v instanceof WishlistAddRemoveButton ){
+			loadingDialog.show();
+			
 			final WishlistAddRemoveButton addRemoveButton = (WishlistAddRemoveButton) v;
+			
 			int buttonState = addRemoveButton.getButtonState();
 			String currentWishlistId = addRemoveButton.getWishlistData().getId();
 			String addRemoveWishlistURL = config.get( MyApp.URL_DEFAULT ).toString()+"me/wishlists/"+currentWishlistId+"/activities/"+productActivityId+".json";
+			final String wishlistId = addRemoveButton.getWishlistData().getId();
 			
 			//Post delete data
 			HashMap<String, String> paramMap = new HashMap<String, String>();
 			paramMap.put( "_a", "delete" );
 			RequestParams deletePostData = new RequestParams(paramMap);
-			/*HashMap< String, String > removeDataMap = new HashMap<String, String>();
-			removeDataMap.put( "_a", "delete" );
-			String deletePostData = NetworkUtil.createPostData( removeDataMap );
-			
-			HashMap< String, String > addDataMap = new HashMap<String, String>();
-			addDataMap.put( "emtpy", "emtpy" );
-			String addPostData = NetworkUtil.createPostData( addDataMap );*/
 			
 			if( buttonState == WishlistAddRemoveButton.BUTTON_STATE_ADD ){
-				/*NetworkThreadUtil.getRawDataWithCookie( addRemoveWishlistURL, addPostData, appCookie, new NetworkThreadListener() {
-					
-					@Override
-					public void onNetworkRawSuccess(String urlString, String result) {
-						ProductWishlistLayout.this.getActivity().runOnUiThread( new Runnable() {
-							@Override
-							public void run() {
-								//Set button image and status.
-								addRemoveButton.setText( "Remove" );
-								addRemoveButton.setButtonState( WishlistAddRemoveButton.BUTTON_STATE_REMOVE );
-							}
-						});
-					}
-					
-					@Override
-					public void onNetworkFail(String urlString) {
-						// TODO Auto-generated method stub
-						
-					}
-					
-					@Override
-					public void onNetworkDocSuccess(String urlString, Document document) {
-						// TODO Auto-generated method stub
-						
-					}
-				});*/
-				
 				asyncHttpClient.post( addRemoveWishlistURL, new AsyncHttpResponseHandler(){
 					@Override
 					public void onSuccess(String arg0) {
 						super.onSuccess(arg0);
 						//Set button image and status.
-						addRemoveButton.setText( "Remove" );
-						addRemoveButton.setButtonState( WishlistAddRemoveButton.BUTTON_STATE_REMOVE );
+						Toast toast = Toast.makeText( ProductWishlistLayout.this.getContext(), "Added to Wish List.", Toast.LENGTH_LONG );
+						toast.show();
+						arrayWishlistId.put( wishlistId );
+						refreshView();
 					}
 				});
 			}else if( buttonState == WishlistAddRemoveButton.BUTTON_STATE_REMOVE ){
-				/*NetworkThreadUtil.getRawDataWithCookie( addRemoveWishlistURL, deletePostData, appCookie, new NetworkThreadListener() {
-					
-					@Override
-					public void onNetworkRawSuccess(String urlString, String result) {
-						ProductWishlistLayout.this.getActivity().runOnUiThread( new Runnable() {
-							@Override
-							public void run() {
-								//Set button image and status.
-								addRemoveButton.setText( "Add" );
-								addRemoveButton.setButtonState( WishlistAddRemoveButton.BUTTON_STATE_ADD );
-							}
-						});
-					}
-					
-					@Override
-					public void onNetworkFail(String urlString) {
-						// TODO Auto-generated method stub
-						
-					}
-					
-					@Override
-					public void onNetworkDocSuccess(String urlString, Document document) {
-						// TODO Auto-generated method stub
-						
-					}
-				});*/
-				
 				asyncHttpClient.post( addRemoveWishlistURL, deletePostData, new AsyncHttpResponseHandler(){
 					@Override
 					public void onSuccess(String arg0) {
 						super.onSuccess(arg0);
 						//Set button image and status.
-						addRemoveButton.setText( "Add" );
-						addRemoveButton.setButtonState( WishlistAddRemoveButton.BUTTON_STATE_ADD );
+						//Remove from wishlist
+						JSONArray jsonArray = new JSONArray();
+						for (int i = 0; i < arrayWishlistId.length(); i++) {
+						    try {
+								if( !(arrayWishlistId.getString( i ).toString().equals( wishlistId )) ){
+									jsonArray.put( arrayWishlistId.getString( i ).toString() );
+								}
+							} catch (JSONException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+						arrayWishlistId = jsonArray;
+						refreshView();
 					}
 				});
 			}
@@ -452,25 +380,14 @@ public class ProductWishlistLayout extends AbstractViewLayout implements OnClick
 		}else if( v.equals( createWishlistLayoutTop ) ){
 			createWishlistLayout.setVisibility( View.GONE );
 		}else if( v.equals( wishlistNameSubmitButton ) ){
-			createWishlistLayout.setVisibility( View.GONE );
-			String text = wishlistNameEditText.getText().toString();
-			if( !(text.equals("")) && !(text.equals(null)) ){
-				/*HashMap< String, String > dataMap = new HashMap<String, String>();
-				dataMap.put( "name", text );
-				String postData = NetworkUtil.createPostData( dataMap );
-				
-				NetworkThreadUtil.getRawDataWithCookie( wishlistURL, postData, appCookie, this );*/
-				
-				HashMap<String, String> paramMap = new HashMap<String, String>();
-				paramMap.put( "name", text );
-				RequestParams params = new RequestParams(paramMap);
-				asyncHttpClient.post( wishlistURL, params, new JsonHttpResponseHandler(){
-					@Override
-					public void onSuccess(JSONObject getJsonObject) {
-						super.onSuccess(getJsonObject);
-						onWishlistURLSuccess(getJsonObject);
-					}
-				});
+			submitCreatNewWishlist();
+		}else if( v.equals( backButton ) ){
+			InputMethodManager imm = (InputMethodManager) this.getActivity().getSystemService(
+				      Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow( wishlistNameEditText.getWindowToken(), 0 );
+			
+			if(listener != null){
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_BACK_BUTTON );
 			}
 		}
 	}

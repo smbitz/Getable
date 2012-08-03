@@ -1,15 +1,18 @@
 package com.codegears.getable.ui;
 
+import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
 import com.codegears.getable.data.ActorData;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.ImageView.ScaleType;
 
 public class UserProfileHeader extends LinearLayout {
 	
@@ -18,6 +21,8 @@ public class UserProfileHeader extends LinearLayout {
 	private UserProfileImageLayout userProfileImageLayout;
 	private LinearLayout followButtonLayout;
 	private FollowButton followButton;
+	private TextView postTime;
+	private TextView moreTextName;
 	
 	public UserProfileHeader(Context context) {
 		super(context);
@@ -25,8 +30,16 @@ public class UserProfileHeader extends LinearLayout {
 		
 		userName = (TextView) findViewById( R.id.userProfileName );
 		userProfileImageLayout = (UserProfileImageLayout) findViewById( R.id.userProfileImageLayout );
+		postTime = (TextView) findViewById( R.id.userProfilePostTime );
 		followButtonLayout = (LinearLayout) findViewById( R.id.userProfileHeaderFollowButtonLayout );
+		moreTextName = (TextView) findViewById( R.id.userProfileMoreTexName );
+		
+		//Set font
+		userName.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		postTime.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		
 		followButton = new FollowButton( context );
+		followButton.setScaleType( ScaleType.FIT_START );
 		followButtonLayout.addView( followButton );
 	}
 
@@ -36,6 +49,14 @@ public class UserProfileHeader extends LinearLayout {
 
 	public void setData(ActorData setUserData) {
 		userData = setUserData;
+	}
+	
+	public void setPostTime(String setTimeText){
+		postTime.setText( setTimeText );
+	}
+	
+	public void setMoreTextNameVisible(){
+		moreTextName.setVisibility( View.VISIBLE );
 	}
 	
 	public ActorData getUserData(){

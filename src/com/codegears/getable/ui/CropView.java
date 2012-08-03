@@ -47,15 +47,52 @@ public class CropView extends ImageView {
 		cropRatio = xyRatio;
 		cropArea.left = 0;
 		cropArea.top = 0;
-		cropArea.right = 0.3f * xyRatio / xyRatioView;
-		cropArea.bottom = 0.3f;
+//		cropArea.right = 1f * xyRatio / xyRatioView;
+		cropArea.right = 1f;
+		cropArea.bottom = 1f;
+	}
+	
+	public void alignCenter(){
+		if(imageBitmap == null){
+			return;
+		}
+		float xyRatioView = (float) this.getWidth() / this.getHeight();
+		float xyRatioImage = (float) imageBitmap.getWidth() / imageBitmap.getHeight();
+		if(xyRatioView >= xyRatioImage){
+			float adjustedImageWidth = xyRatioImage * this.getHeight();
+			float imageWidth = adjustedImageWidth / this.getWidth();
+			float imageHeight = imageWidth / cropRatio * xyRatioView;
+			cropArea.left = 0.5f - imageWidth / 2;
+			cropArea.right = 0.5f + imageWidth / 2;
+			cropArea.top = 0.5f - imageHeight / 2;
+			cropArea.bottom = 0.5f + imageHeight / 2;
+		} else {
+			float adjustedImageHeight = this.getWidth() / xyRatioImage;
+			float imageHeight = adjustedImageHeight / this.getHeight();
+			float imageWidth = imageHeight * cropRatio / xyRatioView;
+			cropArea.left = 0.5f - imageWidth / 2;
+			cropArea.right = 0.5f + imageWidth / 2;
+			cropArea.top = 0.5f - imageHeight / 2;
+			cropArea.bottom = 0.5f + imageHeight / 2;
+		}
+		// Unexpected case, some bug appear above, so cropArea.width() > 1 occur some time.
+		if(cropArea.width() > 1){
+			float width = cropArea.width();
+			float height = cropArea.height();
+			cropArea.left = 0;
+			cropArea.right = 1;
+			cropArea.top = 0.5f - (height / width) / 2;
+			cropArea.bottom = 0.5f + (height / width) / 2;
+		}
 	}
 	
 	@Override
 	public void onWindowFocusChanged(boolean hasWindowFocus){
 		super.onWindowFocusChanged(hasWindowFocus);
+		float xyRatioView = (float) this.getWidth() / this.getHeight();
 		this.setCropRatio(cropRatio);	//reset CropRatio due to the problem of view measure
 		adjustCropArea();				//readjust CropArea due to the problem of view measure
+		alignCenter();
 	}
 
 	/*
@@ -82,7 +119,7 @@ public class CropView extends ImageView {
 		}
 		float xyRatioView = (float) this.getWidth() / this.getHeight();
 		float xyRatioImage = (float) imageBitmap.getWidth() / imageBitmap.getHeight();
-		if ( xyRatioView > xyRatioImage ) {
+		if ( xyRatioView >= xyRatioImage ) {
 			float adjustedImageWidth = xyRatioImage * this.getHeight();
 			float space = (this.getWidth() - adjustedImageWidth) / 2;
 			float spaceRatio = space / this.getWidth();
@@ -125,11 +162,10 @@ public class CropView extends ImageView {
 				cropArea.right = cropArea.left + imageWidth;
 			}
 			if ( cropArea.width() > 1 ) {
-				float expectedWidth = cropRatio;
-				float divWidth = Math.abs( expectedWidth - cropArea.width() );
-				cropArea.top = 0;
-				cropArea.bottom = 1;
-				cropArea.right = cropArea.left + divWidth;
+				float width = cropArea.width();
+				cropArea.left = 0;
+				cropArea.right = 1;
+				cropArea.bottom = cropArea.top + cropArea.height() / width;
 			}
 			if ( cropArea.top < spaceRatio ) {
 				cropArea.bottom = cropArea.bottom + spaceRatio - cropArea.top;
@@ -160,7 +196,7 @@ public class CropView extends ImageView {
 
 		float xyRatioView = (float) this.getWidth() / this.getHeight();
 		float xyRatioImage = (float) imageBitmap.getWidth() / imageBitmap.getHeight();
-		if ( xyRatioView > xyRatioImage ) {
+		if ( xyRatioView >= xyRatioImage ) {
 			cropTop = cropArea.top * imageBitmap.getHeight();
 			cropBottom = cropArea.bottom * imageBitmap.getHeight();
 			

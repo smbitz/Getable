@@ -16,6 +16,7 @@ public class ProductNumComment extends TextView {
 	public ProductNumComment(Context context) {
 		super(context);
 		this.setTextColor( Color.parseColor( this.getResources().getString( R.color.NameColorBlue ) ) );
+		this.setTextSize( 12 );
 	}
 	
 	public void setProductData( ProductActivityData setData ){

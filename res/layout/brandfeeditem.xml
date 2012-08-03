@@ -5,13 +5,46 @@
 
     <LinearLayout
         android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:orientation="vertical" >
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content" >
 
-        <ImageView
-            android:id="@+id/brandFeedItemUserImage"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:src="@drawable/ic_launcher" />
+        <LinearLayout
+            android:layout_width="60dp"
+            android:layout_height="60dp"
+            android:background="@drawable/product_frame"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical" >
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/brandFeedItemUserImage"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:src="@drawable/ic_launcher" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical" >
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="5dp"
+            android:layout_height="match_parent" >
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -23,17 +56,9 @@
                 android:layout_height="wrap_content" >
 
                 <TextView
-                    android:id="@+id/brandFeedItemUserName"
+                    android:id="@+id/brandFeedItemDetailText"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="TextView" />
-
-                <TextView
-                    android:id="@+id/textView2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=" added a new product." />
-
+                    android:layout_height="wrap_content"/>
             </LinearLayout>
 
             <LinearLayout
@@ -41,83 +66,132 @@
                 android:layout_height="wrap_content" >
 
                 <LinearLayout
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical" android:layout_weight="1">
+                    android:orientation="vertical" >
 
                     <ImageView
                         android:id="@+id/brandFeedItemImage"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:src="@drawable/ic_launcher" android:layout_weight="1"/>
+                        android:layout_width="60dp"
+                        android:layout_height="60dp"
+                        android:layout_weight="1"
+                        android:src="@drawable/ic_launcher" />
 
                     <TextView
                         android:id="@+id/brandFeedItemTime"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="TextView" android:layout_weight="1"/>
+                        android:layout_weight="1" />
+                </LinearLayout>
 
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
                 </LinearLayout>
 
                 <LinearLayout
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical" android:layout_weight="1">
+                    android:layout_height="match_parent"
+                    android:layout_weight="1"
+                    android:orientation="vertical" >
 
                     <TextView
                         android:id="@+id/brandFeedItemBrandName"
                         android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="TextView" />
+                        android:layout_height="wrap_content" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical" >
+                    </LinearLayout>
 
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content" >
 
-                        <ImageView
-                            android:id="@+id/imageView2"
+                        <LinearLayout
+                            android:id="@+id/brandFeedLikeImageLayout"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_launcher" android:layout_weight="1"/>
+                            android:layout_height="match_parent" >
+                        </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/brandFeedItemNumberLikes"
+                        <LinearLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="TextView"/>
+                            android:layout_height="match_parent"
+                            android:layout_weight="0.5"
+                            android:orientation="horizontal" >
 
-                        <ImageView
-                            android:id="@+id/imageView3"
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1" >
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/brandFeedItemNumberLikes"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:textColor="@color/NameColorPink"/>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1" >
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/brandFeedCommentImageLayout"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_launcher" android:layout_weight="1"/>
+                            android:layout_height="match_parent" >
+                        </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/brandFeedItemNumberComments"
+                        <LinearLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="TextView"/>
+                            android:layout_height="match_parent"
+                            android:layout_weight="0.5"
+                            android:orientation="horizontal" >
 
-                        <ImageView
-                            android:id="@+id/imageView4"
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1" >
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/brandFeedItemNumberComments"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content" android:textColor="@color/NameColorPink"/>
+
+                            <LinearLayout
+                                android:layout_width="wrap_content"
+                                android:layout_height="match_parent"
+                                android:layout_weight="1" >
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:id="@+id/brandFeedWishlistImageLayout"
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:src="@drawable/ic_launcher" android:layout_weight="1"/>
+                            android:layout_height="match_parent" >
+                        </LinearLayout>
 
-                        <TextView
-                            android:id="@+id/brandFeedItemNumberWishlists"
+                        <LinearLayout
                             android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="TextView"/>
-
+                            android:layout_height="match_parent"
+                            android:layout_weight="1" >
+                        </LinearLayout>
                     </LinearLayout>
-
                 </LinearLayout>
-
             </LinearLayout>
-
         </LinearLayout>
+    </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="5dp"
+        android:orientation="vertical" >
     </LinearLayout>
 
 </LinearLayout>

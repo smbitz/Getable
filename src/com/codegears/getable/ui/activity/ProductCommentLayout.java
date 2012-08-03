@@ -10,15 +10,20 @@ import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Typeface;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ListView;
 
 import com.codegears.getable.BodyLayoutStackListener;
@@ -30,8 +35,10 @@ import com.codegears.getable.data.ProductActivityCommentsData;
 import com.codegears.getable.ui.AbstractViewLayout;
 import com.codegears.getable.ui.CommentDeleteButton;
 import com.codegears.getable.ui.CommentRowLayout;
+import com.codegears.getable.ui.FooterListView;
 import com.codegears.getable.ui.ProductCommentItemLayout;
 import com.codegears.getable.ui.UserFollowItemLayout;
+import com.codegears.getable.util.CalculateTime;
 import com.codegears.getable.util.Config;
 import com.codegears.getable.util.ImageLoader;
 import com.loopj.android.http.AsyncHttpClient;
@@ -41,6 +48,7 @@ import com.loopj.android.http.RequestParams;
 
 import android.view.View.OnClickListener;
 import android.view.View.OnKeyListener;
+import android.view.inputmethod.InputMethodManager;
 
 public class ProductCommentLayout extends AbstractViewLayout implements OnClickListener {
 	
@@ -60,6 +68,7 @@ public class ProductCommentLayout extends AbstractViewLayout implements OnClickL
 	private EditText commentText;
 	private Button submitButton;
 	private String getCommentDataURL;
+	private String addCommentDataURL;
 	private String deleteCommentUrl;
 	private MyApp app;
 	private Button editButton;
@@ -67,6 +76,8 @@ public class ProductCommentLayout extends AbstractViewLayout implements OnClickL
 	//private List<String> appCookie;
 	private String activityUserId;
 	private AsyncHttpClient asyncHttpClient;
+	private ImageButton backButton;
+	private ProgressDialog loadingDialog;
 	
 	public ProductCommentLayout(Activity activity) {
 		super(activity);
@@ -87,9 +98,24 @@ public class ProductCommentLayout extends AbstractViewLayout implements OnClickL
 		commentAdapter = new CommentAdapter();
 		imageLoader = new ImageLoader( this.getContext() );
 		editButton = (Button) findViewById( R.id.productCommentLayoutEditButton );
+		backButton = (ImageButton) findViewById( R.id.productCommentLayoutBackButton );
+		
+		loadingDialog = new ProgressDialog( this.getContext() );
+		loadingDialog.setTitle("");
+		loadingDialog.setMessage("Loading. Please wait...");
+		loadingDialog.setIndeterminate( true );
+		loadingDialog.setCancelable( true );
+		
+		//Set footer listview
+		commentListView.addFooterView( new FooterListView( this.getContext() ) );
+		
+		//Set font
+		submitButton.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		commentText.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
 		
 		submitButton.setOnClickListener( this );
 		editButton.setOnClickListener( this );
+		backButton.setOnClickListener( this );
 		
 		commentText.setOnKeyListener(new OnKeyListener() {
 			@Override
@@ -98,6 +124,9 @@ public class ProductCommentLayout extends AbstractViewLayout implements OnClickL
 		        if ((event.getAction() == KeyEvent.ACTION_DOWN) &&
 		            (keyCode == KeyEvent.KEYCODE_ENTER)) {
 		          // Perform action on key press
+	        	  InputMethodManager imm = (InputMethodManager) ProductCommentLayout.this.getActivity().getSystemService(
+					      Context.INPUT_METHOD_SERVICE);
+					imm.hideSoftInputFromWindow( commentText.getWindowToken(), 0 );
 		          submitCommentText();
 		          return true;
 		        }
@@ -114,13 +143,20 @@ public class ProductCommentLayout extends AbstractViewLayout implements OnClickL
 		String urlVar1 = MyApp.DEFAULT_URL_VAR_1;
 		
 		getCommentDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+productId+"/comments.json"+urlVar1;
+		addCommentDataURL = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+productId+"/comments.json";
 		
 		//NetworkThreadUtil.getRawData(getCommentDataURL, null, this);
+		loadData();
+	}
+	
+	public void loadData(){
+		loadingDialog.show();
+		
 		asyncHttpClient.get( getCommentDataURL, new JsonHttpResponseHandler(){
 			@Override
 			public void onSuccess(JSONObject jsonObject) {
 				super.onSuccess(jsonObject);
-				onGetCommentURLSuccess( jsonObject );
+				onGetCommentURLSuccess( jsonObject, getCommentDataURL );
 			}
 		});
 	}
@@ -133,51 +169,18 @@ public class ProductCommentLayout extends AbstractViewLayout implements OnClickL
 	
 	@Override
 	public void refreshView() {
-		// TODO Auto-generated method stub
-		
+		recycleResource();
+		loadData();
 	}
 	
 	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener){
 		this.listener = listener;
 	}
 	
-	private void onGetCommentURLSuccess(JSONObject jsonObject){
-		JSONArray newArray = null;
-		try {
-			newArray = jsonObject.optJSONArray("entities");
-			
-			ProductActivityCommentsData newData;
-			if( newArray == null ){
-				newData = new ProductActivityCommentsData( jsonObject );
-				activityCommentsData.add( newData );
-			}else{
-				for(int i = 0; i<newArray.length(); i++){
-					//Load Product Data
-					newData = new ProductActivityCommentsData( (JSONObject) newArray.get(i) );
-					activityCommentsData.add( newData );
-				}
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		
-		commentAdapter.setData( activityCommentsData );
-		commentText.setText("");
-		commentListView.setAdapter( commentAdapter );
-	}
-	
-	/*@Override
-	public void onNetworkDocSuccess(String urlString, Document document) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onNetworkRawSuccess(String urlString, String result) {
+	private void onGetCommentURLSuccess(JSONObject jsonObject, String urlString){
 		if( urlString.equals( getCommentDataURL ) ){
 			JSONArray newArray = null;
 			try {
-				JSONObject jsonObject = new JSONObject( result );
 				newArray = jsonObject.optJSONArray("entities");
 				
 				ProductActivityCommentsData newData;
@@ -196,52 +199,20 @@ public class ProductCommentLayout extends AbstractViewLayout implements OnClickL
 			}
 			
 			commentAdapter.setData( activityCommentsData );
-			this.getActivity().runOnUiThread( new Runnable() {
-				@Override
-				public void run() {
-					commentText.setText("");
-					commentListView.setAdapter( commentAdapter );
-				}
-			});
-		}else if( urlString.equals( deleteCommentUrl ) ){
-			JSONObject jsonObject = null;
-			try {
-				jsonObject = new JSONObject( result ).optJSONObject( "status" );
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-			
-			if( jsonObject != null ){
-				String deleteCommentId = jsonObject.optString( "id" );
-				ArrayList<ProductActivityCommentsData> newActivityCommentsData = new ArrayList<ProductActivityCommentsData>();
-				for( ProductActivityCommentsData fetchData:activityCommentsData ){
-					String currentCommentId = fetchData.getId();
-					if( !(deleteCommentId.equals( currentCommentId )) ){
-						newActivityCommentsData.add( fetchData );
-					}
-				}
-				activityCommentsData = newActivityCommentsData;
-			}
+			commentListView.setAdapter( commentAdapter );
+		}else if( urlString.equals( addCommentDataURL ) ){
+			ProductActivityCommentsData newData = new ProductActivityCommentsData( jsonObject );
+			activityCommentsData.add( newData );
 			
 			commentAdapter.setData( activityCommentsData );
-			this.getActivity().runOnUiThread( new Runnable() {
-				@Override
-				public void run() {
-					commentText.setText("");
-					commentListView.setAdapter( commentAdapter );
-					commentListView.invalidateViews();
-				}
-			});
+			commentText.setText("");
+			commentListView.setAdapter( commentAdapter );
 		}
 		
+		if( loadingDialog.isShowing() ){
+			loadingDialog.dismiss();
+		}
 	}
-	
-	@Override
-	public void onNetworkFail(String urlString) {
-		// TODO Auto-generated method stub
-		
-	}*/
 	
 	private void recycleResource() {
 		activityCommentsData.clear();
@@ -278,20 +249,22 @@ public class ProductCommentLayout extends AbstractViewLayout implements OnClickL
 				returnView = new ProductCommentItemLayout( ProductCommentLayout.this.getContext() );
 			}else{
 				returnView = (ProductCommentItemLayout) convertView;
+				returnView.setUsetImageDefault();
 			}
 			
 			String getUserImageURL = data.get( position ).getActor().getPicture().getImageUrls().getImageURLT();
 			String setUserName = data.get( position ).getActor().getName();
 			String setCommentText = data.get( position ).getComment().getCommentText();
+			String setPostTime = CalculateTime.getPostTime( data.get( position ).getActivityTime() );
 			
 			imageLoader.DisplayImage(getUserImageURL, ProductCommentLayout.this.getActivity(), returnView.getUserImageView(), true, asyncHttpClient);
 			returnView.setUserName( setUserName );
 			returnView.setCommentText( setCommentText );
+			returnView.setPostTime( setPostTime );
 			returnView.setOnClickListener( ProductCommentLayout.this );
 			returnView.setProductCommentActivityData( data.get( position ) );
 			returnView.getDeleteButton().setActivityCommentsData( data.get( position ) );
 			returnView.getDeleteButton().setOnClickListener( ProductCommentLayout.this );
-			//returnView.setCommentTime(  );
 			
 			if( deleteButtonStatus == DELETE_BUTTON_STATUS_HIDE ){
 				returnView.setDeleteButtonLayout( ProductCommentItemLayout.DELETE_LAYOUT_INVISIBLE );
@@ -321,12 +294,6 @@ public class ProductCommentLayout extends AbstractViewLayout implements OnClickL
 			String commentActivityId = commentDeleteButton.getActivityCommentsData().getId();
 			deleteCommentUrl = config.get( MyApp.URL_DEFAULT ).toString()+"activities/"+commentActivityId+".json";
 			
-			/*HashMap< String, String > dataMap = new HashMap<String, String>();
-			dataMap.put( "_a", "delete" );
-			String postData = NetworkUtil.createPostData( dataMap );
-			
-			NetworkThreadUtil.getRawDataWithCookie( deleteCommentUrl, postData, appCookie, this );*/
-			
 			HashMap<String, String> paramMap = new HashMap<String, String>();
 			paramMap.put( "_a", "delete" );
 			RequestParams params = new RequestParams(paramMap);
@@ -355,6 +322,14 @@ public class ProductCommentLayout extends AbstractViewLayout implements OnClickL
 					commentListView.invalidateViews();
 				}
 			});
+		}else if( v.equals( backButton ) ){
+			InputMethodManager imm = (InputMethodManager) this.getActivity().getSystemService(
+				      Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow( commentText.getWindowToken(), 0 );
+			
+			if(listener != null){
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_BACK_BUTTON );
+			}
 		}else if(listener != null){
 			if( v instanceof ProductCommentItemLayout ){
 				ProductCommentItemLayout productCommentItemLayout = (ProductCommentItemLayout) v;
@@ -370,20 +345,31 @@ public class ProductCommentLayout extends AbstractViewLayout implements OnClickL
 	private void submitCommentText() {
 		String text = commentText.getText().toString();
 		if( !(text.equals("")) && !(text.equals(null)) ){
-			/*HashMap< String, String > dataMap = new HashMap<String, String>();
-			dataMap.put( "text", text );
-			String postData = NetworkUtil.createPostData( dataMap );
-			
-			NetworkThreadUtil.getRawDataWithCookie(getCommentDataURL, postData, appCookie, this);*/
-			
 			HashMap<String, String> paramMap = new HashMap<String, String>();
 			paramMap.put( "text", text );
 			RequestParams params = new RequestParams(paramMap);
-			asyncHttpClient.get( getCommentDataURL, params, new JsonHttpResponseHandler(){
+			asyncHttpClient.post( addCommentDataURL, params, new JsonHttpResponseHandler(){
 				@Override
 				public void onSuccess(JSONObject jsonObject) {
 					super.onSuccess(jsonObject);
-					onGetCommentURLSuccess( jsonObject );
+					try {
+						String checkJson = jsonObject.getString("id");
+						onGetCommentURLSuccess( jsonObject, addCommentDataURL );
+					} catch (JSONException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+						final AlertDialog alertDialog = new AlertDialog.Builder( ProductCommentLayout.this.getContext() ).create();
+						alertDialog.setTitle( "Error" );
+						alertDialog.setMessage( "Add comment fail." );
+						alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+							@Override
+							public void onClick(DialogInterface dialog, int which) {
+								// TODO Auto-generated method stub
+								alertDialog.dismiss();
+							}
+						});
+						alertDialog.show();
+					}
 				}
 			});
 		}

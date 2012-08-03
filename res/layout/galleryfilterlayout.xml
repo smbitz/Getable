@@ -43,7 +43,7 @@
 	            android:layout_height="match_parent">
 
 	            <TextView
-	                android:id="@+id/textView1"
+	                android:id="@+id/galleryFilterLocationText"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:text="LOCATION"
@@ -98,7 +98,7 @@
 	                android:orientation="vertical" >
 	            </LinearLayout>
 
-	    <LinearLayout
+	    <!--<LinearLayout
 	        android:id="@+id/galleryFilterMetroLayout"
 	        android:layout_width="match_parent"
 	        android:layout_height="wrap_content"
@@ -117,6 +117,27 @@
 	            android:orientation="vertical" >
 	        </LinearLayout>
 
+	    </LinearLayout>-->
+	    
+	    <LinearLayout
+	        android:id="@+id/galleryFilterMetroLayout"
+	        android:layout_width="match_parent"
+	        android:layout_height="match_parent"
+	        android:layout_weight="1"
+	        android:orientation="vertical" android:visibility="gone">
+	        
+	        <kankan.wheel.widget.WheelView android:id="@+id/galleryFilterMetrosWheelView"
+		        android:layout_height="120dp"
+		        android:layout_width="match_parent"
+		        android:layout_gravity="center_vertical"
+		        android:layout_weight="1"/>
+
+	        <LinearLayout
+	            android:layout_width="match_parent"
+	            android:layout_height="5dp"
+	            android:orientation="vertical" >
+	        </LinearLayout>
+
 	    </LinearLayout>
 
 	    <LinearLayout
@@ -126,7 +147,7 @@
 
 	        <LinearLayout
 	            android:layout_width="match_parent"
-	            android:layout_height="match_parent" android:layout_weight="2.95">
+	            android:layout_height="match_parent" android:layout_weight="2.45">
 
 	            <LinearLayout
 	                android:layout_width="wrap_content"
@@ -134,7 +155,7 @@
 	            </LinearLayout>
 
 	            <TextView
-	                android:id="@+id/textView2"
+	                android:id="@+id/galleryFilterSortText"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:text="SORT"
@@ -143,7 +164,7 @@
 	            <LinearLayout
 	                android:layout_width="wrap_content"
 	                android:layout_height="match_parent"
-	                android:layout_weight="1" >
+	                android:layout_weight="0.6" >
 	            </LinearLayout>
 
 	        </LinearLayout>

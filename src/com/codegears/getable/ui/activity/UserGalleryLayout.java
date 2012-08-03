@@ -52,6 +52,7 @@ public class UserGalleryLayout extends AbstractViewLayout implements OnItemClick
 	private ImageLoader imageLoader;
 	private MyApp app;
 	private AsyncHttpClient asyncHttpClient;
+	private ProgressDialog loadingDialog;
 	
 	public UserGalleryLayout(Activity activity, String setDataURL, String setViewDataType) {
 		super(activity);
@@ -68,12 +69,20 @@ public class UserGalleryLayout extends AbstractViewLayout implements OnItemClick
 		arrayProductData = new ArrayList<ProductActivityData>();
 		imageLoader = new ImageLoader( this.getContext() );
 		
+		loadingDialog = new ProgressDialog( this.getContext() );
+		loadingDialog.setTitle("");
+		loadingDialog.setMessage("Loading. Please wait...");
+		loadingDialog.setIndeterminate( true );
+		loadingDialog.setCancelable( true );
+		
 		userDataURL = setDataURL;
 
 		loadData();
 	}
 
 	private void loadData() {
+		loadingDialog.show();
+		
 		recycleResource();
 		//NetworkThreadUtil.getRawData( userDataURL, null, this);
 		asyncHttpClient.get( userDataURL, new JsonHttpResponseHandler(){
@@ -112,6 +121,10 @@ public class UserGalleryLayout extends AbstractViewLayout implements OnItemClick
 				userGalleryGrid.setAdapter( userGalleryAdapter );
 			}
 		});
+		
+		if( loadingDialog.isShowing() ){
+			loadingDialog.dismiss();
+		}
 	}
 
 	private void recycleResource() {
@@ -126,8 +139,8 @@ public class UserGalleryLayout extends AbstractViewLayout implements OnItemClick
 	
 	@Override
 	public void refreshView() {
-		// TODO Auto-generated method stub
-		
+		recycleResource();
+		loadData();
 	}
 	
 	public void setBodyLayoutStackListener( BodyLayoutStackListener setListener ){

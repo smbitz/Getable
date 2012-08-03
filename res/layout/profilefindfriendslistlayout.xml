@@ -28,26 +28,73 @@
                 android:text="Follow All" android:layout_gravity="center" android:background="@null" android:textColor="#ffffff" android:layout_weight="1"/>
 
         </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center" >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
+
+                <ImageButton
+                    android:id="@+id/profileFindFriendsListBackButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:background="@null"
+                    android:src="@drawable/back_button" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="3.5" >
+            </LinearLayout>
+        </LinearLayout>
 
     </FrameLayout>
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical" android:background="@color/NameColorGrey" android:id="@+id/profileFindfriendsListLayoutSearchLayout" android:visibility="gone">
+        android:orientation="vertical" android:id="@+id/profileFindfriendsListLayoutSearchLayout" android:background="@color/BGColorGrey" android:visibility="gone">
 
         <EditText
             android:id="@+id/profileFindfriendsListLayoutSearchDialog"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:ems="10"/>
+            android:ems="10" android:layout_gravity="center"/>
 
     </LinearLayout>
 
     <ListView
         android:id="@+id/profileFindFriendsListView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" android:cacheColorHint="#00000000" android:dividerHeight="0.5dp" android:divider="#c0bbb8">
+        android:layout_height="wrap_content" android:cacheColorHint="#00000000" android:dividerHeight="0.5dp" android:divider="#c0bbb8" android:listSelector="#00000000">
     </ListView>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" android:layout_marginTop="5dp" android:id="@+id/profileFindFriendsListLayoutNoUserFoundLayout">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" android:layout_weight="1">
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/profileFindFriendsListLayoutNoUserFoundText"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"/>
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent" android:layout_weight="1">
+        </LinearLayout>
+
+    </LinearLayout>
 
 </LinearLayout>

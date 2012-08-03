@@ -1,0 +1,439 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#ffffff"
+    android:orientation="vertical" >
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <com.codegears.getable.ui.AppHeader
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+        </com.codegears.getable.ui.AppHeader>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center" >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="5" >
+            </LinearLayout>
+
+            <Button
+                android:id="@+id/shareProductAddNewStoreAddressNextButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:background="@null"
+                android:text="Next"
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:textColor="#ffffff" />
+        </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center" >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
+
+                <ImageButton
+                    android:id="@+id/shareProductAddNewStoreAddressBackButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:background="@null"
+                    android:src="@drawable/back_button" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="3.5" >
+            </LinearLayout>
+        </LinearLayout>
+        
+    </FrameLayout>
+
+    <ScrollView
+        android:id="@+id/scrollView1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="vertical" >
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal" >
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/shareProductAddNewStoreAddressText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Address"
+                    android:textColor="#000000" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2.1" >
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/shareProductAddNewStoreAddress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1.5"
+                    android:background="@null"
+                    android:ellipsize="end"
+                    android:ems="10"
+                    android:hint="Optional"
+                    android:inputType="textImeMultiLine"
+                    android:lines="1"
+                    android:textColorHint="@color/NameColorGreyHint"
+                    android:textSize="15dp" >
+                </EditText>
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/ImageView05"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/image_line" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal" >
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/shareProductAddNewStoreAddressCrossStreetText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Cross street"
+                    android:textColor="#000000" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="0.85" >
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/shareProductAddNewStoreAddressCrossStreet"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1.5"
+                    android:background="@null"
+                    android:ellipsize="end"
+                    android:ems="10"
+                    android:hint="Optional"
+                    android:inputType="textImeMultiLine"
+                    android:lines="1"
+                    android:textColorHint="@color/NameColorGreyHint"
+                    android:textSize="15dp" />
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/ImageView04"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/image_line" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal" >
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/shareProductAddNewStoreAddressCityText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="City"
+                    android:textColor="#000000" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3.6" >
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/shareProductAddNewStoreAddressCity"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1.5"
+                    android:background="@null"
+                    android:ellipsize="end"
+                    android:ems="10"
+                    android:hint="Optional"
+                    android:inputType="textImeMultiLine"
+                    android:lines="1"
+                    android:textColorHint="@color/NameColorGreyHint"
+                    android:textSize="15dp" />
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/ImageView03"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/image_line" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal" >
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/shareProductAddNewStoreAddressStateText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="State"
+                    android:textColor="#000000" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="3.3" >
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/shareProductAddNewStoreAddressState"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1.5"
+                    android:background="@null"
+                    android:ellipsize="end"
+                    android:ems="10"
+                    android:hint="Optional"
+                    android:inputType="textImeMultiLine"
+                    android:lines="1"
+                    android:textColorHint="@color/NameColorGreyHint"
+                    android:textSize="15dp" />
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/ImageView02"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/image_line" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal" >
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/shareProductAddNewStoreAddressPostCodeText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Postcode"
+                    android:textColor="#000000" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="1.8" >
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/shareProductAddNewStoreAddressPostCode"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1.5"
+                    android:background="@null"
+                    android:ellipsize="end"
+                    android:ems="10"
+                    android:hint="Optional"
+                    android:inputType="number"
+                    android:lines="1"
+                    android:textColorHint="@color/NameColorGreyHint"
+                    android:textSize="15dp" />
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/ImageView01"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/image_line" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal" >
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/shareProductAddNewStoreAddressPhoneText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Phone"
+                    android:textColor="#000000" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2.8" >
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/shareProductAddNewStoreAddressPhone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1.5"
+                    android:background="@null"
+                    android:ellipsize="end"
+                    android:ems="10"
+                    android:hint="Optional"
+                    android:inputType="phone"
+                    android:lines="1"
+                    android:textColorHint="@color/NameColorGreyHint"
+                    android:textSize="15dp" >
+                </EditText>
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/imageView2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/image_line" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:orientation="horizontal" >
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+
+                <TextView
+                    android:id="@+id/shareProductAddNewStoreAddressTwitterText"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:text="Twitter"
+                    android:textColor="#000000" />
+
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout_weight="2.5" >
+                </LinearLayout>
+
+                <EditText
+                    android:id="@+id/shareProductAddNewStoreAddressTwitter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_weight="1.5"
+                    android:background="@null"
+                    android:ellipsize="end"
+                    android:ems="10"
+                    android:hint="Optional"
+                    android:inputType="textImeMultiLine"
+                    android:lines="1"
+                    android:textColorHint="@color/NameColorGreyHint"
+                    android:textSize="15dp" />
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
+            </LinearLayout>
+
+            <ImageView
+                android:id="@+id/ImageView06"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/image_line" />
+        </LinearLayout>
+    </ScrollView>
+
+</LinearLayout>

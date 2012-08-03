@@ -1,9 +1,12 @@
 package com.codegears.getable.ui;
 
+import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
 import com.codegears.getable.data.WishlistData;
 
 import android.content.Context;
+import android.graphics.Typeface;
+import android.view.Gravity;
 import android.view.View;
 import android.widget.Button;
 import android.widget.LinearLayout;
@@ -24,7 +27,12 @@ public class ProductWishlistItem extends LinearLayout {
 		itemQty = (TextView) findViewById( R.id.productWishlistItemWishlistQuantity );
 		addRemoveButtonLayout = (LinearLayout) findViewById( R.id.productWishlistItemAddRemoveButtonLayout );
 		
+		//Set font
+		name.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		itemQty.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		
 		addRemoveButton = new WishlistAddRemoveButton( context );
+		addRemoveButton.setGravity( Gravity.CENTER );
 		
 		addRemoveButtonLayout.addView( addRemoveButton );
 	}

@@ -2,16 +2,22 @@ package com.codegears.getable.ui.activity;
 
 import java.util.HashMap;
 
+import org.json.JSONException;
 import org.json.JSONObject;
 
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.ToggleButton;
 
+import com.codegears.getable.BodyLayoutStackListener;
+import com.codegears.getable.MainActivity;
 import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
 import com.codegears.getable.data.ActorData;
@@ -48,6 +54,9 @@ public class ProductSetupSocialShareLayout extends AbstractViewLayout implements
 	private ActorData currentActorData;
 	private int facebookButtonStatus;
 	private int twitterButtonStatus;
+	private ImageButton backButton;
+	private BodyLayoutStackListener listener;
+	private AlertDialog alertDialog;
 	
 	public ProductSetupSocialShareLayout(Activity activity) {
 		super(activity);
@@ -58,6 +67,7 @@ public class ProductSetupSocialShareLayout extends AbstractViewLayout implements
 		config = new Config( this.getContext() );
 		facebook = app.getFacebook();
 		currentActorData = app.getCurrentProfileData();
+		alertDialog = new AlertDialog.Builder( this.getContext() ).create();
 		
 		SharedPreferences socialPrefs = this.getActivity().getSharedPreferences( MyApp.SHARE_PREF_SOCIAL_STATUS_BUTTON, this.getActivity().MODE_PRIVATE );
 		facebookButtonStatus = socialPrefs.getInt( MyApp.SHARE_PREF_KEY_FACEBOOK_BUTTON_STATUS, 0 );
@@ -67,11 +77,13 @@ public class ProductSetupSocialShareLayout extends AbstractViewLayout implements
 		facebookConfigText = (TextView) findViewById( R.id.productSetupSocialShareFacebookConfigText );
 		twitterConfigButton = (ToggleButton) findViewById( R.id.productSetupSocialShareTwitterConfigButton );
 		twitterConfigText = (TextView) findViewById( R.id.productSetupSocialShareTwitterConfigText );
+		backButton = (ImageButton) findViewById( R.id.productSetupSocialShareListLayoutBackButton );
 		
 		facebookConfigButton.setOnClickListener( this );
 		twitterConfigButton.setOnClickListener( this );
 		facebookConfigText.setOnClickListener( this );
 		twitterConfigText.setOnClickListener( this );
+		backButton.setOnClickListener( this );
 		
 		loadingDialog = new ProgressDialog( this.getActivity() );
 		loadingDialog.setTitle("");
@@ -123,6 +135,10 @@ public class ProductSetupSocialShareLayout extends AbstractViewLayout implements
 			twitterConfigText.setVisibility( View.VISIBLE );
 		}
 	}
+	
+	public void setBodyLayoutChangeListener(BodyLayoutStackListener setListener) {
+		this.listener = setListener;
+	}
 
 	@Override
 	public void refreshView(Intent getData) {
@@ -172,7 +188,7 @@ public class ProductSetupSocialShareLayout extends AbstractViewLayout implements
 		}else if( v.equals( facebookConfigText ) ){
 			loadingDialog.show();
 			
-			SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences( this.getActivity() );
+			/*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences( this.getActivity() );
 			String currentAccessToken = prefs.getString( ConnectFacebook.FACEBOOK_ACCESS_TOKEN, null );
 			long expires = prefs.getLong( ConnectFacebook.FACEBOOK_ACCESS_EXPIRES, 0);
 			if(currentAccessToken != null) {
@@ -231,9 +247,172 @@ public class ProductSetupSocialShareLayout extends AbstractViewLayout implements
 						refreshView();
 					}
 				});
-			}
+			}*/
+			facebook.authorize( this.getActivity(), MyApp.FACEBOOK_PERMISSION, new DialogListener() {
+				
+				@Override
+				public void onFacebookError(FacebookError e) {
+					System.out.println("ProductSetupShareFacebookError1 : "+e);
+					alertDialog.setTitle( "Error" );
+					alertDialog.setMessage( "Cannot connect facebook." );
+					alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							// TODO Auto-generated method stub
+							alertDialog.dismiss();
+						}
+					});
+					alertDialog.show();
+					
+					if( loadingDialog.isShowing() ){
+						loadingDialog.dismiss();
+					}
+				}
+				
+				@Override
+				public void onError(DialogError e) { 
+					System.out.println("ProductSetupShareFacebookError2 : "+e);
+					alertDialog.setTitle( "Error" );
+					alertDialog.setMessage( "Cannot connect facebook." );
+					alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+						@Override
+						public void onClick(DialogInterface dialog, int which) {
+							// TODO Auto-generated method stub
+							alertDialog.dismiss();
+						}
+					});
+					alertDialog.show();
+					
+					if( loadingDialog.isShowing() ){
+						loadingDialog.dismiss();
+					}
+				}
+				
+				@Override
+				public void onComplete(Bundle values) {
+					String token = facebook.getAccessToken();  //get access token
+					Long expires = facebook.getAccessExpires();  //get access expire
+					
+					SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences( ProductSetupSocialShareLayout.this.getActivity() );
+					SharedPreferences.Editor editor = prefs.edit();
+					editor.putString( ConnectFacebook.FACEBOOK_ACCESS_TOKEN , token);
+					editor.putLong( ConnectFacebook.FACEBOOK_ACCESS_EXPIRES , expires);
+					editor.commit();
+					
+					HashMap<String, String> paramMap = new HashMap<String, String>();
+					paramMap.put( "accessToken", facebook.getAccessToken() );
+					paramMap.put( "_a", "connect" );
+					RequestParams params = new RequestParams(paramMap);
+					asyncHttpClient.post( connectFacebookURL, params, new JsonHttpResponseHandler(){
+						@Override
+						public void onSuccess(JSONObject jsonObject) {
+							super.onSuccess(jsonObject);
+							try {
+								String checkValue = jsonObject.getString( "status" );
+								refreshView();
+							} catch (JSONException e) {
+								System.out.println("ProductSetupShareFacebookError3 : "+e);
+								e.printStackTrace();
+								if( loadingDialog.isShowing() ){
+									loadingDialog.dismiss();
+								}
+								
+								JSONObject errorObject;
+								try {
+									errorObject = jsonObject.getJSONObject( "error" );
+									String message = errorObject.optString( "message" );
+									alertDialog.setTitle( "Error" );
+									alertDialog.setMessage( message );
+									alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+										@Override
+										public void onClick(DialogInterface dialog, int which) {
+											// TODO Auto-generated method stub
+											alertDialog.dismiss();
+										}
+									});
+									alertDialog.show();
+								} catch (JSONException e1) {
+									// TODO Auto-generated catch block
+									System.out.println("ProductSetupShareFacebookError4 : "+e1);
+									e1.printStackTrace();
+									alertDialog.setTitle( "Error" );
+									alertDialog.setMessage( "Cannot connect facebook." );
+									alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+										@Override
+										public void onClick(DialogInterface dialog, int which) {
+											// TODO Auto-generated method stub
+											alertDialog.dismiss();
+										}
+									});
+									alertDialog.show();
+								}
+							}
+						}
+						
+						@Override
+						public void onFailure(Throwable arg0, JSONObject arg1) {
+							// TODO Auto-generated method stub
+							System.out.println("ProductSetupShareFacebookError5 : "+arg1);
+							super.onFailure(arg0, arg1);
+							if( loadingDialog.isShowing() ){
+								loadingDialog.dismiss();
+							}
+							
+							alertDialog.setTitle( "Error" );
+							alertDialog.setMessage( "Cannot connect facebook." );
+							alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									// TODO Auto-generated method stub
+									alertDialog.dismiss();
+								}
+							});
+							alertDialog.show();
+						}
+						
+						@Override
+						public void onFailure(Throwable arg0, String arg1) {
+							System.out.println("ProductSetupShareFacebookError6 : "+arg1);
+							super.onFailure(arg0, arg1);
+							if( loadingDialog.isShowing() ){
+								loadingDialog.dismiss();
+							}
+							
+							alertDialog.setTitle( "Error" );
+							alertDialog.setMessage( "Cannot connect facebook." );
+							alertDialog.setButton( "ok", new DialogInterface.OnClickListener() {
+								@Override
+								public void onClick(DialogInterface dialog, int which) {
+									// TODO Auto-generated method stub
+									alertDialog.dismiss();
+								}
+							});
+							alertDialog.show();
+						}
+					});
+				}
+				
+				@Override
+				public void onCancel() {
+					if( loadingDialog.isShowing() ){
+						loadingDialog.dismiss();
+					}
+				}
+				
+			});
 		}else if( v.equals( twitterConfigText ) ){
-			
+			if(listener != null){
+				SharedPreferences myPreferences = this.getActivity().getSharedPreferences( ProfileLayoutWebView.SHARE_PREF_WEB_VIEW_TYPE, this.getActivity().MODE_PRIVATE );
+				SharedPreferences.Editor prefsEditor = myPreferences.edit();
+				prefsEditor.putString( ProfileLayoutWebView.WEB_VIEW_TYPE, ProfileLayoutWebView.WEB_VIEW_TYPE_CONNECT_TWITTER );
+				prefsEditor.putInt( ProfileLayoutWebView.CONNECT_TWITTER_FROM, ProfileLayoutWebView.CONNECT_TWITTER_FROM_PRODUCT_DETAIL );
+				prefsEditor.commit();
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PROFILE_WEBVIEW );
+			}
+		}else if( v.equals( backButton ) ){
+			if (listener != null) {
+				listener.onRequestBodyLayoutStack(MainActivity.LAYOUTCHANGE_BACK_BUTTON);
+			}
 		}
 	}
 

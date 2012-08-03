@@ -1,10 +1,12 @@
 package com.codegears.getable.ui;
 
+import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
 import com.codegears.getable.data.WishlistData;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.Typeface;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -24,6 +26,10 @@ public class UserWishlistsGrouptItem extends LinearLayout {
 		wishlistsImage = (ImageView) findViewById( R.id.userWishlistsImage );
 		wishlistsName = (TextView) findViewById( R.id.userWishlistsName );
 		wishlistsItemNumber = (TextView) findViewById( R.id.userWishlistsItemNumber );
+		
+		//Set font
+		wishlistsName.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		wishlistsItemNumber.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
 	}
 	
 	public void setWishlistsImage( Bitmap setBitmap ){

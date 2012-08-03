@@ -14,15 +14,18 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.Dialog;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.ColorDrawable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -39,6 +42,7 @@ import com.loopj.android.http.JsonHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 
 public class ProfileEditProfile extends AbstractViewLayout implements OnClickListener {
 	
@@ -58,6 +62,12 @@ public class ProfileEditProfile extends AbstractViewLayout implements OnClickLis
 	private ProgressDialog loadingDialog;
 	private Config config;
 	private AsyncHttpClient asyncHttpClient;
+	private ImageButton backButton;
+	private TextView editProfileText;
+	private TextView firstNameText;
+	private TextView lastNameText;
+	private TextView phoneText;
+	private TextView genderText;
 	
 	public ProfileEditProfile(Activity activity) {
 		super(activity);
@@ -74,9 +84,28 @@ public class ProfileEditProfile extends AbstractViewLayout implements OnClickLis
 		textViewGender = (TextView) findViewById( R.id.textViewProfileGender );
 		editProfileGenderLayout = (LinearLayout) findViewById( R.id.editProfileGenderLayout );
 		doneButton = (Button) findViewById( R.id.editProfileDoneButton );
+		backButton = (ImageButton) findViewById( R.id.editProfileBackButton );
+		editProfileText = (TextView) findViewById( R.id.editProfileText );
+		firstNameText = (TextView) findViewById( R.id.editProfileFirstNameText );
+		lastNameText = (TextView) findViewById( R.id.editProfileLastNameText );
+		phoneText = (TextView) findViewById( R.id.editProfilePhoneText );
+		genderText = (TextView) findViewById( R.id.editProfileGenderText );
+		
+		//Set font
+		editProfileText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		firstNameText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		lastNameText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		phoneText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		genderText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		doneButton.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH_2) );
+		editTextFirstName.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		editTextLastName.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		editTextPhoneNumber.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		textViewGender.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
 		
 		editTextFirstName.setText( userProfileData.getFirstName() );
 		editTextLastName.setText( userProfileData.getLastName() );
+		System.out.println("AppUserPhone2 : "+userProfileData.getPhone());
 		editTextPhoneNumber.setText( userProfileData.getPhone() );
 		
 		editTextFirstName.addTextChangedListener( new TextWatcher() {
@@ -98,7 +127,7 @@ public class ProfileEditProfile extends AbstractViewLayout implements OnClickLis
 			public void afterTextChanged(Editable s) {
 				if( s.length() == 0 ||
 					editTextLastName.getText().length() == 0){
-					doneButton.setTextColor( R.color.NameColorGrey );
+					doneButton.setTextColor( R.color.NameColorBlueSubmitEnableFalse );
 					doneButton.setEnabled( false );
 				}else{
 					doneButton.setTextColor( Color.WHITE );
@@ -126,7 +155,7 @@ public class ProfileEditProfile extends AbstractViewLayout implements OnClickLis
 			public void afterTextChanged(Editable s) {
 				if( s.length() == 0 ||
 					editTextFirstName.getText().length() == 0){
-					doneButton.setTextColor( R.color.NameColorGrey );
+					doneButton.setTextColor( R.color.NameColorBlueSubmitEnableFalse );
 					doneButton.setEnabled( false );
 				}else{
 					doneButton.setTextColor( Color.WHITE );
@@ -154,6 +183,7 @@ public class ProfileEditProfile extends AbstractViewLayout implements OnClickLis
 		
 		editProfileGenderLayout.setOnClickListener( this );
 		doneButton.setOnClickListener( this );
+		backButton.setOnClickListener( this );
 		
 		updateUserURL = config.get( MyApp.URL_DEFAULT ).toString()+"me.json";
 	}
@@ -183,6 +213,10 @@ public class ProfileEditProfile extends AbstractViewLayout implements OnClickLis
 			customDialogMaleButton = (Button) dialog.findViewById( R.id.customDialogGenderMaleButton );
 			customDialogFemaleButton = (Button) dialog.findViewById( R.id.customDialogGenderFemaleButton );
 			customDialogNotSayButton = (Button) dialog.findViewById( R.id.customDialogGenderNotSayButton );
+			
+			customDialogMaleButton.setTypeface( Typeface.createFromAsset( ProfileEditProfile.this.getContext().getAssets(), MyApp.APP_FONT_PATH ) );
+			customDialogFemaleButton.setTypeface( Typeface.createFromAsset( ProfileEditProfile.this.getContext().getAssets(), MyApp.APP_FONT_PATH ) );
+			customDialogNotSayButton.setTypeface( Typeface.createFromAsset( ProfileEditProfile.this.getContext().getAssets(), MyApp.APP_FONT_PATH ) );
 			
 			customDialogMaleButton.setOnClickListener( new OnClickListener() {
 				@Override
@@ -214,6 +248,12 @@ public class ProfileEditProfile extends AbstractViewLayout implements OnClickLis
 			dialog.getWindow().setBackgroundDrawable(new ColorDrawable(android.graphics.Color.TRANSPARENT));
 			dialog.show();
 		}else if( v.equals( doneButton ) ){
+			InputMethodManager imm = (InputMethodManager) this.getActivity().getSystemService(
+				      Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow( editTextFirstName.getWindowToken(), 0 );
+				imm.hideSoftInputFromWindow( editTextLastName.getWindowToken(), 0 );
+				imm.hideSoftInputFromWindow( editTextPhoneNumber.getWindowToken(), 0 );
+			
 			loadingDialog.show();
 			
 			String editedName = editTextFirstName.getText().toString();
@@ -227,16 +267,6 @@ public class ProfileEditProfile extends AbstractViewLayout implements OnClickLis
 				editedGender = MyApp.PROFILE_GENDER_FEMALE_ID;
 			}
 			
-			/*HashMap< String, String > dataMap = new HashMap<String, String>();
-			dataMap.put( "firstName", editedName );
-			dataMap.put( "lastName", editedLastName );
-			dataMap.put( "phoneNumber", editedPhone );
-			dataMap.put( "gender.value", editedGender );
-			dataMap.put( "_a", "put" );
-			String postData = NetworkUtil.createPostData( dataMap );
-			
-			NetworkThreadUtil.getRawDataWithCookie( updateUserURL, postData, app.getAppCookie(), this );*/
-			
 			HashMap<String, String> paramMap = new HashMap<String, String>();
 			paramMap.put( "firstName", editedName );
 			paramMap.put( "lastName", editedLastName );
@@ -244,25 +274,19 @@ public class ProfileEditProfile extends AbstractViewLayout implements OnClickLis
 			paramMap.put( "gender.value", editedGender );
 			paramMap.put( "_a", "put" );
 			RequestParams params = new RequestParams(paramMap);
-			/*asyncHttpClient.post( updateUserURL, params, new AsyncHttpResponseHandler(){
-				@Override
-				public void onSuccess(String arg0) {
-					super.onSuccess(arg0);
-					if( loadingDialog.isShowing() ){
-						loadingDialog.dismiss();
-					}
-					listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PROFILE_LAYOUT_BACK );
-				}
-			});*/
+
 			asyncHttpClient.post( updateUserURL, params, new JsonHttpResponseHandler(){
 				@Override
 				public void onSuccess(JSONObject jsonObject) {
 					super.onSuccess(jsonObject);
 					try {
 						//Check data.
-						String userId = jsonObject.getString( "id" );
+						String checkData = jsonObject.getString( "id" );
 						ActorData actorData = new ActorData( jsonObject );
+						System.out.println("UpdateUserResult : "+jsonObject);
+						System.out.println("UserPhone : "+actorData.getPhone());
 						app.setCurrentProfileData( actorData );
+						System.out.println("AppUserPhone1 : "+app.getCurrentProfileData().getPhone());
 						if(listener != null){
 							listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PROFILE_LAYOUT_BACK );
 						}
@@ -292,27 +316,17 @@ public class ProfileEditProfile extends AbstractViewLayout implements OnClickLis
 					}
 				}
 			});
+		}else if( v.equals( backButton ) ){
+			InputMethodManager imm = (InputMethodManager) this.getActivity().getSystemService(
+				      Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow( editTextFirstName.getWindowToken(), 0 );
+				imm.hideSoftInputFromWindow( editTextLastName.getWindowToken(), 0 );
+				imm.hideSoftInputFromWindow( editTextPhoneNumber.getWindowToken(), 0 );
+			
+			if(listener != null){
+				listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_BACK_BUTTON );
+			}
 		}
 	}
-
-	/*@Override
-	public void onNetworkDocSuccess(String urlString, Document document) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onNetworkRawSuccess(String urlString, String result) {
-		if( urlString.equals( updateUserURL ) ){
-			loadingDialog.dismiss();
-			listener.onRequestBodyLayoutStack( MainActivity.LAYOUTCHANGE_PROFILE_LAYOUT_BACK );
-		}
-	}
-
-	@Override
-	public void onNetworkFail(String urlString) {
-		// TODO Auto-generated method stub
-		
-	}*/
 	
 }

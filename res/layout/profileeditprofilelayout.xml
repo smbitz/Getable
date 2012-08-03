@@ -29,6 +29,32 @@
                 android:text="Done" android:layout_gravity="center" android:background="@null" android:textColor="#ffffff" android:layout_weight="1" android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         </LinearLayout>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center" >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
+
+                <ImageButton
+                    android:id="@+id/editProfileBackButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:background="@null"
+                    android:src="@drawable/back_button" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="3.5" >
+            </LinearLayout>
+        </LinearLayout>
 
     </FrameLayout>
 	
@@ -43,7 +69,7 @@
        </LinearLayout>
 
        <TextView
-           android:id="@+id/textView1"
+           android:id="@+id/editProfileText"
            android:layout_width="wrap_content"
            android:layout_height="wrap_content"
            android:layout_gravity="center"
@@ -73,7 +99,7 @@
 	            </LinearLayout>
 
 	            <TextView
-	                android:id="@+id/TextView02"
+	                android:id="@+id/editProfileFirstNameText"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:layout_gravity="center"
@@ -83,7 +109,7 @@
 	            <LinearLayout
 	                android:layout_width="wrap_content"
 	                android:layout_height="match_parent"
-	                android:layout_weight="1" >
+	                android:layout_weight="0.6" >
 	            </LinearLayout>
 
 	            <EditText
@@ -91,7 +117,7 @@
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:layout_weight="1.5"
-	                android:ems="10" android:layout_gravity="center" android:background="@null" android:textSize="15dp" android:lines="1">
+	                android:ems="10" android:layout_gravity="center" android:background="@null" android:textSize="15dp" android:lines="1" android:inputType="textImeMultiLine">
 
 	                <requestFocus />
 	            </EditText>
@@ -126,7 +152,7 @@
 	            </LinearLayout>
 
 	            <TextView
-	                android:id="@+id/TextView01"
+	                android:id="@+id/editProfileLastNameText"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:layout_gravity="center"
@@ -136,7 +162,7 @@
 	            <LinearLayout
 	                android:layout_width="wrap_content"
 	                android:layout_height="match_parent"
-	                android:layout_weight="1.2" >
+	                android:layout_weight="1" >
 	            </LinearLayout>
 
 	            <EditText
@@ -145,7 +171,7 @@
 	                android:layout_height="wrap_content"
 	                android:layout_weight="1.7"
 	                android:background="@null"
-	                android:ems="10" android:layout_gravity="center" android:textSize="15dp" android:lines="1"/>
+	                android:ems="10" android:layout_gravity="center" android:textSize="15dp" android:lines="1" android:inputType="textImeMultiLine"/>
 
 	            <LinearLayout
 	                android:layout_width="5dp"
@@ -177,7 +203,7 @@
 	            </LinearLayout>
 
 	            <TextView
-	                android:id="@+id/TextView07"
+	                android:id="@+id/editProfilePhoneText"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:layout_gravity="center"
@@ -197,7 +223,7 @@
 	                android:layout_weight="2.1"
 	                android:background="@null"
 	                android:ems="10" android:layout_gravity="center" android:textSize="15dp"
-	                android:numeric="integer" android:lines="1"/>
+	                android:numeric="integer" android:lines="1" android:inputType="phone"/>
 
 	            <LinearLayout
 	                android:layout_width="5dp"
@@ -229,7 +255,7 @@
 	            </LinearLayout>
 
 	            <TextView
-	                android:id="@+id/TextView06"
+	                android:id="@+id/editProfileGenderText"
 	                android:layout_width="wrap_content"
 	                android:layout_height="wrap_content"
 	                android:layout_gravity="center"
@@ -244,7 +270,7 @@
 
 	            <TextView
 	                android:id="@+id/textViewProfileGender"
-	                android:layout_width="215dp"
+	                android:layout_width="217dp"
 	                android:layout_height="wrap_content"
 	                android:layout_gravity="center" android:textColor="#000000" android:textSize="15dp"/>
 

@@ -109,7 +109,7 @@ public class ConnectFacebook {
 	}
 	
 	public void connectToFacebook(){
-		SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences( currentActivity );
+		/*SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences( currentActivity );
 		String currentAccessToken = prefs.getString( FACEBOOK_ACCESS_TOKEN, null );
 		long expires = prefs.getLong( FACEBOOK_ACCESS_EXPIRES, 0);
 		if(currentAccessToken != null) {
@@ -119,7 +119,7 @@ public class ConnectFacebook {
             facebook.setAccessExpires(expires);
         }
 		
-		if( !facebook.isSessionValid() ){
+		if( !facebook.isSessionValid() ){*/
 			facebook.authorize( currentActivity, new DialogListener() {
 				
 				@Override
@@ -145,13 +145,13 @@ public class ConnectFacebook {
 				public void onCancel() { }
 				
 			});
-		}else{
+		/*}else{
 			HashMap<String, String> paramMap = new HashMap<String, String>();
 			paramMap.put( "accessToken", facebook.getAccessToken() );
 			paramMap.put( "_a", "connect" );
 			RequestParams params = new RequestParams(paramMap);
 			asyncHttpClient.post( connectFacebookURL, params, null );
-		}
+		}*/
 	}
 	
 	private void saveFacebookAccessToken(String token, Long expires){

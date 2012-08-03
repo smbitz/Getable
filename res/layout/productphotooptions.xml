@@ -13,7 +13,7 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content" android:id="@+id/productDetailPhotoOptionMainLayout" android:visibility="invisible">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -45,7 +45,7 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/textView1"
+                    android:id="@+id/productDetailPhotoOptionsText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Photo options"
@@ -103,7 +103,7 @@
                                 android:layout_height="match_parent" >
 
                                 <TextView
-                                    android:id="@+id/textView2"
+                                    android:id="@+id/productDetailPhotoOptionsFlagForReviewText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Flag for Review" android:textColor="#ffffff"/>
@@ -155,7 +155,7 @@
                                 android:layout_height="match_parent" >
 
                                 <TextView
-                                    android:id="@+id/TextView01"
+                                    android:id="@+id/productDetailPhotoOptionsSharePostText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Share Post"
@@ -208,7 +208,7 @@
                                 android:layout_height="match_parent" >
 
                                 <TextView
-                                    android:id="@+id/TextView02"
+                                    android:id="@+id/productDetailPhotoOptionsCopyShareUrlText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Copy Share URL"
@@ -260,7 +260,7 @@
                                 android:layout_height="match_parent" >
 
                                 <TextView
-                                    android:id="@+id/TextView03"
+                                    android:id="@+id/productDetailPhotoOptionsEmailPhotoText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Email Photo"
@@ -313,7 +313,7 @@
                                 android:layout_height="match_parent" >
 
                                 <TextView
-                                    android:id="@+id/TextView04"
+                                    android:id="@+id/productDetailPhotoOptionsTextPhotoText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Text Photo"
@@ -379,7 +379,7 @@
                                 android:layout_height="match_parent" >
 
                                 <TextView
-                                    android:id="@+id/TextView10"
+                                    android:id="@+id/productDetailPhotoOptionsOwnDeleteText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Delete"
@@ -421,7 +421,7 @@
                             android:layout_weight="1" >
 
                             <Button
-                                android:id="@+id/productDetailPhotoOptionsShareButton"
+                                android:id="@+id/productDetailPhotoOptionsShareButtonOwn"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content" android:background="@null"/>
 
@@ -430,7 +430,7 @@
                                 android:layout_height="match_parent" >
 
                                 <TextView
-                                    android:id="@+id/TextView09"
+                                    android:id="@+id/productDetailPhotoOptionsOwnSharePostText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Share Post"
@@ -472,7 +472,7 @@
                             android:layout_weight="1" >
 
                             <Button
-                                android:id="@+id/productDetailPhotoOptionsCopyURLButton"
+                                android:id="@+id/productDetailPhotoOptionsCopyURLButtonOwn"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content" android:background="@null"/>
 
@@ -481,11 +481,10 @@
                                 android:layout_height="match_parent" >
 
                                 <TextView
-                                    android:id="@+id/TextView08"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Copy share URL"
-                                    android:textColor="#ffffff" />
+                                    android:textColor="#ffffff" android:id="@+id/productDetailPhotoOptionsOwnCopyShareUrlText"/>
                             </LinearLayout>
                         </FrameLayout>
 
@@ -523,7 +522,7 @@
                             android:layout_weight="1" >
 
                             <Button
-                                android:id="@+id/productDetailPhotoOptionsSendEmailButton"
+                                android:id="@+id/productDetailPhotoOptionsSendEmailButtonOwn"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content" android:background="@null"/>
 
@@ -532,7 +531,7 @@
                                 android:layout_height="match_parent" >
 
                                 <TextView
-                                    android:id="@+id/TextView07"
+                                    android:id="@+id/productDetailPhotoOptionsOwnEmailPhotoText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Email Photo"
@@ -574,7 +573,7 @@
                             android:layout_weight="1" >
 
                             <Button
-                                android:id="@+id/productDetailPhotoOptionsSendTextButton"
+                                android:id="@+id/productDetailPhotoOptionsSendTextButtonOwn"
                                 android:layout_width="match_parent"
                                 android:layout_height="wrap_content" android:background="@null"/>
 
@@ -583,7 +582,7 @@
                                 android:layout_height="match_parent" >
 
                                 <TextView
-                                    android:id="@+id/TextView06"
+                                    android:id="@+id/productDetailPhotoOptionsOwnTextPhotoText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Text Photo"
@@ -634,7 +633,7 @@
                                 android:layout_height="match_parent" >
 
                                 <TextView
-                                    android:id="@+id/TextView05"
+                                    android:id="@+id/productDetailPhotoOptionsOwnManageCommentText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Manage Comments"

@@ -9,7 +9,7 @@
         android:id="@+id/userGalleryGridView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:numColumns="3" android:horizontalSpacing="10dp" android:verticalSpacing="10dp" android:columnWidth="90dp">
+        android:numColumns="3" android:horizontalSpacing="10dp" android:verticalSpacing="10dp" android:columnWidth="90dp" android:listSelector="#00000000">
     </GridView>
 
 </LinearLayout>

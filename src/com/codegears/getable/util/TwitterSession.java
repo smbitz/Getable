@@ -13,6 +13,7 @@ public class TwitterSession {
 	private static final String TWEET_AUTH_KEY = "auth_key";
 	private static final String TWEET_AUTH_SECRET_KEY = "auth_secret_key";
 	private static final String TWEET_USER_NAME = "user_name";
+	private static final String TWEET_USER_ID = "user_id";
 	private static final String SHARED = "Twitter_Preferences";
 	
 	public TwitterSession(Context context) {
@@ -21,11 +22,12 @@ public class TwitterSession {
 		editor 		  = sharedPref.edit();
 	}
 	
-	public void storeAccessToken(AccessToken accessToken, String username) {
+	public void storeAccessToken(AccessToken accessToken, String username, String userId) {
 		editor.putString(TWEET_AUTH_KEY, accessToken.getToken());
 		editor.putString(TWEET_AUTH_SECRET_KEY, accessToken.getTokenSecret());
 		editor.putString(TWEET_USER_NAME, username);
-		
+		editor.putString(TWEET_USER_ID, userId );
+
 		editor.commit();
 	}
 	
@@ -33,12 +35,17 @@ public class TwitterSession {
 		editor.putString(TWEET_AUTH_KEY, null);
 		editor.putString(TWEET_AUTH_SECRET_KEY, null);
 		editor.putString(TWEET_USER_NAME, null);
+		editor.putString(TWEET_USER_ID, null);
 		
 		editor.commit();
 	}
 	
 	public String getUsername() {
 		return sharedPref.getString(TWEET_USER_NAME, "");
+	}
+	
+	public String getUserId() {
+		return sharedPref.getString(TWEET_USER_ID, "");
 	}
 	
 	public AccessToken getAccessToken() {

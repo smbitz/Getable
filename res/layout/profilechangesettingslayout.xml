@@ -3,10 +3,42 @@
 	android:orientation="vertical" android:layout_width="match_parent"
 	android:layout_height="match_parent">
 	
-    <com.codegears.getable.ui.AppHeader
-        android:layout_height="wrap_content"
-        android:layout_width="match_parent">
-    </com.codegears.getable.ui.AppHeader>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" >
+
+        <com.codegears.getable.ui.AppHeader
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
+        </com.codegears.getable.ui.AppHeader>
+        
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center" >
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
+
+                <ImageButton
+                    android:id="@+id/profileChangeSettingBackButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:background="@null"
+                    android:src="@drawable/back_button" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="3.5" >
+            </LinearLayout>
+        </LinearLayout>
+
+    </FrameLayout>
 
     <ScrollView
         android:id="@+id/scrollView1"
@@ -29,7 +61,7 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/textView1"
+                    android:id="@+id/profileChangeSettingAccountText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -54,12 +86,12 @@
 	                </LinearLayout>
 
 	                <TextView
-	                    android:id="@+id/textView2"
+	                    android:id="@+id/profileChangeSettingChangePasswordText"
 	                    android:layout_width="wrap_content"
 	                    android:layout_height="wrap_content"
 	                    android:layout_gravity="center"
 	                    android:text="Change Password"
-	                    android:textColor="@color/NameColorGrey" />
+	                    android:textColor="#000000" />
 
 	                <LinearLayout
 	                    android:layout_width="wrap_content"
@@ -144,7 +176,7 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/textView1"
+                    android:id="@+id/profileChangeSettingSharingText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -169,12 +201,12 @@
 	                </LinearLayout>
 
 	                <TextView
-	                    android:id="@+id/textView2"
+	                    android:id="@+id/profileChangeSettingFacebookText"
 	                    android:layout_width="wrap_content"
 	                    android:layout_height="wrap_content"
 	                    android:layout_gravity="center"
 	                    android:text="Facebook"
-	                    android:textColor="@color/NameColorGrey" />
+	                    android:textColor="#000000" />
 
 	                <LinearLayout
 	                    android:layout_width="wrap_content"
@@ -201,7 +233,7 @@
 	                </LinearLayout>
 
 	                <ImageView
-	                    android:id="@+id/imageView2"
+	                    android:id="@+id/profileChangeSettingFacebookArrowImage"
 	                    android:layout_width="wrap_content"
 	                    android:layout_height="wrap_content"
 	                    android:layout_gravity="center"
@@ -238,12 +270,12 @@
 	                </LinearLayout>
 
 	                <TextView
-	                    android:id="@+id/TextView01"
+	                    android:id="@+id/profileChangeSettingTwitterText"
 	                    android:layout_width="wrap_content"
 	                    android:layout_height="wrap_content"
 	                    android:layout_gravity="center"
 	                    android:text="Twitter"
-	                    android:textColor="@color/NameColorGrey" />
+	                    android:textColor="#000000" />
 
 	                <LinearLayout
 	                    android:layout_width="wrap_content"
@@ -270,7 +302,7 @@
 	                </LinearLayout>
 
 	                <ImageView
-	                    android:id="@+id/ImageView01"
+	                    android:id="@+id/profileChangeSettingTwitterArrowImage"
 	                    android:layout_width="wrap_content"
 	                    android:layout_height="wrap_content"
 	                    android:layout_gravity="center"
@@ -295,7 +327,7 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/textView1"
+                    android:id="@+id/profileChangeSettingNotificationText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
@@ -320,12 +352,12 @@
 	                </LinearLayout>
 
 	                <TextView
-	                    android:id="@+id/textView2"
+	                    android:id="@+id/profileChangeSettingFollowingText"
 	                    android:layout_width="wrap_content"
 	                    android:layout_height="wrap_content"
 	                    android:layout_gravity="center"
 	                    android:text="Following Activity"
-	                    android:textColor="@color/NameColorGrey" />
+	                    android:textColor="#000000" />
 
 	                <LinearLayout
 	                    android:layout_width="wrap_content"
@@ -335,7 +367,7 @@
 					
 	                <com.codegears.getable.ui.ProfileSettingNotificationButton
 	                    android:layout_width="wrap_content"
-	                    android:layout_height="wrap_content" android:layout_gravity="center" android:src="@drawable/notification_icon_push_1" android:background="@null" android:id="@+id/profileChangeSettingsFollowPushButton">
+	                    android:layout_height="wrap_content" android:layout_gravity="center" android:src="@drawable/notification_icon_push_1" android:background="@null" android:id="@+id/profileChangeSettingsFollowPushButton" android:visibility="invisible">
 	                </com.codegears.getable.ui.ProfileSettingNotificationButton>
 
 	                <LinearLayout
@@ -378,12 +410,12 @@
 	                </LinearLayout>
 
 	                <TextView
-	                    android:id="@+id/TextView01"
+	                    android:id="@+id/profileChangeSettingCommentText"
 	                    android:layout_width="wrap_content"
 	                    android:layout_height="wrap_content"
 	                    android:layout_gravity="center"
 	                    android:text="Comments"
-	                    android:textColor="@color/NameColorGrey" />
+	                    android:textColor="#000000" />
 
 	                <LinearLayout
 	                    android:layout_width="wrap_content"
@@ -395,7 +427,7 @@
 	                    android:layout_width="wrap_content"
 	                    android:layout_height="wrap_content"
 	                    android:background="@null"
-	                    android:src="@drawable/notification_icon_push_1" android:layout_gravity="center" android:id="@+id/profileChangeSettingsCommentPushButton"/>
+	                    android:src="@drawable/notification_icon_push_1" android:layout_gravity="center" android:id="@+id/profileChangeSettingsCommentPushButton" android:visibility="invisible"/>
 
 	                <LinearLayout
 	                    android:layout_width="15dp"
@@ -439,12 +471,12 @@
 	                </LinearLayout>
 
 	                <TextView
-	                    android:id="@+id/TextView01"
+	                    android:id="@+id/profileChangeSettingLikeText"
 	                    android:layout_width="wrap_content"
 	                    android:layout_height="wrap_content"
 	                    android:layout_gravity="center"
 	                    android:text="Likes"
-	                    android:textColor="@color/NameColorGrey" />
+	                    android:textColor="#000000" />
 
 	                <LinearLayout
 	                    android:layout_width="wrap_content"
@@ -456,7 +488,7 @@
 	                    android:layout_width="wrap_content"
 	                    android:layout_height="wrap_content"
 	                    android:background="@null"
-	                    android:src="@drawable/notification_icon_push_1" android:layout_gravity="center" android:id="@+id/profileChangeSettingsLikePushButton"/>
+	                    android:src="@drawable/notification_icon_push_1" android:layout_gravity="center" android:id="@+id/profileChangeSettingsLikePushButton" android:visibility="invisible"/>
 
 	                <LinearLayout
 	                    android:layout_width="15dp"

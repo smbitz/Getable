@@ -20,13 +20,13 @@
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="match_parent" >
+            android:layout_height="match_parent" android:layout_gravity="top">
 
             <ImageView
                 android:id="@+id/nearByItemProductImage"
                 android:layout_width="60dp"
-                android:layout_height="match_parent"
-                android:src="@drawable/empty_image" />
+                android:layout_height="60dp"
+                android:src="@drawable/empty_image" android:scaleType="fitStart"/>
 
         </LinearLayout>
 
@@ -35,104 +35,177 @@
             android:layout_height="match_parent" >
         </LinearLayout>
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical" android:layout_weight="1">
+            android:layout_height="match_parent" >
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
+                android:layout_height="match_parent"
+                android:orientation="vertical" >
 
-                <TextView
-                    android:id="@+id/nearByItemUserName"
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="UserName" android:textColor="#63bfec"/>
+                    android:orientation="vertical" >
 
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent" android:layout_weight="1">
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content" >
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent" >
+
+                            <TextView
+                                android:id="@+id/nearByItemUserName"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:lines="1"
+                                android:textColor="#63bfec" android:textSize="10dp"/>
+
+                            <TextView
+                                android:id="@+id/nearByItemUserNameMoreText"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:lines="1"
+                                android:textColor="#63bfec" android:textSize="10dp"/>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_weight="1" >
+                        </LinearLayout>
+
+                        <TextView
+                            android:id="@+id/nearByItemTime"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content" android:textSize="10dp" android:textColor="#887f79"/>
+
+                        <LinearLayout
+                            android:layout_width="wrap_content"
+                            android:layout_height="match_parent"
+                            android:layout_weight="10" >
+                        </LinearLayout>
+                    </LinearLayout>
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/nearByItemTime"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"/>
-
                 <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="match_parent" android:layout_weight="10">
-                </LinearLayout>
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:orientation="horizontal" >
 
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="1"
+                        android:orientation="vertical" >
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" >
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent" android:layout_weight="1">
+
+                                <TextView
+                                    android:id="@+id/nearByItemProductName"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="ProductName"
+                                    android:textColor="#63bfec"
+                                    android:textSize="15dp" />
+
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="match_parent"
+                                android:layout_height="match_parent" android:layout_weight="2">
+                            </LinearLayout>
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical" android:layout_weight="1">
+                        </LinearLayout>
+
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content" >
+
+                            <ImageView
+                                android:id="@+id/imageView2"
+                                android:layout_width="15dp"
+                                android:layout_height="15dp"
+                                android:src="@drawable/icon_address" />
+
+                            <LinearLayout
+                                android:layout_width="5dp"
+                                android:layout_height="match_parent" >
+                            </LinearLayout>
+
+                            <TextView
+                                android:id="@+id/nearByItemProductAddress"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Address"
+                                android:textColor="#887f79" android:textSize="10dp"/>
+                        </LinearLayout>
+                    </LinearLayout>
+                </LinearLayout>
             </LinearLayout>
 
             <LinearLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <TextView
-                    android:id="@+id/nearByItemProductName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="ProductName"
-                    android:textAppearance="?android:attr/textAppearanceMedium" android:textColor="#63bfec"/>
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content" >
-
-                <ImageView
-                    android:id="@+id/imageView2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:src="@drawable/icon_address" />
+                android:layout_height="match_parent" >
 
                 <LinearLayout
-                    android:layout_width="5dp"
-                    android:layout_height="match_parent" >
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginRight="5dp"
+                    android:layout_weight="2.5" >
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" android:layout_weight="1">
+                    </LinearLayout>
+
+                    <TextView
+                        android:id="@+id/nearByItemMiDistanceText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text="1"
+                        android:textColor="#63bfec" android:textSize="11dp"/>
+
+                    <TextView
+                        android:id="@+id/textview"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:text=" mi"
+                        android:textColor="#63bfec" android:textSize="11dp"/>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:layout_weight="3.2" >
+                    </LinearLayout>
+
+                    <ImageView
+                        android:id="@+id/imageView3"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="center"
+                        android:src="@drawable/image_arrow_right" />
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/nearByItemProductAddress"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Address" android:textColor="#887f79"/>
-
             </LinearLayout>
 
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" android:layout_weight="1.5">
-
-            <TextView
-                android:id="@+id/nearByItemMiDistanceText"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="1" android:layout_gravity="center" android:textColor="#63bfec"/>
-            
-            <TextView
-                android:id="@+id/textview"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text=" mi" android:layout_gravity="center" android:textColor="#63bfec"/>
-
-            <LinearLayout
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent" android:layout_weight="1">
-            </LinearLayout>
-
-            <ImageView
-                android:id="@+id/imageView3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/image_arrow_right" android:layout_gravity="center"/>
-
-        </LinearLayout>
+        </FrameLayout>
 
         <LinearLayout
             android:layout_width="5dp"

@@ -1,10 +1,12 @@
 package com.codegears.getable.ui;
 
+import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
 import com.codegears.getable.data.ProductActivityCommentsData;
 
 import android.content.Context;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -27,6 +29,10 @@ public class CommentRowLayout extends LinearLayout {
 		userImageView = (ImageView) findViewById( R.id.commentRowLayoutUserImage );
 		userName = new UserName(context);
 		userNameLayout.addView( userName );
+		
+		//Set font
+		userName.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
+		commentText.setTypeface( Typeface.createFromAsset( this.getContext().getAssets(), MyApp.APP_FONT_PATH) );
 		
 		userName.setTextColor( Color.parseColor( this.getResources().getString( R.color.NameColorBlue ) ) );
 	}

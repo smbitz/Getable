@@ -29,7 +29,33 @@
                 android:text="Done" android:layout_gravity="center" android:background="@null" android:textColor="#ffffff" android:layout_weight="1" android:textAppearance="?android:attr/textAppearanceMedium"/>
 
         </LinearLayout>
+	
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_gravity="center" >
 
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1" >
+
+                <ImageButton
+                    android:id="@+id/shareImageCropBackButton"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_gravity="center"
+                    android:background="@null"
+                    android:src="@drawable/back_button" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="3.5" >
+            </LinearLayout>
+        </LinearLayout>
+        
     </FrameLayout>
     
     <LinearLayout
@@ -41,7 +67,8 @@
             android:id="@+id/shareImageCropImageView"
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
-            android:scaleType="fitCenter" android:src="@drawable/empty_image"/>
+            android:scaleType="fitCenter"
+            android:src="@drawable/empty_image"/>
     </LinearLayout>
 
 </LinearLayout>

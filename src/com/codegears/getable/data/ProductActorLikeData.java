@@ -32,6 +32,10 @@ public class ProductActorLikeData {
 		}
 	}
 	
+	public void setActorData( ActorData setActorData ){
+		actor = setActorData;
+	}
+	
 	public ActorLikeActivity getLike(){
 		return this.like;
 	}

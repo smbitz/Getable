@@ -37,7 +37,7 @@
 
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" android:layout_weight="5">
+            android:layout_height="wrap_content" android:layout_weight="5">
         </LinearLayout>
 
         <LinearLayout
@@ -50,28 +50,9 @@
                 android:layout_height="wrap_content" >
 
                 <TextView
-                    android:id="@+id/myFeedCommentRowUserName"
+                    android:id="@+id/myFeedCommentRowDetailText"
                     android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="UserName" />
-
-                <TextView
-                    android:id="@+id/textView2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=" commented on " />
-
-                <TextView
-                    android:id="@+id/myFeedCommentRowTargetUserName"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="TargetUserName" />
-
-                <TextView
-                    android:id="@+id/textView4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text=" post" />
+                    android:layout_height="wrap_content"/>
 
                 <LinearLayout
                     android:layout_width="wrap_content"
@@ -94,17 +75,21 @@
                     android:layout_height="match_parent" >
                 </LinearLayout>
 
-                <TextView
-                    android:id="@+id/myFeedCommentRowCommentText"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="TextView" android:maxLines="1"/>
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent" android:layout_weight="1">
 
-                <TextView
-                    android:id="@+id/textView1"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="..." />
+                    <TextView
+                        android:id="@+id/myFeedCommentRowCommentText"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"/>
+
+                </LinearLayout>
+
+                <LinearLayout
+                    android:layout_width="5dp"
+                    android:layout_height="match_parent" >
+                </LinearLayout>
 
             </LinearLayout>
 

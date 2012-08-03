@@ -16,6 +16,7 @@ import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
 import com.codegears.getable.data.WishlistData;
 import com.codegears.getable.ui.AbstractViewLayout;
+import com.codegears.getable.ui.FooterListView;
 import com.codegears.getable.ui.UserWishlistsGrouptItem;
 import com.codegears.getable.util.ImageLoader;
 import com.loopj.android.http.AsyncHttpClient;
@@ -45,8 +46,10 @@ public class UserWishlistsLayout extends AbstractViewLayout implements OnClickLi
 	private ImageLoader imageLoader;
 	private MyApp app;
 	private AsyncHttpClient asyncHttpClient;
+	private String getWishlistsDataURL;
+	private ProgressDialog loadingDialog;
 	
-	public UserWishlistsLayout(Activity activity, String getWishlistsDataURL) {
+	public UserWishlistsLayout(Activity activity, String setWishlistsDataURL) {
 		super(activity);
 		View.inflate( this.getContext(), R.layout.userwishlistslayout, this );
 		
@@ -57,11 +60,37 @@ public class UserWishlistsLayout extends AbstractViewLayout implements OnClickLi
 		app = (MyApp) this.getActivity().getApplication();
 		asyncHttpClient = app.getAsyncHttpClient();
 		
+		loadingDialog = new ProgressDialog( this.getContext() );
+		loadingDialog.setTitle("");
+		loadingDialog.setMessage("Loading. Please wait...");
+		loadingDialog.setIndeterminate( true );
+		loadingDialog.setCancelable( true );
+		
+		//Set line at footer
+		wishlistsGallery.addFooterView( new FooterListView( this.getContext() ) );
+		
 		//NetworkThreadUtil.getRawData( getWishlistsDataURL, null, this);
+		getWishlistsDataURL = setWishlistsDataURL;
+		
+		loadData();
+	}
+	
+	private void recycleResource() {
+		arrayWishlistsData.clear();
+	}
+	
+	public void loadData(){
+		loadingDialog.show();
+		
 		asyncHttpClient.get( getWishlistsDataURL, new JsonHttpResponseHandler(){
 			@Override
 			public void onSuccess(JSONObject jsonObject) {
 				super.onSuccess(jsonObject);
+				
+				if( loadingDialog.isShowing() ){
+					loadingDialog.dismiss();
+				}
+				
 				try {
 					JSONArray newArray = jsonObject.getJSONArray("entities");
 					for(int i = 0; i<newArray.length(); i++){
@@ -129,42 +158,6 @@ public class UserWishlistsLayout extends AbstractViewLayout implements OnClickLi
 		
 	}
 
-	/*@Override
-	public void onNetworkDocSuccess(String urlString, Document document) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onNetworkRawSuccess(String urlString, String result) {
-		try {
-			JSONObject jsonObject = new JSONObject(result);
-			JSONArray newArray = jsonObject.getJSONArray("entities");
-			for(int i = 0; i<newArray.length(); i++){
-				//Load Wishlists Data
-				WishlistData newData = new WishlistData( (JSONObject) newArray.get(i) );
-				JSONObject object = (JSONObject) newArray.get(i);
-				arrayWishlistsData.add(newData);
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		
-		wishlistsAdapter.setData( arrayWishlistsData );
-		this.getActivity().runOnUiThread( new Runnable() {
-			@Override
-			public void run() {
-				wishlistsGallery.setAdapter( wishlistsAdapter );
-			}
-		});
-	}
-
-	@Override
-	public void onNetworkFail(String urlString) {
-		// TODO Auto-generated method stub
-		
-	}*/
-
 	@Override
 	public void refreshView(Intent getData) {
 		// TODO Auto-generated method stub
@@ -173,8 +166,8 @@ public class UserWishlistsLayout extends AbstractViewLayout implements OnClickLi
 	
 	@Override
 	public void refreshView() {
-		// TODO Auto-generated method stub
-		
+		recycleResource();
+		loadData();
 	}
 
 	public void setBodyLayoutStackListener(BodyLayoutStackListener listener) {

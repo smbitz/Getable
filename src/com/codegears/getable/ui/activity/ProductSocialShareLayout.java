@@ -4,11 +4,13 @@ import java.util.HashMap;
 
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 
 import com.codegears.getable.BodyLayoutStackListener;
 import com.codegears.getable.MainActivity;
@@ -21,6 +23,7 @@ import com.loopj.android.http.AsyncHttpResponseHandler;
 import com.loopj.android.http.RequestParams;
 
 import android.view.View.OnClickListener;
+import android.view.inputmethod.InputMethodManager;
 
 public class ProductSocialShareLayout extends AbstractViewLayout implements OnClickListener {
 	
@@ -30,6 +33,8 @@ public class ProductSocialShareLayout extends AbstractViewLayout implements OnCl
 	public static final String SHARE_PREF_SOCIAL_TYPE = "SHARE_PREF_SOCIAL_TYPE";
 	public static final int SHARE_PREF_SOCIAL_TYPE_FACEBOOK = 1;
 	public static final int SHARE_PREF_SOCIAL_TYPE_TWITTER = 2;
+	
+	public static final int MAX_TWITTER_LENGHT = 140;
 	
 	private Button shareButton;
 	private EditText shareEditText;
@@ -42,6 +47,7 @@ public class ProductSocialShareLayout extends AbstractViewLayout implements OnCl
 	private String shareTwitterURL;
 	private BodyLayoutStackListener listener;
 	private ProgressDialog loadingDialog;
+	private ImageButton backButton;
 	
 	public ProductSocialShareLayout(Activity activity) {
 		super(activity);
@@ -57,8 +63,21 @@ public class ProductSocialShareLayout extends AbstractViewLayout implements OnCl
 		
 		shareButton = (Button) findViewById( R.id.productSocialShareLayoutShareButton );
 		shareEditText = (EditText) findViewById( R.id.productSocialShareLayoutShareText );
+		backButton = (ImageButton) findViewById( R.id.productSocialShareLayoutBackButton );
+		
+		if( socialType == SHARE_PREF_SOCIAL_TYPE_TWITTER ){
+			shareEditText.setMaxLines( MAX_TWITTER_LENGHT );
+		}
+		
+		this.post( new Runnable() {
+			@Override
+			public void run() {
+				shareEditText.requestFocus();
+			}
+		});
 		
 		shareButton.setOnClickListener( this );
+		backButton.setOnClickListener( this );
 		
 		loadingDialog = new ProgressDialog( this.getActivity() );
 		loadingDialog.setTitle("");
@@ -117,6 +136,14 @@ public class ProductSocialShareLayout extends AbstractViewLayout implements OnCl
 						}
 					}
 				});
+			}
+		}else if( v.equals( backButton ) ){
+			InputMethodManager imm = (InputMethodManager) this.getActivity().getSystemService(
+				      Context.INPUT_METHOD_SERVICE);
+				imm.hideSoftInputFromWindow( shareEditText.getWindowToken(), 0 );
+			
+			if (listener != null) {
+				listener.onRequestBodyLayoutStack(MainActivity.LAYOUTCHANGE_BACK_BUTTON);
 			}
 		}
 	}

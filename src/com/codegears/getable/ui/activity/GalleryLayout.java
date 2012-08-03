@@ -32,6 +32,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Typeface;
 import android.inputmethodservice.Keyboard.Key;
 import android.preference.PreferenceManager.OnActivityResultListener;
 import android.view.KeyEvent;
@@ -76,6 +77,7 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 	private int galleryViewItemStatus;
 	private AsyncHttpClient asyncHttpClient;
 	private MyApp app;
+	private ProgressDialog loadingDialog;
 	
 	public GalleryLayout( Activity activity ) {
 		super( activity );
@@ -95,6 +97,16 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 		app = (MyApp) this.getActivity().getApplication();
 		asyncHttpClient = app.getAsyncHttpClient();
 		
+		loadingDialog = new ProgressDialog( this.getContext() );
+		loadingDialog.setTitle("");
+		loadingDialog.setMessage("Loading. Please wait...");
+		loadingDialog.setIndeterminate( true );
+		loadingDialog.setCancelable( true );
+		
+		//Set font
+		textViewFilter1.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		textViewFilter2.setTypeface( Typeface.createFromAsset( this.getActivity().getAssets(), MyApp.APP_FONT_PATH) );
+		
 		galleryViewItemStatus = GALLERY_THREE_ITEM_VIEW;
 		
 		filterButton.setOnClickListener( this );
@@ -112,11 +124,11 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 	}
 	
 	public void loadData(){
+		loadingDialog.show();
+		
 		recycleResource();
-		/*NetworkThreadUtil.getRawData(
-				config.get( URL_GET_PRODUCT_ACTIVITIES ).toString()+urlVar1+urlVar2+urlVar3,
-        		null, this);*/
-		asyncHttpClient.post( 
+		String textURL = config.get( URL_GET_PRODUCT_ACTIVITIES ).toString()+urlVar1+urlVar2+urlVar3;
+		asyncHttpClient.post(
 			config.get( URL_GET_PRODUCT_ACTIVITIES ).toString()+urlVar1+urlVar2+urlVar3,
 			new JsonHttpResponseHandler(){
 				@Override
@@ -135,6 +147,10 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 					
 					galleryAdapter.setData( arrayProductData );
 					galleryGrid.setAdapter( galleryAdapter );
+					
+					if( loadingDialog.isShowing() ){
+						loadingDialog.dismiss();
+					}
 				}
 		});
 	}
@@ -254,41 +270,6 @@ public class GalleryLayout extends AbstractViewLayout implements OnClickListener
 			return returnView;
 		}
 	}
-
-	/*@Override
-	public void onNetworkDocSuccess(String urlString, Document document) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onNetworkRawSuccess(String urlString, String result) {
-		try {
-			JSONObject jsonObject = new JSONObject(result);
-			JSONArray newArray = jsonObject.getJSONArray("entities");
-			for(int i = 0; i<newArray.length(); i++){
-				//Load Product Data
-				ProductActivityData newData = new ProductActivityData( newArray.getJSONObject(i) );
-				arrayProductData.add(newData);
-			}
-		} catch (JSONException e) {
-			e.printStackTrace();
-		}
-		
-		galleryAdapter.setData( arrayProductData );
-		this.getActivity().runOnUiThread( new Runnable() {
-			@Override
-			public void run() {
-				galleryGrid.setAdapter( galleryAdapter );
-			}
-		});
-	}
-
-	@Override
-	public void onNetworkFail(String urlString) {
-		// TODO Auto-generated method stub
-		
-	}*/
 
 	@Override
 	public void refreshView( Intent getData ) {

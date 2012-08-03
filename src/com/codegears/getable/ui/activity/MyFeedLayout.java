@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import org.w3c.dom.Document;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.view.View;
@@ -24,8 +25,10 @@ import com.codegears.getable.BodyLayoutStackListener;
 import com.codegears.getable.MainActivity;
 import com.codegears.getable.MyApp;
 import com.codegears.getable.R;
+import com.codegears.getable.data.ActorData;
 import com.codegears.getable.data.ProductActivityData;
 import com.codegears.getable.ui.AbstractViewLayout;
+import com.codegears.getable.ui.FooterListView;
 import com.codegears.getable.ui.LikeButton;
 import com.codegears.getable.ui.MyFeedAddNewProductRow;
 import com.codegears.getable.ui.MyFeedCommentButton;
@@ -36,6 +39,7 @@ import com.codegears.getable.ui.MyFeedLikeRow;
 import com.codegears.getable.ui.MyfeedWishlistButton;
 import com.codegears.getable.ui.ProductImageThumbnail;
 import com.codegears.getable.ui.ProductNumComment;
+import com.codegears.getable.util.CalculateTime;
 import com.codegears.getable.util.Config;
 import com.codegears.getable.util.ImageLoader;
 import com.loopj.android.http.AsyncHttpClient;
@@ -51,11 +55,11 @@ public class MyFeedLayout extends AbstractViewLayout implements OnClickListener 
 	private static final String FEED_TYPE_COMMENT = "2";
 	private static final String FEED_TYPE_LIKE = "3";
 	private static final String FEED_TYPE_FOLLOW = "4";
+	private static final String FEED_TYPE_UPDATE_PRODUCT = "7";
 	
 	private BodyLayoutStackListener listener;
 	private Config config;
 	private MyApp app;
-	private List<String> appCookie;
 	private ArrayList<ProductActivityData> arrayFeedData;
 	private ListView feedListView;
 	private FeedAdapter feedAdapter;
@@ -66,6 +70,9 @@ public class MyFeedLayout extends AbstractViewLayout implements OnClickListener 
 	private AsyncHttpClient asyncHttpClient;
 	private LinearLayout findFriendLayout;
 	private Button findFriendButton;
+	private ProgressDialog loadingDialog;
+	private ActorData currentActorData;
+	private MyFeedAddNewProductRow myFeedAddNewProductRow;
 	
 	public MyFeedLayout(Activity activity) {
 		super(activity);
@@ -80,17 +87,40 @@ public class MyFeedLayout extends AbstractViewLayout implements OnClickListener 
 		imageLoader = new ImageLoader( this.getContext() );
 		findFriendLayout = (LinearLayout) findViewById( R.id.myFeedLayoutFindFriendLayout );
 		findFriendButton = (Button) findViewById( R.id.myFeedLayoutFindFriendButton );
+		currentActorData = app.getCurrentProfileData();
 		
 		findFriendButton.setOnClickListener( this );
 		
+		loadingDialog = new ProgressDialog( this.getContext() );
+		loadingDialog.setTitle("");
+		loadingDialog.setMessage("Loading. Please wait...");
+		loadingDialog.setIndeterminate( true );
+		loadingDialog.setCancelable( true );
+		
+		//Set line at footer
+		feedListView.addFooterView( new FooterListView( this.getContext() ) );
+		
 		getFeedURL = config.get( MyApp.URL_DEFAULT ).toString()+"me/feed.json"+MyApp.DEFAULT_URL_VAR_1;
-		appCookie = app.getAppCookie();
 		
 		//NetworkThreadUtil.getRawDataWithCookie(getFeedURL, null, appCookie, this);
+		loadData();
+	}
+	
+	private void recycleResource() {
+		arrayFeedData.clear();
+	}
+	
+	public void loadData(){
+		loadingDialog.show();
+		
+		//Clear Data
+		arrayFeedData.clear();
+		
 		asyncHttpClient.get( getFeedURL, new JsonHttpResponseHandler(){
 			@Override
 			public void onSuccess(JSONObject resultObject) {
 				super.onSuccess(resultObject);
+				
 				try {
 					//Check type of feed.
 					if( resultObject.optJSONArray( "entities" ) != null ){
@@ -116,10 +146,14 @@ public class MyFeedLayout extends AbstractViewLayout implements OnClickListener 
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+				
+				if( loadingDialog.isShowing() ){
+					loadingDialog.dismiss();
+				}
 			}
 		});
 	}
-
+	
 	@Override
 	public void refreshView(Intent getData) {
 		// TODO Auto-generated method stub
@@ -128,56 +162,13 @@ public class MyFeedLayout extends AbstractViewLayout implements OnClickListener 
 	
 	@Override
 	public void refreshView() {
-		// TODO Auto-generated method stub
-		
+		recycleResource();
+		loadData();
 	}
 
 	public void setBodyLayoutChangeListener(BodyLayoutStackListener listener) {
 		this.listener = listener;
 	}
-
-	/*@Override
-	public void onNetworkDocSuccess(String urlString, Document document) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
-	public void onNetworkRawSuccess(String urlString, String result) {
-		if( urlString.equals( getFeedURL ) ){
-			try {
-				//Check type of feed.
-				JSONObject resultObject = new JSONObject( result );
-				if( resultObject.optJSONArray( "entities" ) != null ){
-					JSONArray newArray = resultObject.optJSONArray( "entities" );
-					
-					for(int i = 0; i<newArray.length(); i++){
-						JSONObject entitiesObject = (JSONObject) newArray.get(i);
-						
-						ProductActivityData activityData = new ProductActivityData( entitiesObject );
-						arrayFeedData.add( activityData );
-					}
-				}
-				
-				feedAdapter.setData( arrayFeedData );
-				this.getActivity().runOnUiThread( new Runnable() {
-					@Override
-					public void run() {
-						feedListView.setAdapter( feedAdapter );
-					}
-				});
-			} catch (JSONException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-		}
-	}
-
-	@Override
-	public void onNetworkFail(String urlString) {
-		// TODO Auto-generated method stub
-		
-	}*/
 	
 	private class FeedAdapter extends BaseAdapter {
 		
@@ -205,11 +196,18 @@ public class MyFeedLayout extends AbstractViewLayout implements OnClickListener 
 		@Override
 		public View getView(int position, View convertView, ViewGroup arg2) {
 			
-			ProductActivityData feedData = data.get( position );
+			final ProductActivityData feedData = data.get( position );
 			String feedType = feedData.getType().getId();
+			String postTimeText = CalculateTime.getPostTime( feedData.getActivityTime() );
 			
 			if( feedType.equals( FEED_TYPE_ADD_PRODUCT ) ){
-				MyFeedAddNewProductRow newProductRow = new MyFeedAddNewProductRow( MyFeedLayout.this.getContext() );
+				//final MyFeedAddNewProductRow newProductRow = new MyFeedAddNewProductRow( MyFeedLayout.this.getContext() );
+				if( convertView instanceof MyFeedAddNewProductRow ){
+					myFeedAddNewProductRow = (MyFeedAddNewProductRow) convertView;
+				}else{
+					myFeedAddNewProductRow = new MyFeedAddNewProductRow( MyFeedLayout.this.getContext() );
+				}
+				final MyFeedAddNewProductRow newProductRow = myFeedAddNewProductRow;
 				
 				String userName = feedData.getActor().getName();
 				String productName = feedData.getProduct().getBrand().getName();
@@ -223,13 +221,78 @@ public class MyFeedLayout extends AbstractViewLayout implements OnClickListener 
 				newProductRow.setProductName( productName );
 				newProductRow.setNumLike( numLike );
 				newProductRow.setNumComment( numComment );
+				newProductRow.setPostTime( postTimeText );
 				
 				//Set Like, Comment, Wishlist Button
 				MyFeedLikeButton feedLikeButton = newProductRow.getLikeButton();
 				MyFeedCommentButton feedCommentButton = newProductRow.getCommentButton();
 				MyfeedWishlistButton feedWishlistButton = newProductRow.getWishlistButton();
 				
-				feedLikeButton.setOnClickListener( MyFeedLayout.this );
+				feedLikeButton.setOnClickListener( new OnClickListener() {
+					@Override
+					public void onClick(View v) {
+						if( v instanceof MyFeedLikeButton ){
+							loadingDialog.show();
+							
+							final MyFeedLikeButton feedLikeButton = (MyFeedLikeButton) v;
+							String productActivityId = feedLikeButton.getActivityData().getId();
+							getProductLikeURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/likes.json";
+							
+							if( feedLikeButton.getButtonStatus() == LikeButton.BUTTON_STATUS_LIKE ){
+								asyncHttpClient.post( getProductLikeURL, new JsonHttpResponseHandler(){
+									@Override
+									public void onSuccess(JSONObject jsonObject) {
+										super.onSuccess(jsonObject);
+										ProductActivityData newData = new ProductActivityData( jsonObject );
+										String likeId = newData.getLike().getActivityData().getId();
+										feedLikeButton.setLikeId( likeId );
+										//feedData.getMyRelation().setLike( newData.getMyRelation().getLike() );
+										feedData.setMyRelation( newData.getLike().getActivityData().getMyRelation() );
+										
+										//On click like result.
+										//Set image liked
+										feedLikeButton.setBackgroundResource( R.drawable.myfeed_liked_icon );
+										feedLikeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKED );
+										
+										int changeLikeNum = (newProductRow.getNumLike())+1;
+										newProductRow.setNumLike( String.valueOf( changeLikeNum ) );
+										feedData.getStatisitc().setNumberOfLikes( changeLikeNum );
+										
+										if( loadingDialog.isShowing() ){
+											loadingDialog.dismiss();
+										}
+									}
+								});
+							}else if( feedLikeButton.getButtonStatus() == LikeButton.BUTTON_STATUS_LIKED ){
+								String likeActivityId = feedLikeButton.getLikeId();
+								getProductUnLikeURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+"/"+likeActivityId+".json";
+								
+								HashMap<String, String> paramMap = new HashMap<String, String>();
+								paramMap.put( "_a", "delete" );
+								RequestParams params = new RequestParams(paramMap);
+								asyncHttpClient.post( getProductUnLikeURL, params, new AsyncHttpResponseHandler(){
+									@Override
+									public void onSuccess(String arg0) {
+										super.onSuccess(arg0);
+										//On click like result.
+										//Set image liked
+										feedLikeButton.setBackgroundResource( R.drawable.myfeed_like_icon );
+										feedLikeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKE );
+										feedData.setMyRelation( null );
+										
+										int changeLikeNum = (newProductRow.getNumLike())-1;
+										newProductRow.setNumLike( String.valueOf( changeLikeNum ) );
+										feedData.getStatisitc().setNumberOfLikes( changeLikeNum );
+										
+										if( loadingDialog.isShowing() ){
+											loadingDialog.dismiss();
+										}
+									}
+								});
+							}
+						}
+					}
+				});
 				feedCommentButton.setOnClickListener( MyFeedLayout.this );
 				feedWishlistButton.setOnClickListener( MyFeedLayout.this );
 				
@@ -271,7 +334,13 @@ public class MyFeedLayout extends AbstractViewLayout implements OnClickListener 
 				
 				return newProductRow;
 			}else if( feedType.equals( FEED_TYPE_COMMENT ) ){
-				MyFeedCommentRow commentRow = new MyFeedCommentRow( MyFeedLayout.this.getContext() );
+				//MyFeedCommentRow commentRow = new MyFeedCommentRow( MyFeedLayout.this.getContext() );
+				MyFeedCommentRow commentRow;
+				if( convertView instanceof MyFeedCommentRow ){
+					commentRow = (MyFeedCommentRow) convertView;
+				}else{
+					commentRow = new MyFeedCommentRow( MyFeedLayout.this.getContext() );
+				}
 				
 				String userName = feedData.getActor().getName();
 				String targetUserName = feedData.getComment().getProductActivityData().getActor().getName();
@@ -281,8 +350,13 @@ public class MyFeedLayout extends AbstractViewLayout implements OnClickListener 
 				
 				//Set Text
 				commentRow.setUserName( userName );
-				commentRow.setTargetUserName( targetUserName );
+				if( feedData.getComment().getProductActivityData().getActor().getId().equals( currentActorData.getId() ) ){
+					commentRow.setTargetUserNameMine();
+				}else{
+					commentRow.setTargetUserName( targetUserName );
+				}
 				commentRow.setCommentText( commentText );
+				commentRow.setPostTime( postTimeText );
 				
 				//Set Data
 				commentRow.setActivityData( feedData.getComment().getProductActivityData() );
@@ -298,7 +372,13 @@ public class MyFeedLayout extends AbstractViewLayout implements OnClickListener 
 				
 				return commentRow;
 			}else if( feedType.equals( FEED_TYPE_LIKE ) ){
-				MyFeedLikeRow likeRow = new MyFeedLikeRow( MyFeedLayout.this.getContext() );
+				//MyFeedLikeRow likeRow = new MyFeedLikeRow( MyFeedLayout.this.getContext() );
+				MyFeedLikeRow likeRow;
+				if( convertView instanceof MyFeedLikeRow ){
+					likeRow = (MyFeedLikeRow) convertView;
+				}else{
+					likeRow = new MyFeedLikeRow( MyFeedLayout.this.getContext() );
+				}
 				
 				String userName = feedData.getActor().getName();
 				String targetUserName = feedData.getLike().getActivityData().getActor().getName();
@@ -307,7 +387,12 @@ public class MyFeedLayout extends AbstractViewLayout implements OnClickListener 
 				
 				//Set Text
 				likeRow.setUserName( userName );
-				likeRow.setTargetUserName( targetUserName );
+				if( feedData.getLike().getActivityData().getActor().getId().equals( currentActorData.getId() ) ){
+					likeRow.setTargetUserNameMine();
+				}else{
+					likeRow.setTargetUserName( targetUserName );
+				}
+				likeRow.setPostTime( postTimeText );
 				
 				//Set Data
 				likeRow.setActivityData( feedData.getLike().getActivityData() );
@@ -323,7 +408,13 @@ public class MyFeedLayout extends AbstractViewLayout implements OnClickListener 
 				
 				return likeRow;
 			}else if( feedType.equals( FEED_TYPE_FOLLOW ) ){
-				MyFeedFollowingRow followingRow = new MyFeedFollowingRow( MyFeedLayout.this.getContext() );
+				//MyFeedFollowingRow followingRow = new MyFeedFollowingRow( MyFeedLayout.this.getContext() );
+				MyFeedFollowingRow followingRow;
+				if( convertView instanceof MyFeedFollowingRow ){
+					followingRow = (MyFeedFollowingRow) convertView;
+				}else{
+					followingRow = new MyFeedFollowingRow( MyFeedLayout.this.getContext() );
+				}
 				
 				String userName = feedData.getActor().getName();
 				String targetUserName = feedData.getFollowedUser().getName();
@@ -331,7 +422,12 @@ public class MyFeedLayout extends AbstractViewLayout implements OnClickListener 
 				
 				//Set Text
 				followingRow.setUserName( userName );
-				followingRow.setTargetUserName( targetUserName );
+				if( feedData.getFollowedUser().getId().equals( currentActorData.getId() ) ){
+					followingRow.setTargetUserNameMine();
+				}else{
+					followingRow.setTargetUserName( targetUserName );
+				}
+				followingRow.setPostTime( postTimeText );
 				
 				//Set Data
 				followingRow.setTargetActorData( feedData.getFollowedUser() );
@@ -344,128 +440,19 @@ public class MyFeedLayout extends AbstractViewLayout implements OnClickListener 
 				followingRow.setOnClickListener( MyFeedLayout.this );
 				
 				return followingRow;
+			}else{
+				LinearLayout emptyLayout = new LinearLayout( MyFeedLayout.this.getContext() );
+				return emptyLayout;
 			}
 			
-			return null;
+			//return null;
 		}
 		
 	}
 
 	@Override
 	public void onClick(View v) {
-		if( v instanceof MyFeedLikeButton ){
-			final MyFeedLikeButton feedLikeButton = (MyFeedLikeButton) v;
-			String productActivityId = feedLikeButton.getActivityData().getId();
-			getProductLikeURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+productActivityId+"/likes.json";
-			
-			if( feedLikeButton.getButtonStatus() == LikeButton.BUTTON_STATUS_LIKE ){
-				/*HashMap< String, String > likeDataMap = new HashMap<String, String>();
-				likeDataMap.put( "emtpy", "emtpy" );
-				String likePostData = NetworkUtil.createPostData( likeDataMap );
-				
-				NetworkThreadUtil.getRawDataWithCookie(getProductLikeURL, likePostData, appCookie, new NetworkThreadListener() {
-					
-					@Override
-					public void onNetworkRawSuccess(String urlString, String result) {
-						//Set product data.
-						try {
-							JSONObject jsonObject = new JSONObject( result );
-							ProductActivityData newData = new ProductActivityData( jsonObject );
-							String likeId = newData.getLike().getActivityData().getId();
-							feedLikeButton.setLikeId( likeId );
-						} catch (JSONException e) {
-							e.printStackTrace();
-						}
-						
-						//On click like result.
-						//Set image liked
-						MyFeedLayout.this.getActivity().runOnUiThread( new Runnable() {
-							@Override
-							public void run() {
-								feedLikeButton.setBackgroundResource( R.drawable.myfeed_liked_icon );
-								feedLikeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKED );
-							}
-						});
-					}
-					
-					@Override
-					public void onNetworkFail(String urlString) {
-						// TODO Auto-generated method stub
-						
-					}
-					
-					@Override
-					public void onNetworkDocSuccess(String urlString, Document document) {
-						// TODO Auto-generated method stub
-						
-					}
-				});*/
-				
-				asyncHttpClient.post( getProductLikeURL, new JsonHttpResponseHandler(){
-					@Override
-					public void onSuccess(JSONObject jsonObject) {
-						super.onSuccess(jsonObject);
-						ProductActivityData newData = new ProductActivityData( jsonObject );
-						String likeId = newData.getLike().getActivityData().getId();
-						feedLikeButton.setLikeId( likeId );
-						
-						//On click like result.
-						//Set image liked
-						feedLikeButton.setBackgroundResource( R.drawable.myfeed_liked_icon );
-						feedLikeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKED );
-					}
-				});
-			}else if( feedLikeButton.getButtonStatus() == LikeButton.BUTTON_STATUS_LIKED ){
-				String likeActivityId = feedLikeButton.getLikeId();
-				getProductUnLikeURL = config.get( MyApp.URL_GET_PRODUCT_ACTIVITIES_BY_ID ).toString()+"/"+likeActivityId+".json";
-				
-				/*HashMap< String, String > likeDataMap = new HashMap<String, String>();
-				likeDataMap.put( "_a", "delete" );
-				String likePostData = NetworkUtil.createPostData( likeDataMap );
-				
-				NetworkThreadUtil.getRawDataWithCookie(getProductUnLikeURL, likePostData, appCookie, new NetworkThreadListener() {
-					
-					@Override
-					public void onNetworkRawSuccess(String urlString, String result) {
-						//On click like result.
-						//Set image liked
-						MyFeedLayout.this.getActivity().runOnUiThread( new Runnable() {
-							@Override
-							public void run() {
-								feedLikeButton.setBackgroundResource( R.drawable.myfeed_like_icon );
-								feedLikeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKE );
-							}
-						});
-					}
-					
-					@Override
-					public void onNetworkFail(String urlString) {
-						// TODO Auto-generated method stub
-						
-					}
-					
-					@Override
-					public void onNetworkDocSuccess(String urlString, Document document) {
-						// TODO Auto-generated method stub
-						
-					}
-				});*/
-				
-				HashMap<String, String> paramMap = new HashMap<String, String>();
-				paramMap.put( "_a", "delete" );
-				RequestParams params = new RequestParams(paramMap);
-				asyncHttpClient.post( getProductUnLikeURL, params, new AsyncHttpResponseHandler(){
-					@Override
-					public void onSuccess(String arg0) {
-						super.onSuccess(arg0);
-						//On click like result.
-						//Set image liked
-						feedLikeButton.setBackgroundResource( R.drawable.myfeed_like_icon );
-						feedLikeButton.setButtonStatus( LikeButton.BUTTON_STATUS_LIKE );
-					}
-				});
-			}
-		}else if( v instanceof MyFeedCommentButton ){
+		if( v instanceof MyFeedCommentButton ){
 			if(listener != null){
 				MyFeedCommentButton feedCommentButton = (MyFeedCommentButton) v;
 				SharedPreferences myPreferences = this.getActivity().getSharedPreferences( ProductCommentLayout.SHARE_PREF_VALUE_PRODUCT_COMMENT_ACT_ID, this.getActivity().MODE_PRIVATE );

@@ -2,6 +2,7 @@ package com.codegears.getable.ui;
 
 import com.codegears.getable.R;
 import com.codegears.getable.data.ProductActivityData;
+import com.codegears.getable.data.ProductBrandFeedData;
 
 import android.content.Context;
 import android.widget.ImageButton;
@@ -9,6 +10,7 @@ import android.widget.ImageButton;
 public class MyFeedCommentButton extends ImageButton {
 	
 	private ProductActivityData productActivityData;
+	private ProductBrandFeedData brandFeedData;
 	
 	public MyFeedCommentButton(Context context) {
 		super(context);
@@ -21,6 +23,14 @@ public class MyFeedCommentButton extends ImageButton {
 	
 	public ProductActivityData getProductData(){
 		return productActivityData;
+	}
+
+	public void setBrandFeedData(ProductBrandFeedData setBrandFeedData) {
+		brandFeedData = setBrandFeedData;
+	}
+	
+	public ProductBrandFeedData getBrandFeedData() {
+		return brandFeedData;
 	}
 
 }

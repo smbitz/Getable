@@ -45,7 +45,7 @@
                 </LinearLayout>
 
                 <TextView
-                    android:id="@+id/textView1"
+                    android:id="@+id/profileChangeImageDialogSetAProfilePicText"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Set a profile picture"
@@ -103,7 +103,7 @@
                                 android:layout_height="match_parent" >
 
                                 <TextView
-                                    android:id="@+id/textView2"
+                                    android:id="@+id/profileChangeImageDialogRemoveCurrentPicText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Remove current picture" android:textColor="#ffffff"/>
@@ -156,7 +156,7 @@
                                 android:layout_height="match_parent" >
 
                                 <TextView
-                                    android:id="@+id/TextView01"
+                                    android:id="@+id/profileChangeImageDialogTakePicText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Take picture"
@@ -210,7 +210,7 @@
                                 android:layout_height="match_parent" >
 
                                 <TextView
-                                    android:id="@+id/TextView02"
+                                    android:id="@+id/profileChangeImageDialogChooseFromLibraryText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Choose from Library"
@@ -263,7 +263,7 @@
                                 android:layout_height="match_parent" >
 
                                 <TextView
-                                    android:id="@+id/TextView03"
+                                    android:id="@+id/profileChangeImageDialogImportFromFacebookText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Import from Facebook"
@@ -317,7 +317,7 @@
                                 android:layout_height="match_parent" >
 
                                 <TextView
-                                    android:id="@+id/TextView04"
+                                    android:id="@+id/profileChangeImageDialogImportFromTwitterText"
                                     android:layout_width="wrap_content"
                                     android:layout_height="wrap_content"
                                     android:text="Import from Twitter"

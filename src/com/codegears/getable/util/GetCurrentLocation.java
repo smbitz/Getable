@@ -13,8 +13,8 @@ import com.google.android.maps.GeoPoint;
 
 public class GetCurrentLocation {
 	
-	private static Double DEFAULT_LAT_VALUE = 13.808655;
-	private static Double DEFAULT_LNG_VALUE = 100.620929;
+	public static Double DEFAULT_LAT_VALUE = 13.808655;
+	public static Double DEFAULT_LNG_VALUE = 100.620929;
 	
 	private GeoPoint currentPoint;
 	private LocationManager locationManager;

@@ -11,6 +11,7 @@ public class UserName extends TextView {
 
 	public UserName(Context context) {
 		super(context);
+		this.setMaxLines( 1 );
 	}
 
 	public void setActorData(ActorData actor) {
